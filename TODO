@@ -1,0 +1,38 @@
+
+From Akil:
+
+- Look into cProfile to see where the time is going 
+
+- Don't checkin __pycache__ files (they're in your gitignore. why are they
+  checked in?) (Fixed)
+
+- Also don't check in desktop.ini, and unless there's a good reason you
+  probably shouldn't check in pickle files, either. (Removed .ini, pickeled files are used for error checking)
+
+- LejaQuadrature.py/MeshUpdates.py
+  - sys.path updating is not done in a cross-platform way. Use either os.path
+    or pathlib. This also applies to other places.
+
+- 2DTQ-UnorderedMeshWithMeshUpdates.py
+  - profiling suggests that G, f1, and f2 gake a large chunk of time, and are
+    called ~400,000 times for 5 timesteps. This seems unnecessary. They
+    probably need to be vectorized.
+  - there are also a lot of functions that seem to be called around 1e4 or 1e5
+    times for this one simulation. Unless they're really low-level routines, I
+    think things are probably implemented in suboptimal ways that take a lot of
+    time by calling these functions many orders of magnitude more than
+    necessary.
+  - other things that seem to take a while are the
+    continue_pivoted_lu_factorization and findNearestKPoints routines, but
+    updating these is probably harder.
+
+- DTQTensorized.py
+  - generateGRow is too slow. From cProfile you can see that most of the time
+    is spent in G, f1, f2 in Functions.py. This is because these are called in
+    non-vectorized ways. 
+  - in generateGRow you should also allocate row as a np array of the
+    appropriate size rather than repeatedly appending to a list and then
+    converting at the end.
+  - in Functions.py, I would prefer if it if you coded this for generate
+    multi-D scenarios. It's hard coded for 2D right now. (And it looks like has
+    a tensor-product form.
