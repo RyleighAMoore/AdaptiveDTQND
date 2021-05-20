@@ -9,7 +9,7 @@ from pyopoly1.Scaling import GaussScale
 import ICMeshGenerator as M
 
 
-def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree, meshRadius, drift, diff, PrintStuff = True):
+def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree, meshRadius, drift, diff, dimension, PrintStuff = True):
     '''Paramaters'''
     addPointsToBoundaryIfBiggerThanTolerance = 10**(-degree)
     removeZerosValuesIfLessThanTolerance = 10**(-degree-0.5)
@@ -20,17 +20,17 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
 
     ''' Initializd orthonormal Polynomial family'''
     poly = HermitePolynomials(rho=0)
-    d=2
+    d=dimension
     k = 40    
     lambdas = indexing.total_degree_indices(d, k)
     poly.lambdas = lambdas
     
     '''pdf after one time step with Dirac initial condition centered at the origin'''
-    mesh = M.getICMeshRadius(meshRadius, minDistanceBetweenPoints, h)
+    mesh = M.getICMeshRadius(meshRadius, minDistanceBetweenPoints, h, dimension)
 
-    scale = GaussScale(2)
-    scale.setMu(h*drift(np.asarray([0,0])).T)
-    scale.setCov((h*diff(np.asarray([0,0]))*diff(np.asarray([0,0])).T).T)
+    scale = GaussScale(dimension)
+    scale.setMu(h*drift(np.zeros(dimension)).T)
+    scale.setCov((h*diff(np.zeros(dimension))*diff(np.zeros(dimension)).T).T)
     
     pdf = fun.Gaussian(scale, mesh)
     
