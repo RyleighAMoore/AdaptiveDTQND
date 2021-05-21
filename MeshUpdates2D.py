@@ -20,7 +20,7 @@ import random
 random.seed(10)
 
 
-def addPointsToMeshProcedure(Mesh, Pdf, triangulation, kstep, h, poly, GMat, addPointsToBoundaryIfBiggerThanTolerance, removeZerosValuesIfLessThanTolerance, minDistanceBetweenPoints,maxDistanceBetweenPoints,drift, diff):
+def addPointsToMeshProcedure(Mesh, Pdf, triangulation, kstep, h, poly, GMat, addPointsToBoundaryIfBiggerThanTolerance, removeZerosValuesIfLessThanTolerance, minDistanceBetweenPoints,maxDistanceBetweenPoints,drift, diff, SpatialDiff):
     '''If the mesh is changed, these become 1 so we know to recompute the triangulation'''
     changedBool2 = 0 
     changedBool1 = 0
@@ -30,7 +30,7 @@ def addPointsToMeshProcedure(Mesh, Pdf, triangulation, kstep, h, poly, GMat, add
     if ChangedBool==1:
         newMeshSize = len(Mesh)
         for i in range(meshSize+1, newMeshSize+1):
-            GMat = fun.AddPointToG(Mesh[:i,:], i-1, h, GMat, drift, diff)
+            GMat = fun.AddPointToG(Mesh[:i,:], i-1, h, GMat, drift, diff, SpatialDiff)
     return Mesh, Pdf, triangulation, ChangedBool, GMat
 
 def removePointsFromMeshProcedure(Mesh, Pdf, tri, boundaryOnlyBool, poly, GMat, LPMat, LPMatBool, removeZerosValuesIfLessThanTolerance):
@@ -40,12 +40,16 @@ def removePointsFromMeshProcedure(Mesh, Pdf, tri, boundaryOnlyBool, poly, GMat, 
 
 
 def getBoundaryPoints(Mesh, tri, alpha):
-    '''Uses triangulation and alpha hull technique to find boundary points'''
-    edges = alpha_shape(Mesh, tri, alpha, only_outer=True)
-    aa = list(chain(edges))
-    out = [item for t in aa for item in t]
-    pointsOnBoundary = np.sort(out)
-    pointsOnBoundary = pointsOnBoundary[1::2]  # Skip every other element to remove repeated elements
+    if np.size(Mesh,1) ==1:
+        pointsOnBoundary = ([np.min(Mesh), np.max(Mesh)])
+    else:
+        '''Uses triangulation and alpha hull technique to find boundary points'''
+        edges = alpha_shape(Mesh, tri, alpha, only_outer=True)
+        aa = list(chain(edges))
+        out = [item for t in aa for item in t]
+        pointsOnBoundary = np.sort(out)
+        pointsOnBoundary = pointsOnBoundary[1::2]  # Skip every other element to remove repeated elements
+    
     return pointsOnBoundary
 
 
@@ -106,38 +110,50 @@ def houseKeepingAfterAdjustingMesh(Mesh, tri):
     
 def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerThanTolerance, removeZerosValuesIfLessThanTolerance, minDistanceBetweenPoints,maxDistanceBetweenPoints):
     ChangedBool = 0
-    # print("adding boundary points...")
     count = 0
     MeshOrig = np.copy(Mesh)
     PdfOrig = np.copy(Pdf)
-    while count < 1: 
-        count = count + 1
-        numPointsAdded = 0
-        boundaryPointsToAddAround = checkIntegrandForAddingPointsAroundBoundaryPoints(Pdf, addPointsToBoundaryIfBiggerThanTolerance, Mesh, triangulation,maxDistanceBetweenPoints)
-        iivals = np.expand_dims(np.arange(len(Mesh)),1)
-        index = iivals[boundaryPointsToAddAround]
-        for indx in index:
-            newPoints = addPointsRadially(Mesh[indx,0], Mesh[indx,1], Mesh, 8, minDistanceBetweenPoints, maxDistanceBetweenPoints)
-            if len(newPoints)>0:
-                Mesh = np.append(Mesh, newPoints, axis=0)
-                ChangedBool = 1
-                numPointsAdded = numPointsAdded + len(newPoints)
-        if numPointsAdded > 0:
-            newPoints = Mesh[-numPointsAdded:,:]
-            interp = [griddata(MeshOrig,PdfOrig, newPoints, method='linear', fill_value=np.min(Pdf))][0]
-            interp[interp<0] = np.min(Pdf)
-            # interp = np.ones(len(newPoints))*removeZerosValuesIfLessThanTolerance 
-            # interp = np.ones(len(newPoints))*10**(-8)
-            Pdf = np.append(Pdf, interp)
-            triangulation = houseKeepingAfterAdjustingMesh(Mesh, triangulation)
+    if np.size(Mesh,1) == 1: # 1D
+        radius = minDistanceBetweenPoints/2 + maxDistanceBetweenPoints/2
+        Mesh = np.append(Mesh, np.min(Mesh)-radius, axis=0)
+        Mesh = np.append(Mesh, np.max(Mesh)+radius, axis=0)
+        interp1 = [griddata(MeshOrig,PdfOrig, np.min(Mesh)-radius, method='linear', fill_value=np.min(Pdf))][0]
+        interp2 = [griddata(MeshOrig,PdfOrig, np.max(Mesh)+radius, method='linear', fill_value=np.min(Pdf))][0]
+        interp1[interp1<0] = np.min(PdfOrig)
+        interp2[interp2<0] = np.min(PdfOrig)
+        Pdf = np.append(Pdf, interp1)
+        Pdf = np.append(Pdf, interp2)
+        ChangedBool=1
+    
+    else: 
+        while count < 1: 
+            count = count + 1
+            numPointsAdded = 0
+            boundaryPointsToAddAround = checkIntegrandForAddingPointsAroundBoundaryPoints(Pdf, addPointsToBoundaryIfBiggerThanTolerance, Mesh, triangulation,maxDistanceBetweenPoints)
+            iivals = np.expand_dims(np.arange(len(Mesh)),1)
+            index = iivals[boundaryPointsToAddAround]
+            for indx in index:
+                newPoints = addPointsRadially(Mesh[indx,0], Mesh[indx,1], Mesh, 8, minDistanceBetweenPoints, maxDistanceBetweenPoints)
+                if len(newPoints)>0:
+                    Mesh = np.append(Mesh, newPoints, axis=0)
+                    ChangedBool = 1
+                    numPointsAdded = numPointsAdded + len(newPoints)
+            if numPointsAdded > 0:
+                newPoints = Mesh[-numPointsAdded:,:]
+                interp = [griddata(MeshOrig,PdfOrig, newPoints, method='linear', fill_value=np.min(Pdf))][0]
+                interp[interp<0] = np.min(Pdf)
+                # interp = np.ones(len(newPoints))*removeZerosValuesIfLessThanTolerance 
+                # interp = np.ones(len(newPoints))*10**(-8)
+                Pdf = np.append(Pdf, interp)
+                triangulation = houseKeepingAfterAdjustingMesh(Mesh, triangulation)
     return Mesh, Pdf, triangulation, ChangedBool
 
 
 def addPointsRadially(pointX, pointY, mesh, numPointsToAdd, minDistanceBetweenPoints, maxDistanceBetweenPoints):
     radius = minDistanceBetweenPoints/2 + maxDistanceBetweenPoints/2
+    points = [] 
     noise = random.uniform(0, 1)*2*np.pi
     dTheta = 2*np.pi/numPointsToAdd
-    points = []     
     for i in range(numPointsToAdd):
         newPointX = radius*np.cos(i*dTheta + noise) + pointX
         newPointY = radius*np.sin(i*dTheta + noise) + pointY

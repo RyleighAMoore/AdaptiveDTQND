@@ -13,11 +13,12 @@ mydiff = DiagDiffOne
 
 
 '''Initialization Parameters'''
-NumSteps = 115
+NumSteps = 50
 '''Discretization Parameters'''
 
 
 x = [1,2,3,4,5,6,7,8,9,10]
+x=[3]
 
 h=0.01
 times = np.asarray(np.arange(h,(NumSteps+1)*h,h))
@@ -38,7 +39,7 @@ kstepMax = 0.17 # Lambda
 radius = 1.5 # R
 
 for i in x:
-    Meshes, PdfTraj, LPReuseArr, AltMethod= D.DTQ(NumSteps, kstepMin, kstepMax, h, i, radius, mydrift, mydiff, PrintStuff=False)
+    Meshes, PdfTraj, LPReuseArr, AltMethod= D.DTQ(NumSteps, kstepMin, kstepMax, h, i, radius, mydrift, mydiff,2, PrintStuff=False)
     surfaces = []
     for ii in range(len(PdfTraj)):
         ana = TwoDdiffusionEquation(Meshes[ii],mydiff(np.asarray([0,0]))[0,0], h*(ii+1), mydrift(np.asarray([0,0]))[0,0])

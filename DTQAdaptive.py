@@ -9,7 +9,7 @@ from pyopoly1.Scaling import GaussScale
 import ICMeshGenerator as M
 
 
-def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree, meshRadius, drift, diff, dimension, PrintStuff = True):
+def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree, meshRadius, drift, diff, dimension, SpatialDiff, PrintStuff = True):
     '''Paramaters'''
     addPointsToBoundaryIfBiggerThanTolerance = 10**(-degree)
     removeZerosValuesIfLessThanTolerance = 10**(-degree-0.5)
@@ -38,9 +38,12 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     PdfTraj = []
     PdfTraj.append(np.copy(pdf))
     Meshes.append(np.copy(mesh))
-    
-    '''Delaunay triangulation for finding the boundary '''
-    tri = Delaunay(mesh, incremental=True)
+
+    if dimension > 1:    
+        '''Delaunay triangulation for finding the boundary '''
+        tri = Delaunay(mesh, incremental=True)
+    else: 
+        tri = 0
     
     # needLPBool = numpy.zeros((2, 2), dtype=bool)
     
@@ -52,7 +55,7 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     
     GMat = np.empty([maxDegFreedom, maxDegFreedom])*np.NaN
     for i in range(len(mesh)):
-        v = fun.G(i,mesh, h, drift, diff)
+        v = fun.G(i,mesh, h, drift, diff, SpatialDiff)
         GMat[i,:len(v)] = v
         
     LPMat = np.ones([maxDegFreedom, NumLejas])*-1
@@ -64,13 +67,13 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
         AltMethod = []
     
     for i in range(1,NumSteps): # Since the first step is taken before this loop.
+        print(i)
         if (i >= 0):
             '''Add points to mesh'''
             # plt.figure()
             # plt.scatter(mesh[:,0], mesh[:,1])
-            mesh, pdf, tri, addBool, GMat = MeshUp.addPointsToMeshProcedure(mesh, pdf, tri, minDistanceBetweenPoints, h, poly, GMat, addPointsToBoundaryIfBiggerThanTolerance, removeZerosValuesIfLessThanTolerance, minDistanceBetweenPoints,maxDistanceBetweenPoints, drift, diff)
+            mesh, pdf, tri, addBool, GMat = MeshUp.addPointsToMeshProcedure(mesh, pdf, tri, minDistanceBetweenPoints, h, poly, GMat, addPointsToBoundaryIfBiggerThanTolerance, removeZerosValuesIfLessThanTolerance, minDistanceBetweenPoints,maxDistanceBetweenPoints, drift, diff, SpatialDiff)
             # plt.plot(mesh[:,0], mesh[:,1], '*r')
-
         if i>=15 and i%10==9:
             '''Remove points from mesh'''
             mesh, pdf, GMat, LPMat, LPMatBool, tri = MeshUp.removePointsFromMeshProcedure(mesh, pdf, tri, True, poly, GMat, LPMat, LPMatBool, removeZerosValuesIfLessThanTolerance)

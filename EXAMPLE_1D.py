@@ -1,32 +1,35 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Mar 26 13:42:29 2021
-
-@author: Rylei
-"""
-
 from DTQAdaptive import DTQ
 import numpy as np
-from DriftDiffFunctionBank import TwoHillDrift, ComplexDiff
+from DriftDiffFunctionBank import FourHillDrift, DiagDiffptSevenFive
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-mydrift = TwoHillDrift
-mydiff = ComplexDiff
+
+def MovingHillDrift(mesh):
+    if mesh.ndim ==1:
+        mesh = np.expand_dims(mesh, axis=0)
+    return np.asarray(np.ones((np.size(mesh,0))))
+    
+def DiagDiffOne(mesh):
+    return np.asarray([1])
+
+
+mydrift = MovingHillDrift
+mydiff = DiagDiffOne
 
 '''Initialization Parameters'''
-NumSteps = 170
+NumSteps = 20
 '''Discretization Parameters'''
 a = 1
 h=0.01
 #kstepMin = np.round(min(0.15, 0.144*mydiff(np.asarray([0,0]))[0,0]+0.0056),2)
-kstepMin = 0.1 # lambda
-kstepMax = 0.12 # Lambda
+kstepMin = 0.12 # lambda
+kstepMax = 0.14 # Lambda
 beta = 3
 radius = 1 # R
-SpatialDiff = True
+dimension = 1
 
-Meshes, PdfTraj, LPReuseArr, AltMethod= DTQ(NumSteps, kstepMin, kstepMax, h, beta, radius, mydrift, mydiff,2, SpatialDiff)
+Meshes, PdfTraj, LPReuseArr, AltMethod= DTQ(NumSteps, kstepMin, kstepMax, h, beta, radius, mydrift, mydiff, dimension, PrintStuff=True)
 
 pc = []
 for i in range(len(Meshes)-1):
@@ -45,12 +48,15 @@ mean2 = np.mean(pc)
 print("Alt Method: ", mean2*100, "%")
 
 
-from plots import plotErrors, plotRowThreePlots
-'''Plot 3 Subplots'''
-# plotRowThreePlots(Meshes, PdfTraj, h, [69,139,199], includeMeshPoints=False)
 from plots import plotErrors, plotRowThreePlots, plot2DColorPlot, plotRowThreePlotsMesh, plotRowSixPlots
+'''Plot 3 Subplots'''
+# plotRowThreePlots(Meshes, PdfTraj, h, [24,69,114], includeMeshPoints=False)
 
-# plotRowSixPlots(Meshes, PdfTraj, h, [49,109,169])
+# plotRowThreePlotsMesh(Meshes, PdfTraj, h, [24,69,114], includeMeshPoints=True)
+# plotRowSixPlots(Meshes, PdfTraj, h, [24,69,114])
+
+# plot2DColorPlot(-1, Meshes, PdfTraj)
+
 
 def update_graph(num):
     graph.set_data (Meshes[num][:,0], Meshes[num][:,1])
@@ -62,7 +68,7 @@ ax = fig.add_subplot(111, projection='3d')
 title = ax.set_title('3D Test')
     
 graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
-ax.set_zlim(0, 4.5)
+ax.set_zlim(0, 1.5)
 ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
 plt.show()
 

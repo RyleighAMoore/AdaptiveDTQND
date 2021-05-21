@@ -8,7 +8,7 @@ mydrift = FourHillDrift
 mydiff = DiagDiffptSevenFive
 
 '''Initialization Parameters'''
-NumSteps = 115
+NumSteps = 20
 '''Discretization Parameters'''
 a = 1
 h=0.01
@@ -43,7 +43,7 @@ from plots import plotErrors, plotRowThreePlots, plot2DColorPlot, plotRowThreePl
 # plotRowThreePlots(Meshes, PdfTraj, h, [24,69,114], includeMeshPoints=False)
 
 # plotRowThreePlotsMesh(Meshes, PdfTraj, h, [24,69,114], includeMeshPoints=True)
-plotRowSixPlots(Meshes, PdfTraj, h, [24,69,114])
+# plotRowSixPlots(Meshes, PdfTraj, h, [24,69,114])
 
 # plot2DColorPlot(-1, Meshes, PdfTraj)
 

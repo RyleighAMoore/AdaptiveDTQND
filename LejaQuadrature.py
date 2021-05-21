@@ -37,7 +37,8 @@ lambdas = indexing.total_degree_indices(d, k)
 poly.lambdas = lambdas
 lejaPointsFinal, new = getLejaPoints(10, np.asarray([[0,0]]).T, poly, num_candidate_samples=5000, candidateSampleMesh = [], returnIndices = False)
     
-def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, step, GMat, LPMat, LPMatBool, numQuadFit, removeZerosValuesIfLessThanTolerance, conditionNumForAltMethod, drift, diff,numPointsForLejaCandidates, PrintStuff = True):
+def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, step, GMat, LPMat, LPMatBool, numQuadFit, removeZerosValuesIfLessThanTolerance, conditionNumForAltMethod, drift, diff,numPointsForLejaCandidates, SpatialDiff, PrintStuff = True):
+    dimension = np.size(mesh,1)
     numLejas = LPMat.shape[1]
     newPDF = []
     # condNums = []
@@ -47,12 +48,13 @@ def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, s
     '''Try to Divide out Guassian using quadratic fit'''
     for ii in range(len(mesh)):
         # print('########################',ii/len(mesh)*100, '%')
-        dr = h*drift(mesh[ii,:])
-        muX = mesh[ii,0] + dr[0][0]
-        muY = mesh[ii,1] + dr[0][1]
+        dr = h*drift(mesh[ii,:])[0]
+        # muX = mesh[ii,0] + dr[0][0]
+        # muY = mesh[ii,1] + dr[0][1]
+        mu = mesh[ii,:]+dr
         
-        scaling = GaussScale(2)
-        scaling.setMu(np.asarray([[muX,muY]]).T)
+        scaling = GaussScale(dimension)
+        scaling.setMu(np.asarray([mu]).T)
 
         
         GPDF = np.expand_dims(GMat[ii,:meshSize], 1)*pdf
@@ -64,7 +66,7 @@ def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, s
             LPUse = LPUse+reuseLP
         '''Alternative Method'''
         if math.isnan(condNum) or value < 0 or condNum > conditionNumForAltMethod: 
-            scaling.setCov((h*diff(np.asarray([muX,muY]))*diff(np.asarray([muX,muY])).T).T)
+            scaling.setCov((h*diff(np.asarray(mu))*diff(np.asarray(mu)).T).T)
             
             mesh12 = VT.map_from_canonical_space(lejaPointsFinal, scaling)
             meshLP, distances, indx = UM.findNearestKPoints(scaling.mu[0][0],scaling.mu[1][0], mesh,numQuadFit, getIndices = True)
@@ -73,7 +75,7 @@ def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, s
             pdf12 = np.asarray(griddata(meshLP, pdfNew, mesh12, method='linear', fill_value=np.min(pdf)))
             pdfNew[pdfNew < 0] = np.min(pdf)
             
-            v = np.expand_dims(G(0,mesh12, h, drift, diff),1)
+            v = np.expand_dims(G(0,mesh12, h, drift, diff, SpatialDiff),1)
             
             
             L = np.linalg.cholesky((scaling.cov))
