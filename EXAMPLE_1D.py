@@ -6,12 +6,10 @@ import matplotlib.animation as animation
 
 
 def MovingHillDrift(mesh):
-    if mesh.ndim ==1:
-        mesh = np.expand_dims(mesh, axis=0)
-    return np.asarray(np.ones((np.size(mesh,0))))
+    return np.asarray(np.ones((np.shape(mesh))))
     
 def DiagDiffOne(mesh):
-    return np.asarray([1])
+    return np.expand_dims(np.asarray(0.4*np.asarray(np.ones((np.size(mesh))))),1)
 
 
 mydrift = MovingHillDrift
@@ -26,10 +24,11 @@ h=0.01
 kstepMin = 0.12 # lambda
 kstepMax = 0.14 # Lambda
 beta = 3
-radius = 1 # R
+radius = 3 # R
 dimension = 1
+SpatialDiff = False
 
-Meshes, PdfTraj, LPReuseArr, AltMethod= DTQ(NumSteps, kstepMin, kstepMax, h, beta, radius, mydrift, mydiff, dimension, PrintStuff=True)
+Meshes, PdfTraj, LPReuseArr, AltMethod= DTQ(NumSteps, kstepMin, kstepMax, h, beta, radius, mydrift, mydiff, dimension, SpatialDiff, PrintStuff=True)
 
 pc = []
 for i in range(len(Meshes)-1):

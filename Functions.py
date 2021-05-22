@@ -49,10 +49,16 @@ def G(indexOfMesh,mesh, h, drift, diff, SpatialDiff):
     D = mesh.shape[1]
     mean = mesh+drift(mesh)*h
     
+    if D == 1:
+        newpointVect = x*np.ones(np.shape(mesh))
+        diffVect = diff(mesh)
+        newVals = 1/(np.sqrt(2*np.pi*diffVect**2*h))*np.exp(-(newpointVect-mean)**2/(2*diffVect**2*h))
+        return np.squeeze(newVals)
+    
     if not SpatialDiff:
-        cov = diff(x)@diff(x).T * h
-        const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(cov))))
-        invCov = np.linalg.inv(cov)
+            cov = diff(x)@diff(x).T * h
+            const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(cov))))
+            invCov = np.linalg.inv(cov)
         
     soln_vals = np.empty(len(mesh))
     for j in range(len(mesh)):
@@ -90,5 +96,3 @@ def AddPointToG(mesh, newPointindex, h, GMat, drift, diff, SpatialDiff):
         newCol[j] = (Gs)
     GMat[:len(newCol),newPointindex] = newCol*const
     return GMat
-
-

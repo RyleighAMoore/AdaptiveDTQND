@@ -91,7 +91,7 @@ def QuadratureByInterpolationND_KnownLP(poly, scaling, mesh, pdf, LejaIndices):
 
 def QuadratureByInterpolationND_DivideOutGaussian(scaling, h, poly, fullMesh, fullPDF, LPMat, LPMatBool, index, NumLejas, numQuadPoints,diff, numPointsForLejaCandidates):
     '''Divides out Gaussian using a quadratic fit. Then computes the update using a Leja Quadrature rule.'''
-    x,y = fullMesh.T
+    # x,y = fullMesh.T
     if not LPMatBool[index][0]: # Do not have points for quadratic fit
         mesh, distances, ii = UM.findNearestKPoints(scaling.mu[0][0],scaling.mu[1][0], fullMesh,numQuadPoints, getIndices = True)
         mesh =  mesh[:numQuadPoints]
@@ -108,10 +108,11 @@ def QuadratureByInterpolationND_DivideOutGaussian(scaling, h, poly, fullMesh, fu
         pdf = fullPDF[QuadPoints]
         scale1, cc, Const = leastSquares(mesh, pdf)
         
-        
     if not math.isnan(Const): # succeeded fitting Gaussian
+        if np.shape(fullMesh,1)==1:
+            t==0
+    
         x,y = fullMesh.T
-
         L = np.linalg.cholesky((scale1.cov))
         JacFactor = np.prod(np.diag(L))
         vals = 1/(np.pi*JacFactor)*np.exp(-(cc[0]*x**2+ cc[1]*y**2 + 2*cc[2]*x*y + cc[3]*x + cc[4]*y + cc[5]))/Const
