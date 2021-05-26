@@ -18,7 +18,7 @@ NumSteps = 115
 
 
 x = [1,2,3,4,5,6,7,8,9,10]
-x=[1,2,3]
+x=[1,2]
 
 h=0.01
 times = np.asarray(np.arange(h,(NumSteps+1)*h,h))
