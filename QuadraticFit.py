@@ -55,23 +55,22 @@ def quad(xy, a, b, c, d, e, f):
 
 
 
-def leastSquares(mesh, pdf):
-    x = mesh[:,0]
-    y = mesh[:,1]
-    A = np.zeros((len(mesh), 6))
+def leastSquares(QuadMesh, pdf):
+    dimension = np.size(QuadMesh,1)
+    numLSBasis = ncr(dimension+2, 2)
+    M, comboList = buildVMatForLinFit(QuadMesh, dimension, numLSBasis)
     
-    A[:,0] = -x**2
-    A[:,1] = -y**2
-    A[:,2] = -2*x*y
-    A[:,3] = -x
-    A[:,4] = -y
-    A[:,5] = -np.ones(len(mesh))
-    
-    AT = A.T
-    const = np.linalg.inv(AT@A)@(AT@np.log(pdf))
+    MT = M.T
+    const = -1*np.linalg.inv(MT@M)@(MT@np.log(pdf))
     c=const.T[0]
     
-    A = np.asarray([[c[0], c[2]],[c[2],c[1]]])
+    A = np.diag(c[:dimension])
+    for ind,i in enumerate(comboList):
+        A[i[0],i[1]] = 1/2*c[dimension+ind]
+        A[i[1],i[0]] = 1/2*c[dimension+ind]
+        
+    # A = np.asarray([[c[0], 1/2*c[2]],[1/2*c[2],c[1]]])    
+    
     B = np.expand_dims(np.asarray([c[3], c[4]]),1)
     
     if np.linalg.det(A)<= 0:
@@ -99,6 +98,40 @@ def leastSquares(mesh, pdf):
     return scaling, c, Const
 
 
+
+from itertools import combinations
+def buildVMatForLinFit(QuadMesh, dimension, numLSBasis):
+    M = np.zeros((len(QuadMesh), numLSBasis))
+    size = 0
+    for i in range(dimension):
+        M[:,size] = QuadMesh[:,i]**2
+        size+=1
+    
+    # dimension =4
+    comb = combinations(list(range(dimension)), 2)
+    comboList= list(comb)
+    for i in comboList:
+        # print(i)
+        vals = np.ones(np.size(QuadMesh,0))
+        for j in range(2):
+            # print(j)
+            vals = vals*QuadMesh[:,j]  
+        M[:,size] = vals
+        size +=1
+        
+    for i in range(dimension):
+        M[:,size] = QuadMesh[:,i]
+        size+=1
+    M[:,size] = np.ones(np.size(QuadMesh,0))
+    return M, comboList 
+        
+import operator as op
+from functools import reduce
+def ncr(n, r):
+    r = min(r, n-r)
+    numer = reduce(op.mul, range(n, n-r, -1), 1)
+    denom = reduce(op.mul, range(1, r+1), 1)
+    return numer // denom  # or / in Python 2
 
     
     

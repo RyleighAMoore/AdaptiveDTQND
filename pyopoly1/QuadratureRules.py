@@ -109,13 +109,13 @@ def QuadratureByInterpolationND_DivideOutGaussian(scaling, h, poly, fullMesh, fu
         scale1, cc, Const = leastSquares(mesh, pdf)
         
     if not math.isnan(Const): # succeeded fitting Gaussian
-        if np.shape(fullMesh,1)==1:
+        if np.size(fullMesh,1)==1:
             t==0
     
         x,y = fullMesh.T
         L = np.linalg.cholesky((scale1.cov))
         JacFactor = np.prod(np.diag(L))
-        vals = 1/(np.pi*JacFactor)*np.exp(-(cc[0]*x**2+ cc[1]*y**2 + 2*cc[2]*x*y + cc[3]*x + cc[4]*y + cc[5]))/Const
+        vals = 1/(np.pi*JacFactor)*np.exp(-(cc[0]*x**2+ cc[1]*y**2 + cc[2]*x*y + cc[3]*x + cc[4]*y + cc[5]))/Const
         # vals1 = vals*(1/np.sqrt(np.pi**2*np.linalg.det(scale1.cov)))
         # vals2 = Gaussian(scale1, fullMesh)
         # vals2 = weightExp(scale1,fullMesh)
