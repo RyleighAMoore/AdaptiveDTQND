@@ -23,11 +23,26 @@ def leastSquares(QuadMesh, pdf):
         
     # A = np.asarray([[c[0], 1/2*c[2]],[1/2*c[2],c[1]]])    
 
-    B = np.expand_dims(c[dimension+ind+1:numLSBasis-1],1)
-    # B = np.expand_dims(np.asarray([c[3], c[4]]),1)
-    
     if np.linalg.det(A)<= 0:
          return float('nan'),float('nan'),float('nan')
+     
+    if dimension == 1:
+        cov = 1/c[0]
+        mean = -c[1]/(2*c[0])
+        const = -c[1]**2/(4*c[0])+c[2]
+        if math.isfinite(mean) and math.isfinite(np.sqrt(cov)):
+            scaling = GaussScale(1)
+            scaling.setMu(mean)
+            scaling.setCov(cov)
+        else:
+            return float('nan'),float('nan'),float('nan'), float('nan')
+        return scaling, c, const, comboList
+        
+        # B = np.expand_dims(c[dimension+1:numLSBasis-1],1)
+        
+     
+    B = np.expand_dims(c[dimension+ind+1:numLSBasis-1],1)
+    # B = np.expand_dims(np.asarray([c[3], c[4]]),1)
          
     sigma = np.linalg.inv(A)
     Lam, U = np.linalg.eigh(A)
