@@ -157,11 +157,13 @@ def addPointsRadially(pointX, pointY, mesh, numPointsToAdd, minDistanceBetweenPo
     for i in range(numPointsToAdd):
         newPointX = radius*np.cos(i*dTheta + noise) + pointX
         newPointY = radius*np.sin(i*dTheta + noise) + pointY
+        
+        newPoint = np.expand_dims(np.hstack((newPointX, newPointY)),1)
         if len(points)>0:
             mesh2 = np.vstack((mesh,points))
-            nearestPoint,distToNearestPoint, idx = UM.findNearestPoint(newPointX, newPointY, mesh2)
+            nearestPoint,distToNearestPoint, idx = UM.findNearestPoint(newPoint, mesh2)
         else:
-            nearestPoint,distToNearestPoint, idx = UM.findNearestPoint(newPointX, newPointY, mesh)
+            nearestPoint,distToNearestPoint, idx = UM.findNearestPoint(newPoint, mesh)
       
         if distToNearestPoint >= minDistanceBetweenPoints and distToNearestPoint <= maxDistanceBetweenPoints:
             points.append([newPointX, newPointY])

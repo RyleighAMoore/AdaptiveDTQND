@@ -65,33 +65,12 @@ def getLejaSetFromPoints(scale, Mesh, numLejaPointsToReturn, poly, Pdf, diff, nu
     # candidatesFull = VT.map_to_canonical_space(Mesh,scale)
     candidatesFull = Mesh # don't need to transform since the scale is normal when this function is used.
     indices = [np.nan]
-    candidates, distances, indik = UM.findNearestKPoints(scale.mu[0][0], scale.mu[1][0], candidatesFull,numPointsForLejaCandidates, getIndices = True)
+    candidates, distances, indik = UM.findNearestKPoints(scale.mu, candidatesFull,numPointsForLejaCandidates, getIndices = True)
     Px = candidates[0,0]
     Py = candidates[0,1]
     candidates = candidates[1:]
     lejaPointsFinal, indices = getLejaPoints(numLejaPointsToReturn, np.asarray([[Px,Py]]).T, poly, num_candidate_samples = 0, candidateSampleMesh = candidates.T, returnIndices=True)
         
-    # while math.isnan(indices[0]) and count < 4:
-    #     # if count >1:
-    #         # print("Trying to find Leja points again using more samples")
-    #     candidates, distances, indik = UM.findNearestKPoints(scale.mu[0][0], scale.mu[1][0], candidatesFull,30*int(count*np.ceil(np.max(diff(np.asarray([0,0]))))), getIndices = True)
-
-    #     Px = candidates[0,0]
-    #     Py = candidates[0,1]
-    #     candidates = candidates[1:]
-        
-    #     lejaPointsFinal, indices = getLejaPoints(numLejaPointsToReturn, np.asarray([[Px,Py]]).T, poly, num_candidate_samples = 0, candidateSampleMesh = candidates.T, returnIndices=True)
-    #     if count > 1:
-    #         t=0
-    #     count = count+1
-
-    # if math.isnan(indices[0]): #Try one more time with full mesh
-    #     candidates, distances, indik = UM.findNearestKPoints(scale.mu[0][0], scale.mu[1][0], candidatesFull,len(Mesh), getIndices = True)
-    #     Px = candidates[0,0]
-    #     Py = candidates[0,1]
-    #     candidates = candidates[1:]
-        
-    
     if math.isnan(indices[0]):
         print("LEJA FAIL - Try increasing numPointsForLejaCandidates and/or the numQuadFit paramaters.")
         return 0, 0, indices

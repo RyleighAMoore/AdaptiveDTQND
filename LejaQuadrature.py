@@ -69,7 +69,7 @@ def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, s
             scaling.setCov((h*diff(np.asarray(mu))*diff(np.asarray(mu)).T).T)
             
             mesh12 = VT.map_from_canonical_space(lejaPointsFinal, scaling)
-            meshLP, distances, indx = UM.findNearestKPoints(scaling.mu[0][0],scaling.mu[1][0], mesh,numQuadFit, getIndices = True)
+            meshLP, distances, indx = UM.findNearestKPoints(scaling.mu, mesh,numQuadFit, getIndices = True)
             pdfNew = pdf[indx]
             
             pdf12 = np.asarray(griddata(meshLP, pdfNew, mesh12, method='linear', fill_value=np.min(pdf)))

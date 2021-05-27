@@ -8,17 +8,27 @@ import matplotlib.pyplot as plt
 #  x2   y2
 #  x3   y3
 #  ...  ...
-def findNearestKPoints(xCoord, yCoord, AllPoints, numNeighbors, getIndices = False):
-    normList = (xCoord*np.ones(len(AllPoints)) - AllPoints[:,0])**2 + (yCoord*np.ones(len(AllPoints)) - AllPoints[:,1])**2
+def findNearestKPoints(Coord, AllPoints, numNeighbors, getIndices = False):
+    xCoord = Coord[0]
+    yCoord= Coord[1]
+    normList1 = (xCoord*np.ones(len(AllPoints)) - AllPoints[:,0])**2 + (yCoord*np.ones(len(AllPoints)) - AllPoints[:,1])**2
+    
+    normList = np.zeros(np.size(AllPoints,0))
+    size = np.size(AllPoints,0)
+    for i in range(np.size(AllPoints,1)):
+        normList += (Coord[i]*np.ones(size) - AllPoints[:,i])**2
+    
     idx = np.argsort(normList)
+    
+    
     if getIndices:
         return AllPoints[idx[:numNeighbors]], normList[idx[:numNeighbors]], idx[:numNeighbors]
     else:
         return AllPoints[idx[:numNeighbors]], normList[idx[:numNeighbors]]
     
 
-def findNearestPoint(xCoord, yCoord, AllPoints):
-    points, normList, indices = findNearestKPoints(xCoord, yCoord, AllPoints, 2, getIndices = True)
+def findNearestPoint(Coord, AllPoints):
+    points, normList, indices = findNearestKPoints(Coord, AllPoints, 2, getIndices = True)
     # if normList[0]==0:
     #     return points[1], np.sqrt(normList[1]), indices[1]
     # else:
