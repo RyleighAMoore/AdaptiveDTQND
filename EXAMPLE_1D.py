@@ -21,10 +21,10 @@ NumSteps = 20
 a = 1
 h=0.01
 #kstepMin = np.round(min(0.15, 0.144*mydiff(np.asarray([0,0]))[0,0]+0.0056),2)
-kstepMin = 0.12 # lambda
-kstepMax = 0.14 # Lambda
+kstepMin = 0.01 # lambda
+kstepMax = 0.01 # Lambda
 beta = 3
-radius = 3 # R
+radius = 0.25 # R
 dimension = 1
 SpatialDiff = False
 

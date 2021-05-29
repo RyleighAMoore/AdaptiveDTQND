@@ -97,10 +97,13 @@ def QuadratureByInterpolationND_DivideOutGaussian(scaling, h, poly, fullMesh, fu
         
     if not math.isnan(Const): # succeeded fitting Gaussian
         if np.size(fullMesh,1)==1:
-            t==0
-    
-        L = np.linalg.cholesky((scale1.cov))
-        JacFactor = np.prod(np.diag(L))
+            L = np.sqrt(scale1.cov)
+            JacFactor = L
+            L=1
+            JacFactor = 1
+        else:
+            L = np.linalg.cholesky((scale1.cov))
+            JacFactor = np.prod(np.diag(L))
         # vals = 1/(np.pi*JacFactor)*np.exp(-(cc[0]*x**2+ cc[1]*y**2 + cc[2]*x*y + cc[3]*x + cc[4]*y + cc[5]))/Const
     
         vals2 = np.zeros(np.size(fullPDF)).T
@@ -116,8 +119,13 @@ def QuadratureByInterpolationND_DivideOutGaussian(scaling, h, poly, fullMesh, fu
             vals2 += cc[count]*fullMesh[:,i]
             count +=1
         vals2 += cc[count]*np.ones(np.shape(vals2))
-        vals = 1/(np.pi*JacFactor)*np.exp(-(vals2))/Const
-    
+        vals = 1/(np.sqrt(np.pi)**dimension*JacFactor)*np.exp(-(vals2))/Const
+        
+        if vals.ndim==1:
+            vals = np.expand_dims(vals,1)
+            vals = vals.T
+        # plt.plot(mesh,pdf, '.')
+        # plt.plot(fullMesh,vals, '*')
         
         # vals1 = vals*(1/np.sqrt(np.pi**2*np.linalg.det(scale1.cov)))
         # vals2 = Gaussian(scale1, fullMesh)

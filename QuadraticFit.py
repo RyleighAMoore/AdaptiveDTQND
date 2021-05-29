@@ -29,7 +29,7 @@ def leastSquares(QuadMesh, pdf):
     if dimension == 1:
         cov = 1/c[0]
         mean = -c[1]/(2*c[0])
-        const = -c[1]**2/(4*c[0])+c[2]
+        const = np.exp(-c[1]**2/(4*c[0])+c[2])
         if math.isfinite(mean) and math.isfinite(np.sqrt(cov)):
             scaling = GaussScale(1)
             scaling.setMu(mean)
@@ -102,6 +102,40 @@ def ncr(n, r):
     return numer // denom  # or / in Python 2
 
     
+# x = np.expand_dims(np.linspace(-1, 1),1)  
+# s = 0.25
+# mu = 0.1
+
+# pdf = 1/(s*np.sqrt(np.pi))*np.exp(-(x-mu)**2/(s**2))
+
+# scaling, cc, Const, combinations = leastSquares(x, pdf)
+# print(scaling.mu)
+# print(np.sqrt(scaling.cov))
+
+# fullMesh = x
+# fullPDF = pdf
+
+# vals2 = np.zeros(np.size(fullPDF)).T
+# count = 0
+# dimension = np.size(fullMesh,1)
+# for i in range(dimension):
+#     vals2 += cc[count]*fullMesh[:,i]**2
+#     count +=1
+# for i,k in combinations:
+#     vals2 += cc[count]*fullMesh[:,i]*fullMesh[:,k]
+#     count +=1
+# for i in range(dimension):
+#     vals2 += cc[count]*fullMesh[:,i]
+#     count +=1
     
+# JacFactor = 1
+# vals2 += cc[count]*np.ones(np.shape(vals2))
+# vals = 1/(np.sqrt(np.pi)**dimension*JacFactor)*np.exp(-(vals2))/Const
+# vals = np.exp(-(vals2))/Const
+
+# vals = np.exp(-(cc[0]*x**2+cc[1]*x+cc[2]))
+# plt.plot(fullMesh,pdf, '.')
+# plt.plot(fullMesh,vals, '*')
+        
 
 
