@@ -28,16 +28,16 @@ def getMeshValsThatAreClose(Mesh, pdf, sigmaX, sigmaY, muX, muY, numStd = 4):
     return np.asarray(MeshToKeep), np.asarray(PdfToKeep)
 
 
-'''Generate Leja Sample for use in alternative method if needed'''
-poly = HermitePolynomials(rho=0)
-d=2
-k = 40    
-ab = poly.recurrence(k+1)
-lambdas = indexing.total_degree_indices(d, k)
-poly.lambdas = lambdas
-lejaPointsFinal, new = getLejaPoints(10, np.asarray([[0,0]]).T, poly, num_candidate_samples=5000, candidateSampleMesh = [], returnIndices = False)
+# '''Generate Leja Sample for use in alternative method if needed'''
+# poly = HermitePolynomials(rho=0)
+# d=2
+# k = 40    
+# ab = poly.recurrence(k+1)
+# lambdas = indexing.total_degree_indices(d, k)
+# poly.lambdas = lambdas
+# lejaPointsFinal, new = getLejaPoints(10, np.asarray([[0,0]]).T, poly, num_candidate_samples=5000, candidateSampleMesh = [], returnIndices = False)
     
-def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, step, GMat, LPMat, LPMatBool, numQuadFit, removeZerosValuesIfLessThanTolerance, conditionNumForAltMethod, drift, diff,numPointsForLejaCandidates, SpatialDiff, PrintStuff = True):
+def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, step, GMat, LPMat, LPMatBool, numQuadFit, removeZerosValuesIfLessThanTolerance, conditionNumForAltMethod, drift, diff,numPointsForLejaCandidates, SpatialDiff,lejaPointsFinal, PrintStuff = True):
     dimension = np.size(mesh,1)
     numLejas = LPMat.shape[1]
     newPDF = []

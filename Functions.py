@@ -76,9 +76,16 @@ def G(indexOfMesh,mesh, h, drift, diff, SpatialDiff):
 
 def AddPointToG(mesh, newPointindex, h, GMat, drift, diff, SpatialDiff):
     newRow = G(newPointindex, mesh,h, drift, diff, SpatialDiff)
-    
-    #Now, add new column
     GMat[newPointindex,:len(newRow)] = newRow
+
+    if np.size(mesh,1) == 1:
+        var = diff(mesh[newPointindex,:])**2*h
+        mean = mesh[newPointindex,:]+ drift(mesh[newPointindex,:])*h
+        newCol = 1/(np.sqrt(2*np.pi*var))*np.exp(-(mesh-mean)**2/(2*var))
+        GMat[:len(newCol),newPointindex] = np.squeeze(newCol)
+        return GMat
+        
+    #Now, add new column
     D = mesh.shape[1]
     # mu1 = mesh[-1,:]+drift(np.expand_dims(mesh[-1,:],axis=0))*h
     # mu1 = mu1[0]

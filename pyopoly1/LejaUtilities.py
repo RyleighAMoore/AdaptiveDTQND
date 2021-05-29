@@ -239,11 +239,14 @@ def christoffel_weights(basis_matrix):
     return 1./np.sum(basis_matrix**2,axis=1)
 
 def sqrtNormal_weights(candidate_samples):
-    x = candidate_samples[0,:]
-    y= candidate_samples[1,:]
-    # z =(1/np.sqrt(2*np.pi))*np.exp(-(x**2/(2)+ y**2/(2)))
-    z =(1/np.pi)*np.exp(-(x**2/(1)+ y**2/(1)))
-    # z =np.exp(-(x**2/(1)+ y**2/(1)))
+    d = np.size(candidate_samples,0)
+    z=1/(np.sqrt(np.pi)**d)
+    for i in range(d):
+        z =z*np.exp(-candidate_samples[i,:]**2)
+        
+    # x = candidate_samples[0,:]
+    # y = candidate_samples[1,:]
+    # z1 =(1/np.pi)*np.exp(-(x**2/(1)+ y**2/(1)))
     return np.sqrt(z)
 
 

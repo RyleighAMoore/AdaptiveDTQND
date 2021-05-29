@@ -7,6 +7,7 @@ from pyopoly1 import indexing
 import MeshUpdates2D as MeshUp
 from pyopoly1.Scaling import GaussScale
 import ICMeshGenerator as M
+from pyopoly1.LejaPoints import getLejaSetFromPoints, getLejaPoints
 
 
 def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree, meshRadius, drift, diff, dimension, SpatialDiff, PrintStuff = True):
@@ -24,6 +25,10 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     k = 40    
     lambdas = indexing.total_degree_indices(d, k)
     poly.lambdas = lambdas
+    
+    '''Generate Alt Leja Points'''
+    lejaPointsFinal, new = getLejaPoints(10, np.zeros((d,1)), poly, num_candidate_samples=5000, candidateSampleMesh = [], returnIndices = False)
+
     
     '''pdf after one time step with Dirac initial condition centered at the origin'''
     mesh = M.getICMeshRadius(meshRadius, minDistanceBetweenPoints, h, dimension)
@@ -83,7 +88,7 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
         if i >-1: 
             '''Step forward in time'''
             pdf = np.expand_dims(pdf,axis=1)
-            pdf, meshTemp, LPMat, LPMatBool, LPReuse, AltMethodCount = LQ.Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly,h,NumLejas, i, GMat, LPMat, LPMatBool, numQuadFit, removeZerosValuesIfLessThanTolerance, conditionNumForAltMethod, drift, diff, numPointsForLejaCandidates, PrintStuff)
+            pdf, meshTemp, LPMat, LPMatBool, LPReuse, AltMethodCount = LQ.Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly,h,NumLejas, i, GMat, LPMat, LPMatBool, numQuadFit, removeZerosValuesIfLessThanTolerance, conditionNumForAltMethod, drift, diff, numPointsForLejaCandidates,SpatialDiff, lejaPointsFinal, PrintStuff)
             pdf = np.squeeze(pdf)
             '''Add new values to lists for graphing'''
             
