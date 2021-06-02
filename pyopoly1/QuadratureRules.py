@@ -30,7 +30,6 @@ def QuadratureByInterpolation_Simple(poly, scaling, mesh, pdf):
     vinv = np.linalg.inv(V)
     c = np.matmul(vinv[0,:], pdf)
     
-    
     return c, np.sum(np.abs(vinv[0,:]))
     
   
@@ -39,10 +38,11 @@ def QuadratureByInterpolationND(poly, scaling, mesh, pdf, NumLejas, diff, numPoi
     Used by QuadratureByInterpolationND_DivideOutGaussian
     Selects a Leja points subset of the passed in mesh'''
     u = VT.map_to_canonical_space(mesh, scaling)
-  
-    normScale = GaussScale(2)
-    normScale.setMu(np.asarray([[0,0]]).T)
-    normScale.setCov(np.asarray([[1,0],[0,1]]))
+    
+    dimension = np.size(mesh,1)
+    normScale = GaussScale(dimension)
+    normScale.setMu(np.zeros(dimension).T)
+    normScale.setCov(np.eye(dimension))
     
     mesh2, pdfNew, indices = LP.getLejaSetFromPoints(normScale, u, NumLejas, poly, pdf, diff, numPointsForLejaCandidates)
     if math.isnan(indices[0]):
@@ -94,38 +94,34 @@ def QuadratureByInterpolationND_DivideOutGaussian(scaling, h, poly, fullMesh, fu
         mesh = fullMesh[QuadPoints]
         pdf = fullPDF[QuadPoints]
         scale1, cc, Const, combinations = leastSquares(mesh, pdf)
+
         
     if not math.isnan(Const): # succeeded fitting Gaussian
         if np.size(fullMesh,1)==1:
-            L = np.sqrt(scale1.cov)
-            JacFactor = L
-            L=1
-            JacFactor = 1
+            vals = np.exp(-(cc[0]*fullMesh**2+cc[1]*fullMesh+cc[2])).T/Const
+            vals = vals*1/(np.sqrt(np.pi)*np.sqrt(scale1.cov))
         else:
             L = np.linalg.cholesky((scale1.cov))
             JacFactor = np.prod(np.diag(L))
-        # vals = 1/(np.pi*JacFactor)*np.exp(-(cc[0]*x**2+ cc[1]*y**2 + cc[2]*x*y + cc[3]*x + cc[4]*y + cc[5]))/Const
-    
-        vals2 = np.zeros(np.size(fullPDF)).T
-        count = 0
-        dimension = np.size(fullMesh,1)
-        for i in range(dimension):
-            vals2 += cc[count]*fullMesh[:,i]**2
-            count +=1
-        for i,k in combinations:
-            vals2 += cc[count]*fullMesh[:,i]*fullMesh[:,k]
-            count +=1
-        for i in range(dimension):
-            vals2 += cc[count]*fullMesh[:,i]
-            count +=1
-        vals2 += cc[count]*np.ones(np.shape(vals2))
-        vals = 1/(np.sqrt(np.pi)**dimension*JacFactor)*np.exp(-(vals2))/Const
+            # vals = 1/(np.pi*JacFactor)*np.exp(-(cc[0]*x**2+ cc[1]*y**2 + cc[2]*x*y + cc[3]*x + cc[4]*y + cc[5]))/Const
         
-        if vals.ndim==1:
-            vals = np.expand_dims(vals,1)
-            vals = vals.T
-        # plt.plot(mesh,pdf, '.')
-        # plt.plot(fullMesh,vals, '*')
+            vals2 = np.zeros(np.size(fullPDF)).T
+            count = 0
+            dimension = np.size(fullMesh,1)
+            for i in range(dimension):
+                vals2 += cc[count]*fullMesh[:,i]**2
+                count +=1
+            for i,k in combinations:
+                vals2 += cc[count]*fullMesh[:,i]*fullMesh[:,k]
+                count +=1
+            for i in range(dimension):
+                vals2 += cc[count]*fullMesh[:,i]
+                count +=1
+            vals2 += cc[count]*np.ones(np.shape(vals2))
+            vals = 1/(np.sqrt(np.pi)**dimension*JacFactor)*np.exp(-(vals2))/Const
+        # plt.figure()
+        # plt.plot(fullMesh,fullPDF, 'o')
+        # plt.plot(fullMesh,vals.T, '.')
         
         # vals1 = vals*(1/np.sqrt(np.pi**2*np.linalg.det(scale1.cov)))
         # vals2 = Gaussian(scale1, fullMesh)

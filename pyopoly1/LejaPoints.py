@@ -66,10 +66,14 @@ def getLejaSetFromPoints(scale, Mesh, numLejaPointsToReturn, poly, Pdf, diff, nu
     candidatesFull = Mesh # don't need to transform since the scale is normal when this function is used.
     indices = [np.nan]
     candidates, distances, indik = UM.findNearestKPoints(scale.mu, candidatesFull,numPointsForLejaCandidates, getIndices = True)
-    Px = candidates[0,0]
-    Py = candidates[0,1]
+    # Px = candidates[0,0]
+    # Py = candidates[0,1]
+    point = candidates[0]
+    pointPDF = Pdf[0]
     candidates = candidates[1:]
-    lejaPointsFinal, indices = getLejaPoints(numLejaPointsToReturn, np.asarray([[Px,Py]]).T, poly, num_candidate_samples = 0, candidateSampleMesh = candidates.T, returnIndices=True)
+    # lejaPointsFinal, indices = getLejaPoints(numLejaPointsToReturn, np.asarray([[Px,Py]]).T, poly, num_candidate_samples = 0, candidateSampleMesh = candidates.T, returnIndices=True)
+
+    lejaPointsFinal, indices = getLejaPoints(numLejaPointsToReturn, np.asarray([point]).T, poly, num_candidate_samples = 0, candidateSampleMesh = candidates.T, returnIndices=True)
         
     if math.isnan(indices[0]):
         print("LEJA FAIL - Try increasing numPointsForLejaCandidates and/or the numQuadFit paramaters.")
@@ -77,14 +81,14 @@ def getLejaSetFromPoints(scale, Mesh, numLejaPointsToReturn, poly, Pdf, diff, nu
     
     # lejaPointsFinal = VT.map_from_canonical_space(lejaPointsFinal, scale)
 
-    # plot= False
-    # if plot:
-    #     plt.figure()
-    #     plt.plot(Mesh[:,0], Mesh[:,1], '*k', label='mesh', markersize=14)
-    #     plt.plot(Px, Py, '*r',label='Main Point',markersize=14)
-    #     plt.plot(lejaPointsFinal[:,0], lejaPointsFinal[:,1], '.c', label='Leja Points',markersize=10)
-    #     plt.legend()
-    #     plt.show()
+    plot= False
+    if plot:
+        plt.figure()
+        plt.plot(Mesh,Pdf, '*k', label='mesh', markersize=14)
+        plt.plot(point,pointPDF,  '*r',label='Main Point',markersize=14)
+        plt.plot(lejaPointsFinal, Pdf[indices], '.c', label='Leja Points',markersize=10)
+        plt.legend()
+        plt.show()
 
     indicesNew = indik[indices]
     return Mesh[indicesNew], Pdf[indicesNew], indicesNew

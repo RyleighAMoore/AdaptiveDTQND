@@ -51,8 +51,8 @@ def G(indexOfMesh,mesh, h, drift, diff, SpatialDiff):
     
     if D == 1:
         newpointVect = x*np.ones(np.shape(mesh))
-        diffVect = diff(mesh)
-        newVals = 1/(np.sqrt(2*np.pi*diffVect**2*h))*np.exp(-(newpointVect-mean)**2/(2*diffVect**2*h))
+        var = h*diff(mesh)**2
+        newVals = 1/(np.sqrt((2*np.pi*var)))*np.exp(-(newpointVect-mean)**2/(2*var))
         return np.squeeze(newVals)
     
     if not SpatialDiff:

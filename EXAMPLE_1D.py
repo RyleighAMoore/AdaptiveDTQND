@@ -6,17 +6,17 @@ import matplotlib.animation as animation
 
 
 def MovingHillDrift(mesh):
-    return np.asarray(np.ones((np.shape(mesh))))
+    return np.asarray(np.zeros((np.shape(mesh))))
     
 def DiagDiffOne(mesh):
-    return np.expand_dims(np.asarray(0.4*np.asarray(np.ones((np.size(mesh))))),1)
+    return np.expand_dims(np.asarray(1*np.asarray(np.ones((np.size(mesh))))),1)
 
 
 mydrift = MovingHillDrift
 mydiff = DiagDiffOne
 
 '''Initialization Parameters'''
-NumSteps = 20
+NumSteps = 4
 '''Discretization Parameters'''
 a = 1
 h=0.01
@@ -24,7 +24,7 @@ h=0.01
 kstepMin = 0.01 # lambda
 kstepMax = 0.01 # Lambda
 beta = 3
-radius = 0.25 # R
+radius = 0.5 # R
 dimension = 1
 SpatialDiff = False
 
@@ -47,27 +47,19 @@ mean2 = np.mean(pc)
 print("Alt Method: ", mean2*100, "%")
 
 
-from plots import plotErrors, plotRowThreePlots, plot2DColorPlot, plotRowThreePlotsMesh, plotRowSixPlots
-'''Plot 3 Subplots'''
-# plotRowThreePlots(Meshes, PdfTraj, h, [24,69,114], includeMeshPoints=False)
-
-# plotRowThreePlotsMesh(Meshes, PdfTraj, h, [24,69,114], includeMeshPoints=True)
-# plotRowSixPlots(Meshes, PdfTraj, h, [24,69,114])
-
-# plot2DColorPlot(-1, Meshes, PdfTraj)
-
 
 def update_graph(num):
-    graph.set_data (Meshes[num][:,0], Meshes[num][:,1])
-    graph.set_3d_properties(PdfTraj[num])
-    title.set_text('3D Test, time={}'.format(num))
+    graph.set_data(Meshes[num], PdfTraj[num])
     return title, graph
 fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-title = ax.set_title('3D Test')
+ax = fig.add_subplot(111)
+title = ax.set_title('2D Test')
     
-graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
-ax.set_zlim(0, 1.5)
+graph, = ax.plot(Meshes[-1], PdfTraj[-1], linestyle="", marker=".")
+ax.set_xlim(-2, 2)
+ax.set_ylim(0, np.max(PdfTraj[0]))
+
+
 ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
 plt.show()
 

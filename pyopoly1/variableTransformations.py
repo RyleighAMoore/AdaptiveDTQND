@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 
 def map_to_canonical_space(user_samples, scale_parameters):
     dimension = np.size(user_samples,1)
-    if dimension ==1:
+    if dimension == 1:
         Linv = 1/np.sqrt(scale_parameters.cov)
         mean = scale_parameters.mu
-        delta = np.zeros(np.shape(user_samples))
+        delta = np.ones(np.shape(user_samples))*mean
         shiftedMesh = user_samples - delta
         canonical_samples = (Linv*shiftedMesh.T).T
         return canonical_samples
@@ -31,7 +31,7 @@ def map_from_canonical_space(user_samples, scale_parameters):
     if dimension ==1:
         L = np.sqrt(scale_parameters.cov)
         mean = scale_parameters.mu
-        delta = np.zeros(np.shape(user_samples))
+        delta = np.ones(np.shape(user_samples))*mean
         vals = L*np.asarray(user_samples).T + delta.T
         return vals.T
         

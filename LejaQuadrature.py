@@ -58,10 +58,14 @@ def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, s
 
         
         GPDF = np.expand_dims(GMat[ii,:meshSize], 1)*pdf
+        # plt.plot(mesh,GPDF, 'o')
+        # plt.plot(mesh, (np.exp(-(-mesh)**2/0.02)/np.sqrt(0.02*np.pi))**2, '.')
         # GPDF2 = np.expand_dims(GVals2(muX, muY, mesh, h),1)*pdf
         # assert np.max(abs(GPDF2-GPDF)) < 10**(-7)
         
         value, condNum, scaleUsed, LPMat, LPMatBool, reuseLP = QuadratureByInterpolationND_DivideOutGaussian(scaling, h, poly, mesh, GPDF, LPMat, LPMatBool,ii,NumLejas, numQuadFit, diff, numPointsForLejaCandidates)
+        # print(value)
+        # print(condNum)
         if PrintStuff:
             LPUse = LPUse+reuseLP
         '''Alternative Method'''

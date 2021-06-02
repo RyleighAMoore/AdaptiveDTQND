@@ -21,22 +21,27 @@ def leastSquares(QuadMesh, pdf):
         A[i[0],i[1]] = 1/2*c[dimension+ind]
         A[i[1],i[0]] = 1/2*c[dimension+ind]
         
-    # A = np.asarray([[c[0], 1/2*c[2]],[1/2*c[2],c[1]]])    
-
     if np.linalg.det(A)<= 0:
-         return float('nan'),float('nan'),float('nan')
+         return float('nan'),float('nan'),float('nan'), float('nan')
      
     if dimension == 1:
-        cov = 1/c[0]
+        cov = c[0]
         mean = -c[1]/(2*c[0])
-        const = np.exp(-c[1]**2/(4*c[0])+c[2])
+        con = 1/np.exp(-c[1]**2/(4*c[0])+c[2]) #7.052369794346946
+        # con = 12.499999999999986
         if math.isfinite(mean) and math.isfinite(np.sqrt(cov)):
             scaling = GaussScale(1)
             scaling.setMu(mean)
-            scaling.setCov(cov)
+            scaling.setCov(1/cov)
         else:
             return float('nan'),float('nan'),float('nan'), float('nan')
-        return scaling, c, const, comboList
+        
+        # plt.figure()
+        # plt.plot(QuadMesh, pdf, 'o')
+        # plt.plot(QuadMesh.T, np.exp(-(c[0]*QuadMesh**2+c[1]*QuadMesh+c[2])).T, '.r')
+        # plt.plot(QuadMesh.T, 1/(np.sqrt(np.pi)*np.sqrt(scaling.cov))*np.exp(-(c[0]*QuadMesh**2+c[1]*QuadMesh+c[2])).T, '.k')
+
+        return scaling, c, con, comboList
         
         # B = np.expand_dims(c[dimension+1:numLSBasis-1],1)
         
@@ -47,7 +52,7 @@ def leastSquares(QuadMesh, pdf):
     sigma = np.linalg.inv(A)
     Lam, U = np.linalg.eigh(A)
     if np.min(Lam) <= 0:
-        return float('nan'),float('nan'),float('nan')
+        return float('nan'),float('nan'),float('nan'), float('nan')
     
     La = np.diag(Lam)
     mu = -1/2*U @ np.linalg.inv(La) @ (B.T @ U).T    
@@ -101,14 +106,37 @@ def ncr(n, r):
     denom = reduce(op.mul, range(1, r+1), 1)
     return numer // denom  # or / in Python 2
 
+
+
+
+# import ICMeshGenerator as M
+# x = M.getICMeshRadius(0.25, 0.05, 0.01, 1)
+# # x = np.expand_dims(np.linspace(-0.25, 0.25),1)  
+# s = 0.1
+# mu = 0
+# import numpy as np
+# import Functions as fun
+# from pyopoly1.Scaling import GaussScale
+# import ICMeshGenerator as M
+# import matplotlib.pyplot as plt
+
+
+# def drift(mesh):
+#     return np.asarray(np.zeros((np.shape(mesh))))
     
-# x = np.expand_dims(np.linspace(-1, 1),1)  
-# s = 0.25
-# mu = 0.1
+# def diff(mesh):
+#     return np.expand_dims(np.asarray(0.8*np.asarray(np.ones((np.size(mesh))))),1)
 
-# pdf = 1/(s*np.sqrt(np.pi))*np.exp(-(x-mu)**2/(s**2))
+# h=0.01
+# scale = GaussScale(1)
+# scale.setMu(h*drift(np.zeros(1)).T)
+# scale.setCov((h*diff(np.zeros(1))*diff(np.zeros(1)).T).T)
 
-# scaling, cc, Const, combinations = leastSquares(x, pdf)
+# # from watchpoints import watch
+# pdf = fun.Gaussian(scale, x)**2
+# # pdf = 1/(s*np.sqrt(np.pi))*np.exp(-(x-mu)**2/(s**2))
+
+# scaling, cc, Const, combinations = leastSquares(x, np.expand_dims(pdf,1))
 # print(scaling.mu)
 # print(np.sqrt(scaling.cov))
 
@@ -128,14 +156,19 @@ def ncr(n, r):
 #     vals2 += cc[count]*fullMesh[:,i]
 #     count +=1
     
-# JacFactor = 1
 # vals2 += cc[count]*np.ones(np.shape(vals2))
-# vals = 1/(np.sqrt(np.pi)**dimension*JacFactor)*np.exp(-(vals2))/Const
-# vals = np.exp(-(vals2))/Const
 
-# vals = np.exp(-(cc[0]*x**2+cc[1]*x+cc[2]))
+# vals = 1/(np.sqrt(scaling.cov)*np.sqrt(np.pi)**dimension)*np.exp(-(vals2))/Const
+# vals = np.expand_dims(vals,1).T
+# # vals = np.exp(-(vals2))/Const
+
+# # vals = np.exp(-(cc[0]*x**2+cc[1]*x+cc[2]))
+# vals = 1/(np.sqrt(scaling.cov)*np.sqrt(np.pi)**dimension)*np.exp(-(cc[0]*fullMesh**2+cc[1]*fullMesh+cc[2]*np.ones(np.shape(fullMesh)))).T/Const
+
+# plt.plot(fullMesh,vals.T, '*')
 # plt.plot(fullMesh,pdf, '.')
-# plt.plot(fullMesh,vals, '*')
+# plt.plot(fullMesh,np.expand_dims(pdf,1)/vals.T, 'o')
         
+# print(np.expand_dims(pdf,1)/vals.T)
 
 

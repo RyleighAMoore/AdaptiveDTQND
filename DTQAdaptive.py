@@ -8,6 +8,8 @@ import MeshUpdates2D as MeshUp
 from pyopoly1.Scaling import GaussScale
 import ICMeshGenerator as M
 from pyopoly1.LejaPoints import getLejaSetFromPoints, getLejaPoints
+import matplotlib.pyplot as plt
+
 
 
 def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree, meshRadius, drift, diff, dimension, SpatialDiff, PrintStuff = True):
@@ -18,6 +20,14 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     NumLejas = 10
     numPointsForLejaCandidates = 40
     numQuadFit = 20
+    
+    '''Paramaters'''
+    # addPointsToBoundaryIfBiggerThanTolerance = 10**(-degree)
+    # removeZerosValuesIfLessThanTolerance = 10**(-degree-0.5)
+    # conditionNumForAltMethod = 10
+    # NumLejas =5
+    # numPointsForLejaCandidates = 30
+    # numQuadFit = 30
 
     ''' Initializd orthonormal Polynomial family'''
     poly = HermitePolynomials(rho=0)
@@ -37,7 +47,9 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     scale.setMu(h*drift(np.zeros(dimension)).T)
     scale.setCov((h*diff(np.zeros(dimension))*diff(np.zeros(dimension)).T).T)
     
+    # from watchpoints import watch
     pdf = fun.Gaussian(scale, mesh)
+    
     
     Meshes = []
     PdfTraj = []
@@ -74,6 +86,7 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     for i in range(1,NumSteps): # Since the first step is taken before this loop.
         print(i)
         if (i >= 0):
+            plt.plot(mesh,pdf,'.')
             '''Add points to mesh'''
             # plt.figure()
             # plt.scatter(mesh[:,0], mesh[:,1])
@@ -86,6 +99,7 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
         if PrintStuff:
             print('Length of mesh = ', len(mesh))
         if i >-1: 
+            
             '''Step forward in time'''
             pdf = np.expand_dims(pdf,axis=1)
             pdf, meshTemp, LPMat, LPMatBool, LPReuse, AltMethodCount = LQ.Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly,h,NumLejas, i, GMat, LPMat, LPMatBool, numQuadFit, removeZerosValuesIfLessThanTolerance, conditionNumForAltMethod, drift, diff, numPointsForLejaCandidates,SpatialDiff, lejaPointsFinal, PrintStuff)
