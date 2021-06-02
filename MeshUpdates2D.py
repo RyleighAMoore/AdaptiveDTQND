@@ -104,6 +104,8 @@ def removeSmallPoints(Mesh, Pdf, tri, boundaryOnlyBool, GMat, LPMat, LPMatBool, 
 
 def houseKeepingAfterAdjustingMesh(Mesh, tri):
     '''Updates all the Vertices information for the mesh. Must be run after removing points'''
+    if np.size(Mesh,1)==1:
+        return 0
     tri = Delaunay(Mesh, incremental=True)
     return tri
 
@@ -118,7 +120,7 @@ def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerTha
         newPoints = []
         mm = np.min(Mesh)
         MM = np.max(Mesh)
-        for i in range(5):
+        for i in range(1,4):
             Mesh = np.append(Mesh, np.asarray([[mm-i*radius]]), axis=0)
             newPoints.append(np.asarray(mm-i*radius))
             Mesh = np.append(Mesh, np.asarray([[MM+i*radius]]), axis=0)

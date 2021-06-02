@@ -22,12 +22,12 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     numQuadFit = 20
     
     '''Paramaters'''
-    # addPointsToBoundaryIfBiggerThanTolerance = 10**(-degree)
-    # removeZerosValuesIfLessThanTolerance = 10**(-degree-0.5)
-    # conditionNumForAltMethod = 10
-    # NumLejas =5
-    # numPointsForLejaCandidates = 30
-    # numQuadFit = 30
+    addPointsToBoundaryIfBiggerThanTolerance = 10**(-degree)
+    removeZerosValuesIfLessThanTolerance = 10**(-degree-0.5)
+    conditionNumForAltMethod = 10
+    NumLejas =5
+    numPointsForLejaCandidates = 30
+    numQuadFit = 30
 
     ''' Initializd orthonormal Polynomial family'''
     poly = HermitePolynomials(rho=0)
@@ -86,7 +86,7 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     for i in range(1,NumSteps): # Since the first step is taken before this loop.
         print(i)
         if (i >= 0):
-            plt.plot(mesh,pdf,'.')
+            # plt.plot(mesh,pdf,'.')
             '''Add points to mesh'''
             # plt.figure()
             # plt.scatter(mesh[:,0], mesh[:,1])

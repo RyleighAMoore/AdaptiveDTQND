@@ -6,25 +6,26 @@ import matplotlib.animation as animation
 
 
 def MovingHillDrift(mesh):
-    return np.asarray(np.zeros((np.shape(mesh))))
+    # return np.asarray(np.zeros((np.shape(mesh))))
+    return mesh*(4-mesh**2)
     
 def DiagDiffOne(mesh):
-    return np.expand_dims(np.asarray(1*np.asarray(np.ones((np.size(mesh))))),1)
+    return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
 
 
 mydrift = MovingHillDrift
 mydiff = DiagDiffOne
 
 '''Initialization Parameters'''
-NumSteps = 4
+NumSteps = 100
 '''Discretization Parameters'''
 a = 1
 h=0.01
 #kstepMin = np.round(min(0.15, 0.144*mydiff(np.asarray([0,0]))[0,0]+0.0056),2)
 kstepMin = 0.01 # lambda
 kstepMax = 0.01 # Lambda
-beta = 3
-radius = 0.5 # R
+beta = 5
+radius = 0.8 # R
 dimension = 1
 SpatialDiff = False
 
@@ -56,7 +57,7 @@ ax = fig.add_subplot(111)
 title = ax.set_title('2D Test')
     
 graph, = ax.plot(Meshes[-1], PdfTraj[-1], linestyle="", marker=".")
-ax.set_xlim(-2, 2)
+ax.set_xlim(-4, 4)
 ax.set_ylim(0, np.max(PdfTraj[0]))
 
 

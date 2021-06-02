@@ -76,11 +76,15 @@ def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, s
             meshLP, distances, indx = UM.findNearestKPoints(scaling.mu, mesh,numQuadFit, getIndices = True)
             pdfNew = pdf[indx]
             
-            pdf12 = np.asarray(griddata(meshLP, pdfNew, mesh12, method='linear', fill_value=np.min(pdf)))
-            pdfNew[pdfNew < 0] = np.min(pdf)
+            pdf12 = np.asarray(griddata(np.squeeze(meshLP), pdfNew, np.squeeze(mesh12), method='linear', fill_value=np.min(pdf)))
+            pdf12[pdf12 < 0] = np.min(pdf)
+            
+            # plt.figure()
+            # plt.plot(mesh,pdf, '*')
+            # plt.plot(meshLP, pdfNew, 'o')
+            # plt.plot(mesh12, pdf12, '.')
             
             v = np.expand_dims(G(0,mesh12, h, drift, diff, SpatialDiff),1)
-            
             
             L = np.linalg.cholesky((scaling.cov))
             JacFactor = np.prod(np.diag(L))
