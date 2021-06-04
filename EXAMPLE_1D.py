@@ -22,8 +22,8 @@ NumSteps = 100
 a = 1
 h=0.01
 #kstepMin = np.round(min(0.15, 0.144*mydiff(np.asarray([0,0]))[0,0]+0.0056),2)
-kstepMin = 0.01 # lambda
-kstepMax = 0.01 # Lambda
+kstepMin = 0.04 # lambda
+kstepMax = 0.04 # Lambda
 beta = 5
 radius = 0.8 # R
 dimension = 1
@@ -58,7 +58,7 @@ title = ax.set_title('2D Test')
     
 graph, = ax.plot(Meshes[-1], PdfTraj[-1], linestyle="", marker=".")
 ax.set_xlim(-4, 4)
-ax.set_ylim(0, np.max(PdfTraj[0]))
+ax.set_ylim(0, np.max(PdfTraj[5]))
 
 
 ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)

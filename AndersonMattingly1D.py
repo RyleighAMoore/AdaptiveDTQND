@@ -88,8 +88,6 @@ plt.plot(xvec,PdfTraj[-1],'o')
 truepdf = np.exp(-xvec**2/(1 - np.exp(-2*T)))/np.sqrt(np.pi*(1-np.exp(-2*T)))
 plt.plot(xvec,truepdf,'r')
     
-    
-
 
 def update_graph(num):
     graph.set_data(xvec, PdfTraj[num])
