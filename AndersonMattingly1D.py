@@ -32,6 +32,7 @@ yM = k*(np.pi/(k**2))
 M = int(np.ceil(yM/k))
 xvec = k*np.linspace(-M,M,2*M+1)
 
+
 def alpha1(th):
     return(1/(2*th*(1-th)))
 
@@ -43,7 +44,13 @@ def alpha2(th):
 def rho(x):
   v = x
   v[x<0] = 0
-  return(v) 
+  return(v)
+
+def rho2(x):
+    v=x
+    if v<0:
+        v=0
+    return v
 
 theta = 0.5
 a1 = alpha1(theta)
@@ -51,6 +58,8 @@ a2 = alpha2(theta)
 
 A = np.zeros((2*M+1,2*M+1))
 
+xjmat = np.repeat(np.expand_dims(xvec,1), 2*M+1, axis=1)
+xstarmat = xjmat.T
 for i in range(2*M+1):
     xjm1 = xvec[i]
     mu1 = xjm1 + driftfun(xjm1)*theta*h
@@ -58,14 +67,50 @@ for i in range(2*M+1):
     scale = GaussScale(1)
     scale.setMu(np.asarray([mu1]))
     scale.setCov(np.asarray([sig1**2]))
+    
     pvec = fun.Gaussian(scale, xvec)
-    xjmat = np.repeat(np.expand_dims(xvec,1), 2*M+1, axis=1)
-    xstarmat = xjmat.T
+
     
     mu2 = xstarmat + (a1*driftfun(xstarmat) - a2*driftfun(xjm1))*(1-theta)*h
     sig2 = np.sqrt(rho(a1*difffun(xstarmat)**2 - a2*difffun(xjm1)**2))*np.sqrt((1-theta)*h)
     pmat = np.exp(-(xjmat-mu2)**2/(2*sig2*sig2))/(sig2*np.sqrt(2*np.pi))
+    
     A[:,i] = k*(pmat @ pvec)
+
+# A2 = np.zeros(np.shape(A))
+# val=0
+# for i in range(len(xvec)):
+#     print(i)
+#     xrow = xvec[i]
+#     for j in range(len(xvec)):
+#         xcol = xvec[j]
+#         prow = []
+#         pvec = []
+#         for m,xm in enumerate(xvec):
+#             xsum = xm
+#             mu1 = xcol + driftfun(xcol)*theta*h
+#             sig1 = abs(difffun(xcol))*np.sqrt(theta*h)
+#             scale = GaussScale(1)
+#             scale.setMu(np.asarray([mu1]))
+#             scale.setCov(np.asarray([sig1**2]))
+            
+#             N1 = fun.Gaussian(scale, xsum)
+#             pvec.append(N1)
+#             # print(N1)
+            
+#             mu2 = xsum + (a1*driftfun(xsum) - a2*driftfun(xcol))*(1-theta)*h
+#             sig2 = np.sqrt(rho2(a1*difffun(xsum)**2 - a2*difffun(xcol)**2))*np.sqrt((1-theta)*h)
+            
+#             scale2 = GaussScale(1)
+#             scale2.setMu(np.asarray([mu2]))
+#             scale2.setCov(np.asarray([sig2**2]))
+            
+#             # N2 = np.exp(-(xrow-mu2)**2/(2*sig2*sig2))/(sig2*np.sqrt(2*np.pi))
+#             N2 = fun.Gaussian(scale2, xrow)
+#             # print(N2)
+#             prow.append(N2)
+            
+#         A2[i,j]= k*np.asarray(prow)@np.asarray(pvec)
     
     
 # pdf after one time step with Dirac \delta(x-init) initial condition
@@ -86,7 +131,7 @@ for i in range(numsteps):
 plt.figure()
 plt.plot(xvec,PdfTraj[-1],'o')
 truepdf = np.exp(-xvec**2/(1 - np.exp(-2*T)))/np.sqrt(np.pi*(1-np.exp(-2*T)))
-plt.plot(xvec,truepdf,'r')
+plt.plot(xvec,truepdf,'.r')
     
 
 def update_graph(num):
