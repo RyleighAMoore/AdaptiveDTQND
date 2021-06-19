@@ -59,12 +59,73 @@ def getICMeshRadius(radius, stepSize, h, dimension):
             r = r+stepSize
             count = count+1
             
-    if dimension >2:
-        print("need to implement")
+    if dimension ==3:
+        x = np.linspace(-0.15, 0.15, num=10)
+        y = np.linspace(-0.15, 0.15, num=10)
+        z = np.linspace(-0.15, 0.15, num=10)
+        mesh = np.meshgrid(x, y, z)
+        newGrid = list(zip(*(dim.flat for dim in mesh)))
+        noise = np.random.uniform(-0.01, 0.01, size = (len(newGrid),3))
+        newGrid = newGrid #+noise
         
-    return newGrid
+    #     times = np.ceil(radius/stepSize)
+    #     newGrid = np.asarray([[0, 0, 0]])
+    #     r = stepSize 
+    #     count = 1
+    #     while times > 0:
+    #         times = times -1
+    #         dThetaTemp = np.arccos((stepSize**2-2*r**2)/(-2*r**2))
+    #         points = int(np.ceil(np.pi/(dThetaTemp)))
+    #         dTheta = np.pi/points
+    #         # points2 = int(np.ceil(np.pi/(dThetaTemp)))
+    #         dPhi = np.pi*2/points
+    #         for j in range(points):
+    #             for i in range(len(newGrid)):
+    #                 x = r*np.cos(j*dPhi)*np.sin(i*dTheta)
+    #                 y = r*np.sin(j*dPhi)*np.sin(i*dTheta)
+    #                 z = r*np.cos(i*dTheta)
+    #                 smallest = 100
+    #                 # for j in range(len(newGrid)):
+    #                 #      g = newGrid[j]
+    #                 #      dist = np.sqrt((x-g[0])**2 + (y- g[1])**2+ (z- g[2])**2)
+    #                 #      # print(dist)
+    #                 #      if dist < smallest:
+    #                 #          smallest = dist
+    #                 # if smallest > 0.00000000005:
+    #                 newGrid = np.vstack((newGrid, (x, y, z)))
+    #         r = r+stepSize
+    #         count = count+1
+    #     # from UnorderedMesh import findNearestKPoints
+    #     # for j in reversed(range(len(newGrid))):
+    #     #      points, dist = findNearestKPoints(newGrid[j,:], newGrid, 2)
+    #     #      if dist[1] < 0.0000000005:
+    #     #          newGrid = np.delete(newGrid, newGrid[j], axis=0)
+    # import matplotlib.pyplot as plt
+    # g= newGrid
+    # fig = plt.figure()
+    # ax = plt.axes(projection='3d')
+    # ax.scatter3D(g[:,0], g[:,1], g[:,2], '.');
+    return np.asarray(newGrid)
         
 
 if __name__ == "__main__":
-    g = getICMeshRadius(0.5, 0.1, 0.01, 1)
+    g = getICMeshRadius(0.1, 0.05, 0.01, 3)
+    from mpl_toolkits import mplot3d
+    import numpy as np
+    import matplotlib.pyplot as plt
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
+    ax.scatter3D(g[:,0], g[:,1], g[:,2], '.');
+    
+    # for i in range(len(g)):
+    #     for j in range(len(g)):
+    #         if i != j:
+    #             dist = np.sqrt((g[i,0]- g[j,0])**2 + (g[i,1]- g[j,1])**2+ (g[i,2]- g[j,2])**2)
+    #             if dist < 0.00005:
+    #                 print(g[i], g[j])
+    #                 print(i,j)
+    #                 print(dist)
+    
+    
+    # g = getICMeshRadius(0.5, 0.1, 0.01, 1)
     # gg = getICMesh(0.5, 0.1, 0.01)

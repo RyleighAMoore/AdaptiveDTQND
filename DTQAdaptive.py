@@ -12,7 +12,8 @@ import matplotlib.pyplot as plt
 
 
 
-def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree, meshRadius, drift, diff, dimension, SpatialDiff, PrintStuff = True):
+def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree, meshRadius, drift, diff, dimension, SpatialDiff, parameters, PrintStuff = True):
+    UpdateMesh = False
     '''Paramaters'''
     addPointsToBoundaryIfBiggerThanTolerance = 10**(-degree)
     removeZerosValuesIfLessThanTolerance = 10**(-degree-0.5)
@@ -24,10 +25,10 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     '''Paramaters'''
     addPointsToBoundaryIfBiggerThanTolerance = 10**(-degree)
     removeZerosValuesIfLessThanTolerance = 10**(-degree-0.5)
-    conditionNumForAltMethod = 10
-    NumLejas =5
-    numPointsForLejaCandidates = 30
-    numQuadFit = 30
+    conditionNumForAltMethod = parameters.conditionNumForAltMethod
+    NumLejas =parameters.NumLejas
+    numPointsForLejaCandidates = parameters.numPointsForLejaCandidates
+    numQuadFit = parameters.numQuadFit
 
     ''' Initializd orthonormal Polynomial family'''
     poly = HermitePolynomials(rho=0)
@@ -85,14 +86,14 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     
     for i in range(1,NumSteps): # Since the first step is taken before this loop.
         print(i)
-        if (i >= 0):
+        if (i >= 0) and UpdateMesh:
             # plt.plot(mesh,pdf,'.')
             '''Add points to mesh'''
             # plt.figure()
             # plt.scatter(mesh[:,0], mesh[:,1])
             mesh, pdf, tri, addBool, GMat = MeshUp.addPointsToMeshProcedure(mesh, pdf, tri, minDistanceBetweenPoints, h, poly, GMat, addPointsToBoundaryIfBiggerThanTolerance, removeZerosValuesIfLessThanTolerance, minDistanceBetweenPoints,maxDistanceBetweenPoints, drift, diff, SpatialDiff)
             # plt.plot(mesh[:,0], mesh[:,1], '*r')
-        if i>=15 and i%10==9:
+        if i>=15 and i%10==9 and UpdateMesh:
             '''Remove points from mesh'''
             mesh, pdf, GMat, LPMat, LPMatBool, tri = MeshUp.removePointsFromMeshProcedure(mesh, pdf, tri, True, poly, GMat, LPMat, LPMatBool, removeZerosValuesIfLessThanTolerance)
         

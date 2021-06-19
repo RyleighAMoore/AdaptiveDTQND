@@ -7,6 +7,8 @@ import Functions as fun
 from DriftDiffFunctionBank import MovingHillDrift, DiagDiffOne
 from exactSolutions import TwoDdiffusionEquation
 from Errors import ErrorValsExact
+import ParametersClass as Param
+
 
 mydrift = MovingHillDrift
 mydiff = DiagDiffOne
@@ -38,9 +40,16 @@ kstepMax = 0.17 # Lambda
 # beta = 3
 radius = 1.5 # R
 SpatialDiff = False
+conditionNumForAltMethod = 8
+NumLejas =10
+numPointsForLejaCandidates = 40
+numQuadFit = 20
+
+par = Param.Parameters(conditionNumForAltMethod, NumLejas, numPointsForLejaCandidates, numQuadFit)
+
 
 for i in x:
-    Meshes, PdfTraj, LPReuseArr, AltMethod= D.DTQ(NumSteps, kstepMin, kstepMax, h, i, radius, mydrift, mydiff,2, SpatialDiff, PrintStuff=False)
+    Meshes, PdfTraj, LPReuseArr, AltMethod= D.DTQ(NumSteps, kstepMin, kstepMax, h, i, radius, mydrift, mydiff,2, SpatialDiff, par, PrintStuff=False)
     surfaces = []
     for ii in range(len(PdfTraj)):
         ana = TwoDdiffusionEquation(Meshes[ii],mydiff(np.asarray([0,0]))[0,0], h*(ii+1), mydrift(np.asarray([0,0]))[0,0])

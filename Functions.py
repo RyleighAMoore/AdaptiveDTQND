@@ -15,7 +15,6 @@ def GVals(indexOfMesh, mesh, h):
     val = G(indexOfMesh,mesh,h)
     return val
 
-
 def Gaussian(scaling, mesh):
     rv = multivariate_normal(scaling.mu.T[0], scaling.cov)        
     soln_vals = np.asarray([rv.pdf(mesh)]).T

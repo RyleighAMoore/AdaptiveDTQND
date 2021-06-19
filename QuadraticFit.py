@@ -88,7 +88,7 @@ def buildVMatForLinFit(QuadMesh, dimension, numLSBasis):
         vals = np.ones(np.size(QuadMesh,0))
         for j in range(2):
             # print(j)
-            vals = vals*QuadMesh[:,j]  
+            vals = vals*QuadMesh[:,i[j]]  
         M[:,size] = vals
         size +=1
         
@@ -105,8 +105,6 @@ def ncr(n, r):
     numer = reduce(op.mul, range(n, n-r, -1), 1)
     denom = reduce(op.mul, range(1, r+1), 1)
     return numer // denom  # or / in Python 2
-
-
 
 
 # import ICMeshGenerator as M
