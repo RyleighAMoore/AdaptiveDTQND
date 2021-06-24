@@ -48,7 +48,11 @@ def getBoundaryPoints(Mesh, tri, alpha):
             pointsOnBoundary = alpha_shape(Mesh, tri, alpha, only_outer=True)
         elif np.size(Mesh,1) ==3:
             pointsOnBoundary = alpha_shape_3D(Mesh, tri, alpha)
-        
+            # fig = plt.figure()
+            # ax = fig.add_subplot(projection='3d')
+            # # ax.scatter(Mesh[:,0], Mesh[:,1], Mesh[:,2])
+            # ax.scatter(Mesh[pointsOnBoundary,0], Mesh[pointsOnBoundary,1], Mesh[pointsOnBoundary,2], 'r')
+
     return pointsOnBoundary
 
 
@@ -140,14 +144,14 @@ def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerTha
             iivals = np.expand_dims(np.arange(len(Mesh)),1)
             index = iivals[boundaryPointsToAddAround]
             for indx in index:
-                newPoints = addPointsRadially(Mesh[indx,0], Mesh[indx,1], Mesh, 8, minDistanceBetweenPoints, maxDistanceBetweenPoints)
+                newPoints = addPointsRadially(Mesh[indx,:], Mesh, 8, minDistanceBetweenPoints, maxDistanceBetweenPoints)
                 if len(newPoints)>0:
                     Mesh = np.append(Mesh, newPoints, axis=0)
                     ChangedBool = 1
                     numPointsAdded = numPointsAdded + len(newPoints)
             if numPointsAdded > 0:
                 newPoints = Mesh[-numPointsAdded:,:]
-                interp = [griddata(MeshOrig,PdfOrig, newPoints, method='linear', fill_value=np.min(Pdf))][0]
+                interp = [griddata(MeshOrig, PdfOrig, newPoints, method='linear', fill_value=np.min(Pdf))][0]
                 interp[interp<0] = np.min(Pdf)
                 # interp = np.ones(len(newPoints))*removeZerosValuesIfLessThanTolerance 
                 # interp = np.ones(len(newPoints))*10**(-8)
@@ -156,12 +160,15 @@ def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerTha
     return Mesh, Pdf, triangulation, ChangedBool
 
 
-def addPointsRadially(pointX, pointY, mesh, numPointsToAdd, minDistanceBetweenPoints, maxDistanceBetweenPoints):
+def addPointsRadially(point, mesh, numPointsToAdd, minDistanceBetweenPoints, maxDistanceBetweenPoints):
     radius = minDistanceBetweenPoints/2 + maxDistanceBetweenPoints/2
     points = [] 
     noise = random.uniform(0, 1)*2*np.pi
     dTheta = 2*np.pi/numPointsToAdd
+    numAdded = 0
     if np.size(mesh,1) ==2:
+        pointX = point[0]
+        pointY= point[1]
         for i in range(numPointsToAdd):
             newPointX = radius*np.cos(i*dTheta + noise) + pointX
             newPointY = radius*np.sin(i*dTheta + noise) + pointY
@@ -175,17 +182,30 @@ def addPointsRadially(pointX, pointY, mesh, numPointsToAdd, minDistanceBetweenPo
           
             if distToNearestPoint >= minDistanceBetweenPoints and distToNearestPoint <= maxDistanceBetweenPoints:
                 points.append([newPointX, newPointY])
+                numAdded +=1
         return np.asarray(points)
    
     if np.size(mesh,1)==3:
-        dTheta = np.pi*2/points
-        dPhi = np.pi*2/points
-        for j in range(points):
-            for i in range(points):
-                x = radius*np.cos(j*dPhi)*np.sin(i*dTheta)
-                y = radius*np.sin(j*dPhi)*np.sin(i*dTheta)
-                z = radius*np.cos(i*dTheta)
-                points.append([x, y, z])
+        pointsSphere = fibonacci_sphere(100)
+        r = radius
+        pointsSphere[:,0] = r*pointsSphere[:,0] +point[0]
+        pointsSphere[:,1] = r*pointsSphere[:,1] +point[1]
+        pointsSphere[:,2] = r*pointsSphere[:,2] +point[2]
+        # fig = plt.figure()
+        # ax = fig.add_subplot(projection='3d')
+        # ax.scatter(pointsSphere[:,0], pointsSphere[:,1], pointsSphere[:,2])
+        # ax.scatter(point[0], point[1], point[2])
+        
+        for kk in range(len(pointsSphere)):
+            newPoint = pointsSphere[kk,:]
+            if len(points)>0:
+                nearestPoint,distToNearestPoint, idx = UM.findNearestPoint(newPoint, mesh)
+            else:
+                nearestPoint,distToNearestPoint, idx = UM.findNearestPoint(newPoint, mesh)
+                # print(distToNearestPoint)
+            if distToNearestPoint >= minDistanceBetweenPoints and distToNearestPoint <= maxDistanceBetweenPoints:
+                points.append(newPoint)
+        
         return np.asarray(points)
     
 
@@ -267,7 +287,7 @@ def alpha_shape_3D(pos, tetra, alpha):
         outer surface vertex indices, edge indices, and triangle indices
     """
 
-    # tetra = Delaunay(pos)
+    tetra = Delaunay(pos)
     # Find radius of the circumsphere.
     # By definition, radius of the sphere fitting inside the tetrahedral needs 
     # to be smaller than alpha value
@@ -301,3 +321,30 @@ def alpha_shape_3D(pos, tetra, alpha):
     Vertices = np.unique(Edges)
     return Vertices
     # return Vertices,Edges,Triangles
+
+
+import math
+#https://stackoverflow.com/questions/9600801/evenly-distributing-n-points-on-a-sphere
+def fibonacci_sphere(samples):
+    points = []
+    phi = math.pi * (3. - math.sqrt(5.))  # golden angle in radians
+
+    for i in range(samples):
+        y = 1 - (i / float(samples - 1)) * 2  # y goes from 1 to -1
+        radius = math.sqrt(1 - y * y)  # radius at y
+
+        theta = phi * i  # golden angle increment
+
+        x = math.cos(theta) * radius
+        z = math.sin(theta) * radius
+
+        points.append((x, y, z))
+
+
+    return np.asarray(points)
+# points = fibonacci_sphere(20)
+# points = np.asarray(points)
+# fig = plt.figure()
+# ax = fig.add_subplot(projection='3d')
+# ax.scatter(points[:,0], points[:,1], points[:,2])
+

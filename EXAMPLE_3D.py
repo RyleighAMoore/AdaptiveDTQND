@@ -13,7 +13,8 @@ def MovingHillDrift(mesh):
     # return mesh*(4-mesh**2)
     
 def DiagDiffOne(mesh):
-    return np.diag([0.2,0.2, 0.2])
+    # return np.diag([1,1, 1])
+    return np.diag([0.5,0.5, 0.5])
     # return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
 
@@ -22,20 +23,20 @@ mydrift = MovingHillDrift
 mydiff = DiagDiffOne
 
 '''Initialization Parameters'''
-NumSteps = 5
+NumSteps = 7
 '''Discretization Parameters'''
 a = 1
 h=0.01
 #kstepMin = np.round(min(0.15, 0.144*mydiff(np.asarray([0,0]))[0,0]+0.0056),2)
-kstepMin = 0.03 # lambda
-kstepMax = 0.03 # Lambda
+kstepMin = 0.05 # lambda
+kstepMax = 0.055 # Lambda
 beta = 5
-radius = 0.2 # R
+radius = 0.25 # R
 dimension = 3
 SpatialDiff = False
 conditionNumForAltMethod = 10
 NumLejas = 10
-numPointsForLejaCandidates =50
+numPointsForLejaCandidates = 250
 numQuadFit = 50
 par = Param.Parameters(conditionNumForAltMethod, NumLejas, numPointsForLejaCandidates, numQuadFit)
 
@@ -59,57 +60,25 @@ print("Alt Method: ", mean2*100, "%")
 
 
 
-# def update_graph(num):
-#     graph.set_data(Meshes[num], PdfTraj[num])
-#     return title, graph
-# fig = plt.figure()
-# ax = fig.add_subplot(111)
-# title = ax.set_title('2D Test')
-    
-# graph, = ax.plot(Meshes[-1], PdfTraj[-1], linestyle="", marker=".")
-# ax.set_xlim(-4, 4)
-# ax.set_ylim(0, np.max(PdfTraj[4]))
-
-
-# ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
-# plt.show()
-
-# def solution(mesh, A, t):
-#     D = 1*0.5
-#     r = (mesh[:,0]-A*t)**2
-#     vals = np.exp(-r/(np.sqrt(4*D*t)))*(1/(4*np.sqrt(np.pi*D*t)))
-#     return vals
-
 trueSoln = []
+from exactSolutions import ThreeDdiffusionEquation
 for i in range(len(Meshes)):
-    xvec = Meshes[i]
-    T=(i+1)*h
-    truepdf = np.exp(-xvec**2/(1 - np.exp(-2*T)))/np.sqrt(np.pi*(1-np.exp(-2*T)))
+    truepdf = ThreeDdiffusionEquation(Meshes[i], DiagDiffOne([0,0,0])[0,0], (i+1)*h, MovingHillDrift([0,0,0])[0,0])
     # truepdf = solution(xvec,-1,T)
-    trueSoln.append(np.squeeze(truepdf))
-        
+    trueSoln.append(np.squeeze(np.copy(truepdf)))
     
-# LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln,  plot=True)
+    
+LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln,  plot=True)
 
-import numpy as np
-import matplotlib.pyplot as plt
-
-fig = plt.figure()
-ax = plt.axes(projection='3d')
-ii=4
-x = Meshes[ii][:,0]
-y = Meshes[ii][:,1]
-z = Meshes[ii][:,2]
-ax.scatter3D(x, y, z, c=PdfTraj[ii], cmap='binary');
 
 from mpl_toolkits.mplot3d.art3d import juggle_axes
 
 def update_graph(num):
-    print(num)
+    # print(num)
     # graph._offsets3d=(Meshes[num][:,0], Meshes[num][:,1],  Meshes[num][:,2])
     # graph.set_array(PdfTraj[num])
     ax.clear()
-    graph = ax.scatter3D(Meshes[num][:,0], Meshes[0][:,1],  Meshes[num][:,2], c=np.log(PdfTraj[num]), cmap='binary', vmax=max(np.log(PdfTraj[0])), vmin=0, marker=".")
+    graph = ax.scatter3D(Meshes[num][:,0], Meshes[num][:,1],  Meshes[num][:,2], c=np.log(PdfTraj[num]), cmap='bone_r', vmax=max(np.log(PdfTraj[0])), vmin=0, marker=".")
 
     # graph.set_data(Meshes[num][:,0], Meshes[num][:,1])
     # graph.set_3d_properties(Meshes[num][:,2], color=PdfTraj[num], cmap='binary')
@@ -120,8 +89,14 @@ fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 title = ax.set_title('3D Test')
     
-# graph = ax.scatter3D(Meshes[0][:,0], Meshes[0][:,1],  Meshes[0][:,2], c=PdfTraj[0], cmap='binary', marker=".")
-# ax.set_zlim(0, 4.5)
+
 ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=1000, blit=False)
 plt.show()
+
+
+
+
+
+
+
 

@@ -7,6 +7,29 @@ def TwoDdiffusionEquation(mesh, D, t, A):
     vals = np.exp(-r/(4*D*t))*(1/(4*np.pi*D*t))
     return vals
 
+
+def ThreeDdiffusionEquation(mesh, D, t, A):
+    N=3
+    D = D**2*0.5
+    r = (mesh[:,0]-A*t)**2 + (mesh[:,1])**2 + (mesh[:,2])**2
+    den = 4*D*t
+    
+    vals = np.exp(-r/(den))*(1/(4*np.pi*D*t)**(N/2))
+    
+    return vals
+
+def OneDdiffusionEquation(mesh, D, t, A):
+    N=1
+    D = D**2*0.5
+    r = (mesh[:,0]-A*t)**2
+    den = 4*D*t
+    
+    vals = np.exp(-r/(den))*(1/(4*np.pi*D*t)**(N/2))
+    
+    return vals
+
+
+
 # index = 15
 # mesh = Meshes[index-1]
 # ana = TwoDdiffusionEquation(mesh, 0.5,0.01*index, 5)

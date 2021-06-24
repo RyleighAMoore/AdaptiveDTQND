@@ -12,6 +12,8 @@ import ParametersClass as Param
 
 mydrift = MovingHillDrift
 mydiff = DiagDiffOne
+dimension = 2
+
 
 
 '''Initialization Parameters'''
@@ -49,7 +51,7 @@ par = Param.Parameters(conditionNumForAltMethod, NumLejas, numPointsForLejaCandi
 
 
 for i in x:
-    Meshes, PdfTraj, LPReuseArr, AltMethod= D.DTQ(NumSteps, kstepMin, kstepMax, h, i, radius, mydrift, mydiff,2, SpatialDiff, par, PrintStuff=False)
+    Meshes, PdfTraj, LPReuseArr, AltMethod= D.DTQ(NumSteps, kstepMin, kstepMax, h, i, radius, mydrift, mydiff,dimension, SpatialDiff, par, PrintStuff=False)
     surfaces = []
     for ii in range(len(PdfTraj)):
         ana = TwoDdiffusionEquation(Meshes[ii],mydiff(np.asarray([0,0]))[0,0], h*(ii+1), mydrift(np.asarray([0,0]))[0,0])

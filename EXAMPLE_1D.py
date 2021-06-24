@@ -9,11 +9,12 @@ from exactSolutions import TwoDdiffusionEquation
 
 
 def MovingHillDrift(mesh):
-    # return 0*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+    return 0*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     # return -1*mesh
     return mesh*(4-mesh**2)
     
 def DiagDiffOne(mesh):
+    return np.expand_dims(np.asarray(0.8*np.ones((np.size(mesh)))),1)
     return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
 
@@ -22,19 +23,19 @@ mydrift = MovingHillDrift
 mydiff = DiagDiffOne
 
 '''Initialization Parameters'''
-NumSteps = 125
+NumSteps = 25
 '''Discretization Parameters'''
 a = 1
 h=0.01
 #kstepMin = np.round(min(0.15, 0.144*mydiff(np.asarray([0,0]))[0,0]+0.0056),2)
-kstepMin = 0.05 # lambda
-kstepMax = 0.05 # Lambda
-beta = 5
+kstepMin = 0.051 # lambda
+kstepMax = 0.055 # Lambda
+beta = 4
 radius = 2 # R
 dimension = 1
 SpatialDiff = False
 conditionNumForAltMethod = 10
-NumLejas =10
+NumLejas = 5
 numPointsForLejaCandidates =50
 numQuadFit = 50
 par = Param.Parameters(conditionNumForAltMethod, NumLejas, numPointsForLejaCandidates, numQuadFit)
@@ -57,6 +58,24 @@ for i in range(len(Meshes)-1):
 mean2 = np.mean(pc)
 print("Alt Method: ", mean2*100, "%")
 
+trueSoln = []
+from exactSolutions import OneDdiffusionEquation
+for i in range(len(Meshes)):
+    truepdf = OneDdiffusionEquation(Meshes[i], DiagDiffOne(Meshes[i]), (i+1)*h, 0)
+    # truepdf = solution(xvec,-1,T)
+    trueSoln.append(np.squeeze(np.copy(truepdf)))
+    
+from Errors import ErrorValsExact
+LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, plot=True)
+
+
+# trueSoln = []
+# from exactSolutions import OneDdiffusionEquation
+# # for i in range(len(Meshes)):
+# for i in range(1,100):
+#     truepdf = OneDdiffusionEquation(Meshes[i], 1, h*i, 0)
+#     # truepdf = solution(xvec,-1,T)
+#     trueSoln.append(np.squeeze(np.copy(truepdf)))
 
 
 def update_graph(num):
@@ -74,27 +93,11 @@ ax.set_ylim(0, np.max(PdfTraj[4]))
 ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
 plt.show()
 
-# def solution(mesh, A, t):
-#     D = 1*0.5
-#     r = (mesh[:,0]-A*t)**2
-#     vals = np.exp(-r/(np.sqrt(4*D*t)))*(1/(4*np.sqrt(np.pi*D*t)))
-#     return vals
 
-trueSoln = []
-for i in range(len(Meshes)):
-    xvec = Meshes[i]
-    T=(i+1)*h
-    truepdf = np.exp(-xvec**2/(1 - np.exp(-2*T)))/np.sqrt(np.pi*(1-np.exp(-2*T)))
-    # truepdf = solution(xvec,-1,T)
-    trueSoln.append(np.squeeze(truepdf))
-        
-    
-LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln,  plot=True)
-
-plt.figure()
-ii =0
-plt.plot(Meshes[ii], trueSoln[ii], 'or')
-plt.plot(Meshes[ii], PdfTraj[ii], '.k')
+# plt.figure()
+# ii =0
+# plt.plot(Meshes[ii], trueSoln[ii], 'or')
+# plt.plot(Meshes[ii], PdfTraj[ii], '.k')
     
 
 

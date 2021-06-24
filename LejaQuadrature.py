@@ -94,9 +94,11 @@ def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, s
             
             
             value, condNum = QuadratureByInterpolation_Simple(poly, scaling, mesh12, testing)
+            # print(value)
             if PrintStuff:
                 countUseMorePoints = countUseMorePoints+1
-            
+        # if value>10:
+        #     print(value)
         if value < 0:
             value = np.min(pdf)
 

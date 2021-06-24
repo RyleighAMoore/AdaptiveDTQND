@@ -33,7 +33,8 @@ def getICMeshRadius(radius, stepSize, h, dimension):
         newGrid = np.asarray([0])
         newPointX = 0
         while newPointX < radius:
-            newPointX = newPointX + stepSize
+            noise = 0.1*np.random.normal(0,1)
+            newPointX = newPointX + stepSize#+noise
             newGrid = np.vstack((newGrid, newPointX))
         
         newPointX = 0
@@ -60,13 +61,14 @@ def getICMeshRadius(radius, stepSize, h, dimension):
             count = count+1
             
     if dimension ==3:
-        x = np.linspace(-0.15, 0.15, num=10)
-        y = np.linspace(-0.15, 0.15, num=10)
-        z = np.linspace(-0.15, 0.15, num=10)
+        num = radius*2/stepSize
+        x = np.linspace(-radius,radius, num=int(num))
+        y = np.linspace(-radius,radius, int(num))
+        z = np.linspace(-radius, radius, int(num))
         mesh = np.meshgrid(x, y, z)
         newGrid = list(zip(*(dim.flat for dim in mesh)))
-        noise = np.random.uniform(-0.01, 0.01, size = (len(newGrid),3))
-        newGrid = newGrid #+noise
+        noise = np.random.uniform(-0.001, 0.001, size = (len(newGrid),3))
+        newGrid = newGrid +noise
         
     #     times = np.ceil(radius/stepSize)
     #     newGrid = np.asarray([[0, 0, 0]])
