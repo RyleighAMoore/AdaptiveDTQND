@@ -151,7 +151,10 @@ def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerTha
                     numPointsAdded = numPointsAdded + len(newPoints)
             if numPointsAdded > 0:
                 newPoints = Mesh[-numPointsAdded:,:]
+                # interp = [griddata(MeshOrig, PdfOrig, newPoints, method='nearest', fill_value=np.min(Pdf))][0]
                 interp = [griddata(MeshOrig, PdfOrig, newPoints, method='linear', fill_value=np.min(Pdf))][0]
+
+                # interp = np.exp(interp)
                 interp[interp<0] = np.min(Pdf)
                 # interp = np.ones(len(newPoints))*removeZerosValuesIfLessThanTolerance 
                 # interp = np.ones(len(newPoints))*10**(-8)
@@ -195,7 +198,6 @@ def addPointsRadially(point, mesh, numPointsToAdd, minDistanceBetweenPoints, max
         # ax = fig.add_subplot(projection='3d')
         # ax.scatter(pointsSphere[:,0], pointsSphere[:,1], pointsSphere[:,2])
         # ax.scatter(point[0], point[1], point[2])
-        
         for kk in range(len(pointsSphere)):
             newPoint = pointsSphere[kk,:]
             if len(points)>0:
@@ -205,6 +207,7 @@ def addPointsRadially(point, mesh, numPointsToAdd, minDistanceBetweenPoints, max
                 # print(distToNearestPoint)
             if distToNearestPoint >= minDistanceBetweenPoints and distToNearestPoint <= maxDistanceBetweenPoints:
                 points.append(newPoint)
+                mesh = np.vstack((mesh,newPoint))
         
         return np.asarray(points)
     

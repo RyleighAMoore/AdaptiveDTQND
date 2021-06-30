@@ -59,8 +59,8 @@ def leastSquares(QuadMesh, pdf):
     Const = np.exp(-c[-1]+1/4*B.T@U@np.linalg.inv(La)@U.T@B)
     
     if math.isfinite(mu[0][0]) and math.isfinite(mu[1][0]) and math.isfinite(np.sqrt(sigma[0,0])) and math.isfinite(np.sqrt(sigma[1,1])):
-        scaling = GaussScale(2)
-        scaling.setMu(np.asarray([[mu[0][0],mu[1][0]]]).T)
+        scaling = GaussScale(dimension)
+        scaling.setMu(mu)
         scaling.setCov(sigma)
     else:
         return float('nan'),float('nan'),float('nan')

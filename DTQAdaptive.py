@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 
 def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree, meshRadius, drift, diff, dimension, SpatialDiff, parameters, PrintStuff = True):
-    UpdateMesh = False
+    UpdateMesh = True
     '''Paramaters'''
     addPointsToBoundaryIfBiggerThanTolerance = 10**(-degree)
     removeZerosValuesIfLessThanTolerance = 10**(-degree-0.5)
@@ -64,18 +64,29 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
         tri = 0
     
     # needLPBool = numpy.zeros((2, 2), dtype=bool)
-    
     '''Initialize Transition probabilities'''
     maxDegFreedom = len(mesh)*2
     # NumLejas = 15
     # numQuadFit = max(20,20*np.max(diff(np.asarray([0,0]))).astype(int))*2
 
-    
+
     GMat = np.empty([maxDegFreedom, maxDegFreedom])*np.NaN
     for i in range(len(mesh)):
         v = fun.G(i,mesh, h, drift, diff, SpatialDiff)
         GMat[i,:len(v)] = v
         
+    # from mpl_toolkits.mplot3d.art3d import juggle_axes
+        
+    # xjmat = np.repeat(mesh, len(mesh), axis=1)
+    # xstarmat = xjmat.T
+    # fig = plt.figure()
+    # plt.scatter(xstarmat,xjmat, c=GMat[:len(mesh), :len(mesh)], cmap='bone_r', marker=".")
+    # plt.ylabel("$y_i$")
+    # plt.xlabel(r"$y_{i-1}$")
+    # plt.title("Euler-Maruyama method kernel")
+    # plt.colorbar()
+    # plt.show()
+
     LPMat = np.ones([maxDegFreedom, NumLejas])*-1
     LPMatBool = np.zeros((maxDegFreedom,1), dtype=bool) # True if we have Lejas, False if we need Lejas
         
@@ -86,7 +97,7 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     
     for i in range(1,NumSteps): # Since the first step is taken before this loop.
         print(i)
-        if (i >= 0) and UpdateMesh:
+        if (i >= 3) and UpdateMesh:
             # plt.plot(mesh,pdf,'.')
             '''Add points to mesh'''
             # plt.figure()
