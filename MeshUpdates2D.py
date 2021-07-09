@@ -123,6 +123,7 @@ def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerTha
         newPoints = []
         mm = np.min(Mesh)
         MM = np.max(Mesh)
+        
         for i in range(1,4):
             Mesh = np.append(Mesh, np.asarray([[mm-i*radius]]), axis=0)
             newPoints.append(np.asarray(mm-i*radius))
@@ -189,7 +190,7 @@ def addPointsRadially(point, mesh, numPointsToAdd, minDistanceBetweenPoints, max
         return np.asarray(points)
    
     if np.size(mesh,1)==3:
-        pointsSphere = fibonacci_sphere(100)
+        pointsSphere = fibonacci_sphere(10)
         r = radius
         pointsSphere[:,0] = r*pointsSphere[:,0] +point[0]
         pointsSphere[:,1] = r*pointsSphere[:,1] +point[1]

@@ -87,9 +87,13 @@ def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, s
             # plt.plot(mesh12, pdf12, '.')
             
             v = np.expand_dims(G(0,mesh12, h, drift, diff, SpatialDiff),1)
+            if dimension > 1:
+                L = np.linalg.cholesky((scaling.cov))
+                JacFactor = np.prod(np.diag(L))
+            if dimension ==1:
+                L = np.sqrt(scaling.cov)
+                JacFactor = L
             
-            L = np.linalg.cholesky((scaling.cov))
-            JacFactor = np.prod(np.diag(L))
             g = weightExp(scaling,mesh12)*1/(np.pi*JacFactor)
             
             testing = np.squeeze((pdf12*v)/np.expand_dims(g,1))

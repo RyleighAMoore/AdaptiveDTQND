@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 
 
-def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree, meshRadius, drift, diff, dimension, SpatialDiff, parameters, PrintStuff = True):
+def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree, meshRadius, drift, diff, dimension, SpatialDiff, parameters, PrintStuff = True, RetG = False, mesh = -10000):
     UpdateMesh = True
     '''Paramaters'''
     addPointsToBoundaryIfBiggerThanTolerance = 10**(-degree)
@@ -42,8 +42,16 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
 
     
     '''pdf after one time step with Dirac initial condition centered at the origin'''
-    mesh = M.getICMeshRadius(meshRadius, minDistanceBetweenPoints, h, dimension)
+    # if min(mesh) ==-10000:
+    # mesh = M.getICMeshRadius(meshRadius, minDistanceBetweenPoints, h, dimension)
+    mesh = M.NDGridMesh(dimension, minDistanceBetweenPoints, meshRadius, UseNoise = False)
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    title = ax.set_title('3D Test')
+    # graph = ax.scatter3D(mesh1[:,0], mesh1[:,1],  mesh1[:,2], marker="o")
 
+    graph = ax.scatter3D(mesh[:,0], mesh[:,1],  mesh[:,2], marker=".")
+    
     scale = GaussScale(dimension)
     scale.setMu(h*drift(np.zeros(dimension)).T)
     scale.setCov((h*diff(np.zeros(dimension))*diff(np.zeros(dimension)).T).T)
@@ -65,7 +73,7 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     
     # needLPBool = numpy.zeros((2, 2), dtype=bool)
     '''Initialize Transition probabilities'''
-    maxDegFreedom = len(mesh)*2
+    maxDegFreedom = len(mesh)*4
     # NumLejas = 15
     # numQuadFit = max(20,20*np.max(diff(np.asarray([0,0]))).astype(int))*2
 
@@ -77,15 +85,15 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
         
     # from mpl_toolkits.mplot3d.art3d import juggle_axes
         
-    # xjmat = np.repeat(mesh, len(mesh), axis=1)
-    # xstarmat = xjmat.T
-    # fig = plt.figure()
-    # plt.scatter(xstarmat,xjmat, c=GMat[:len(mesh), :len(mesh)], cmap='bone_r', marker=".")
-    # plt.ylabel("$y_i$")
-    # plt.xlabel(r"$y_{i-1}$")
-    # plt.title("Euler-Maruyama method kernel")
-    # plt.colorbar()
-    # plt.show()
+# xjmat = np.repeat(mesh, len(mesh), axis=1)
+# xstarmat = xjmat.T
+# fig = plt.figure()
+# plt.scatter(xstarmat,xjmat, c=GMat[:len(mesh), :len(mesh)], cmap='bone_r', marker=".")
+# plt.ylabel("$y_i$")
+# plt.xlabel(r"$y_{i-1}$")
+# plt.title("Euler-Maruyama method kernel")
+# plt.colorbar()
+# plt.show()
 
     LPMat = np.ones([maxDegFreedom, NumLejas])*-1
     LPMatBool = np.zeros((maxDegFreedom,1), dtype=bool) # True if we have Lejas, False if we need Lejas
@@ -104,7 +112,7 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
             # plt.scatter(mesh[:,0], mesh[:,1])
             mesh, pdf, tri, addBool, GMat = MeshUp.addPointsToMeshProcedure(mesh, pdf, tri, minDistanceBetweenPoints, h, poly, GMat, addPointsToBoundaryIfBiggerThanTolerance, removeZerosValuesIfLessThanTolerance, minDistanceBetweenPoints,maxDistanceBetweenPoints, drift, diff, SpatialDiff)
             # plt.plot(mesh[:,0], mesh[:,1], '*r')
-        if i>=15 and i%10==9 and UpdateMesh:
+        if i>=9 and i%10==1 and UpdateMesh:
             '''Remove points from mesh'''
             mesh, pdf, GMat, LPMat, LPMatBool, tri = MeshUp.removePointsFromMeshProcedure(mesh, pdf, tri, True, poly, GMat, LPMat, LPMatBool, removeZerosValuesIfLessThanTolerance)
         
@@ -142,8 +150,9 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
             LPMatBool2[:len(mesh)]= LPMatBool[:len(mesh)]
             LPMatBool = LPMatBool2
         
-
+    if RetG:
+        return Meshes, PdfTraj, LPReuseArr, AltMethod, GMat
     if PrintStuff:
-        return Meshes, PdfTraj, LPReuseArr, AltMethod
+        return Meshes, PdfTraj, LPReuseArr, AltMethod        
     else: 
         return Meshes, PdfTraj, [], []

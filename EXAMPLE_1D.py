@@ -14,7 +14,7 @@ def MovingHillDrift(mesh):
     return mesh*(4-mesh**2)
     
 def DiagDiffOne(mesh):
-    return np.expand_dims(np.asarray(0.8*np.ones((np.size(mesh)))),1)
+    return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
 
@@ -23,15 +23,17 @@ mydrift = MovingHillDrift
 mydiff = DiagDiffOne
 
 '''Initialization Parameters'''
-NumSteps = 25
+NumSteps = 10
 '''Discretization Parameters'''
 a = 1
-h=0.01
+h=0.1
 #kstepMin = np.round(min(0.15, 0.144*mydiff(np.asarray([0,0]))[0,0]+0.0056),2)
 kstepMin = 0.051 # lambda
 kstepMax = 0.055 # Lambda
-beta = 4
-radius = 2 # R
+kstepMin = 0.1 # lambda
+kstepMax = 0.12 # Lambda
+beta = 8
+radius = 4 # R
 dimension = 1
 SpatialDiff = False
 conditionNumForAltMethod = 10

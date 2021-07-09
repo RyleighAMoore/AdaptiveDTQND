@@ -11,8 +11,8 @@ from exactSolutions import TwoDdiffusionEquation
 def MovingHillDrift(mesh):
     if mesh.ndim ==1:
         mesh = np.expand_dims(mesh, axis=0)
-    return np.asarray([3*np.ones((np.size(mesh,0))), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
-    # return np.asarray([mesh[:,0]*(4-mesh[:,0]**2), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
+    # return np.asarray([np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
+    return np.asarray([mesh[:,0]*(4-mesh[:,0]**2), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
     
 # return mesh*(4-mesh**2)
     
@@ -29,13 +29,13 @@ mydiff = DiagDiffOne
 '''Initialization Parameters'''
 NumSteps = 15
 '''Discretization Parameters'''
-# a = 1
+a = 1
 h=0.01
 #kstepMin = np.round(min(0.15, 0.144*mydiff(np.asarray([0,0]))[0,0]+0.0056),2)
-kstepMin = 0.1 # lambda
-kstepMax = 0.15 # Lambda
-beta = 4
-radius = 0.55 # R
+kstepMin = 0.06 # lambda
+kstepMax = 0.065 # Lambda
+beta = 3
+radius = 0.4 # R
 dimension = 3
 SpatialDiff = False
 conditionNumForAltMethod = 8

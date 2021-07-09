@@ -21,6 +21,12 @@ def Gaussian(scaling, mesh):
     return np.squeeze(soln_vals)
 
 def weightExp(scaling,mesh):
+    if np.size(mesh,1) == 1:
+        mu = scaling.mu
+        cov = scaling.cov
+        newvals = np.exp(-(mesh-mu)**2)*(1/cov)
+        return np.squeeze(newvals)
+        
     mu = scaling.mu
     D = mesh.shape[1]
     cov = scaling.cov
