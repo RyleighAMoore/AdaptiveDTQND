@@ -7,31 +7,35 @@ import ParametersClass as Param
 from Errors import ErrorValsExact
 from exactSolutions import TwoDdiffusionEquation
 from scipy.special import erf
+from NDFunctionBank import SimpleDriftSDE
 
+dimension = 3
+fun = SimpleDriftSDE(0,0.5,dimension)
+mydrift = fun.Drift
+mydiff = fun.Diff
 
-
-def MovingHillDrift(mesh):
-    if mesh.ndim ==1:
-        mesh = np.expand_dims(mesh, axis=0)
-    return np.asarray([np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
-    return np.asarray([3*np.ones((np.size(mesh,0))), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
-    # return np.asarray([mesh[:,0]*(4-mesh[:,0]**2), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
-    x = mesh[:,0]
-    # return np.asarray([3*erf(10*x), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
-# return mesh*(4-mesh**2)
+# def MovingHillDrift(mesh):
+#     if mesh.ndim ==1:
+#         mesh = np.expand_dims(mesh, axis=0)
+#     return np.asarray([np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
+#     return np.asarray([3*np.ones((np.size(mesh,0))), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
+#     # return np.asarray([mesh[:,0]*(4-mesh[:,0]**2), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
+#     x = mesh[:,0]
+#     # return np.asarray([3*erf(10*x), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
+# # return mesh*(4-mesh**2)
     
-def DiagDiffOne(mesh):
-    # return np.diag([1,1, 1])
-    return np.diag([0.5, 0.5, 0.5])
-    # return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
-    # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
+# def DiagDiffOne(mesh):
+#     # return np.diag([1,1, 1])
+#     return np.diag([0.5, 0.5, 0.5])
+#     # return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+#     # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
 
 
-mydrift = MovingHillDrift
-mydiff = DiagDiffOne
+# mydrift = MovingHillDrift
+# mydiff = DiagDiffOne
 
 '''Initialization Parameters'''
-NumSteps = 15
+NumSteps = 3
 '''Discretization Parameters'''
 # a = 1
 h=0.01
@@ -40,7 +44,6 @@ kstepMin = 0.1 # lambda
 kstepMax = 0.15 # Lambda
 beta = 3
 radius = 0.55 # R
-dimension = 3
 SpatialDiff = False
 conditionNumForAltMethod = 8
 NumLejas = 30
@@ -72,7 +75,8 @@ print("Alt Method: ", mean2*100, "%")
 trueSoln = []
 from exactSolutions import ThreeDdiffusionEquation
 for i in range(len(Meshes)):
-    truepdf = ThreeDdiffusionEquation(Meshes[i], DiagDiffOne(np.asarray([0,0,0]))[0,0], (i+1)*h, MovingHillDrift(np.asarray([0,0,0]))[0,0])
+    truepdf = fun.Solution(Meshes[i], (i+1)*h)
+    # truepdf = ThreeDdiffusionEquation(Meshes[i], mydiff(np.asarray([0,0,0]))[0,0], (i+1)*h, mydrift(np.asarray([0,0,0]))[0,0])
     # truepdf = solution(xvec,-1,T)
     trueSoln.append(np.squeeze(np.copy(truepdf)))
     

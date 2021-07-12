@@ -1,5 +1,9 @@
 import numpy as np
 
+
+
+
+
 #Solution to Dd^2p/dx^2 + Dd^2p/dy^2 - dp/dt=0
 def TwoDdiffusionEquation(mesh, D, t, A):
     D = D**2*0.5

@@ -6,21 +6,26 @@ import matplotlib.animation as animation
 import ParametersClass as Param
 from Errors import ErrorValsExact
 from exactSolutions import TwoDdiffusionEquation
+from NDFunctionBank import SimpleDriftSDE
 
+dimension = 1
+fun = SimpleDriftSDE(0,1,dimension)
+mydrift = fun.Drift
+mydiff = fun.Diff
 
-def MovingHillDrift(mesh):
-    return 0*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
-    # return -1*mesh
-    return mesh*(4-mesh**2)
+# def MovingHillDrift(mesh):
+#     return 0*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+#     # return -1*mesh
+#     return mesh*(4-mesh**2)
     
-def DiagDiffOne(mesh):
-    return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
-    return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
-    # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
+# def DiagDiffOne(mesh):
+#     return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+#     return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+#     # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
 
 
-mydrift = MovingHillDrift
-mydiff = DiagDiffOne
+# mydrift = MovingHillDrift
+# mydiff = DiagDiffOne
 
 '''Initialization Parameters'''
 NumSteps = 10
@@ -63,7 +68,7 @@ print("Alt Method: ", mean2*100, "%")
 trueSoln = []
 from exactSolutions import OneDdiffusionEquation
 for i in range(len(Meshes)):
-    truepdf = OneDdiffusionEquation(Meshes[i], DiagDiffOne(Meshes[i]), (i+1)*h, 0)
+    truepdf = OneDdiffusionEquation(Meshes[i], mydiff(Meshes[i]), (i+1)*h, mydrift(Meshes[i]))
     # truepdf = solution(xvec,-1,T)
     trueSoln.append(np.squeeze(np.copy(truepdf)))
     
