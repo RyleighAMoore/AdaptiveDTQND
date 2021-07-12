@@ -15,7 +15,6 @@ class SimpleDriftSDE:
 
   def Diff(self, mesh):
       return self.diff*np.diag(np.ones(self.dim))
-  
 
   def Solution(self, mesh, t):
     D = self.diff**2*0.5
@@ -25,13 +24,3 @@ class SimpleDriftSDE:
     vals = np.exp(-r/(4*D*t))*(1/(4*np.pi*D*t))**(self.dim/2)
     return vals
 
-
-# def ThreeDdiffusionEquation(mesh, D, t, A):
-#     N=3
-#     D = D**2*0.5
-#     r = (mesh[:,0]-A*t)**2 + (mesh[:,1])**2 + (mesh[:,2])**2
-#     den = 4*D*t
-    
-#     vals = np.exp(-r/(den))*(1/(4*np.pi*D*t)**(N/2))
-    
-#     return vals

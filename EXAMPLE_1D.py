@@ -68,7 +68,8 @@ print("Alt Method: ", mean2*100, "%")
 trueSoln = []
 from exactSolutions import OneDdiffusionEquation
 for i in range(len(Meshes)):
-    truepdf = OneDdiffusionEquation(Meshes[i], mydiff(Meshes[i]), (i+1)*h, mydrift(Meshes[i]))
+    truepdf = fun.Solution(Meshes[i], (i+1)*h)
+    # truepdf = OneDdiffusionEquation(Meshes[i], mydiff(Meshes[i]), (i+1)*h, mydrift(Meshes[i]))
     # truepdf = solution(xvec,-1,T)
     trueSoln.append(np.squeeze(np.copy(truepdf)))
     
