@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Mar 23 14:21:51 2021
 
-@author: Rylei
-"""
+
+
 import numpy as np
 from scipy.special import erf
 

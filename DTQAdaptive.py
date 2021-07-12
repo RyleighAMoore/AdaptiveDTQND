@@ -45,12 +45,12 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     # if min(mesh) ==-10000:
     # mesh = M.getICMeshRadius(meshRadius, minDistanceBetweenPoints, h, dimension)
     mesh = M.NDGridMesh(dimension, minDistanceBetweenPoints, meshRadius, UseNoise = False)
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    title = ax.set_title('3D Test')
-    # graph = ax.scatter3D(mesh1[:,0], mesh1[:,1],  mesh1[:,2], marker="o")
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection='3d')
+    # title = ax.set_title('3D Test')
+    # # graph = ax.scatter3D(mesh1[:,0], mesh1[:,1],  mesh1[:,2], marker="o")
 
-    graph = ax.scatter3D(mesh[:,0], mesh[:,1],  mesh[:,2], marker=".")
+    # graph = ax.scatter3D(mesh[:,0], mesh[:,1],  mesh[:,2], marker=".")
     
     scale = GaussScale(dimension)
     scale.setMu(h*drift(np.zeros(dimension)).T)

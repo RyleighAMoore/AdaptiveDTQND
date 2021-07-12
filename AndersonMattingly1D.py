@@ -16,13 +16,15 @@ import matplotlib.animation as animation
 
 
 def driftfun(mesh):
+    # return -1/2*np.tanh(mesh)*(1/np.cosh(mesh))**2
     return 0*mesh
 
 def difffun(mesh):
+    # return 1/np.cosh(mesh)
     return np.ones(np.shape(mesh))
 
 # simulation parameters
-T = 3
+T =10
 s = 0.75
 h=0.1
 init = 0

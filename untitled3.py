@@ -16,9 +16,11 @@ import matplotlib.animation as animation
 
 
 def driftfun(mesh):
+    # return -1/2*np.tanh(mesh)*(1/np.cosh(mesh))**2
     return 0*mesh
 
 def difffun(mesh):
+    # return 1/np.cosh(mesh)
     return np.ones(np.shape(mesh))
 
 
@@ -98,9 +100,12 @@ def AndersonMattingly(T, h, k, plot=False):
     trueSoln = []
     from exactSolutions import OneDdiffusionEquation
     for i in range(len(PdfTraj)):
+        t=(i+1)*h
         truepdf = OneDdiffusionEquation(np.expand_dims(xvec,1), difffun(xvec), (i+1)*h, 0)
+        # truepdf = (2*np.pi*t)**(-1/2)*np.cosh(xvec)*np.exp(-(np.sinh(xvec))**2/(2*t))
         # truepdf = solution(xvec,-1,T)
         trueSoln.append(np.squeeze(np.copy(truepdf)))
+    
     from Errors import ErrorValsExact
     LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(xvec, PdfTraj, trueSoln, plot=False)
     
@@ -114,8 +119,9 @@ def AndersonMattingly(T, h, k, plot=False):
 
 
 T=10
-h = np.arange(0.05, 2.1, 0.1)
+h = np.arange(0.05, 2.1, 0.5)
 k = np.arange(0.1, 0.2, 0.05)
+# h=[0.05]
 
 hs = []
 ks = []

@@ -6,14 +6,18 @@ import matplotlib.animation as animation
 import ParametersClass as Param
 from Errors import ErrorValsExact
 from exactSolutions import TwoDdiffusionEquation
+from scipy.special import erf
+
 
 
 def MovingHillDrift(mesh):
     if mesh.ndim ==1:
         mesh = np.expand_dims(mesh, axis=0)
+    return np.asarray([np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
     return np.asarray([3*np.ones((np.size(mesh,0))), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
     # return np.asarray([mesh[:,0]*(4-mesh[:,0]**2), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
-    
+    x = mesh[:,0]
+    # return np.asarray([3*erf(10*x), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
 # return mesh*(4-mesh**2)
     
 def DiagDiffOne(mesh):
@@ -34,7 +38,7 @@ h=0.01
 #kstepMin = np.round(min(0.15, 0.144*mydiff(np.asarray([0,0]))[0,0]+0.0056),2)
 kstepMin = 0.1 # lambda
 kstepMax = 0.15 # Lambda
-beta = 4
+beta = 3
 radius = 0.55 # R
 dimension = 3
 SpatialDiff = False
@@ -77,7 +81,6 @@ LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, true
 
 
 from mpl_toolkits.mplot3d.art3d import juggle_axes
-
 def update_graph(num):
     # print(num)
     # graph._offsets3d=(Meshes[num][:,0], Meshes[num][:,1],  Meshes[num][:,2])
