@@ -35,7 +35,7 @@ mydiff = fun.Diff
 # mydiff = DiagDiffOne
 
 '''Initialization Parameters'''
-NumSteps = 5
+NumSteps = 20
 '''Discretization Parameters'''
 # a = 1
 h=0.01

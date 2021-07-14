@@ -9,7 +9,7 @@ from exactSolutions import TwoDdiffusionEquation
 from scipy.special import erf
 from NDFunctionBank import SimpleDriftSDE
 
-dimension = 6
+dimension = 4
 fun = SimpleDriftSDE(0,0.5,dimension)
 mydrift = fun.Drift
 mydiff = fun.Diff
@@ -49,7 +49,7 @@ conditionNumForAltMethod = 8
 NumLejas = 30 
 numPointsForLejaCandidates = 350 + 150*dimension
 numQuadFit = 350+ 350*dimension
-AdaptiveBool = False
+AdaptiveBool = True
 
 par = Param.Parameters(conditionNumForAltMethod, NumLejas, numPointsForLejaCandidates, numQuadFit)
 

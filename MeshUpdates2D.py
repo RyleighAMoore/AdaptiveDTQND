@@ -17,6 +17,10 @@ from pyopoly1 import LejaPoints as LP
 from pyopoly1 import LejaPoints as LP
 from scipy.interpolate import griddata
 import random
+import Circumsphere as CS
+from itertools import combinations
+from collections import defaultdict
+
 random.seed(10)
 
 
@@ -40,14 +44,16 @@ def removePointsFromMeshProcedure(Mesh, Pdf, tri, boundaryOnlyBool, poly, GMat, 
 
 
 def getBoundaryPoints(Mesh, tri, alpha):
-    if np.size(Mesh,1) ==1:
+    dimension = np.size(Mesh,1)
+    if dimension ==1:
         pointsOnBoundary = ([np.min(Mesh), np.max(Mesh)])
     else:
         '''Uses triangulation and alpha hull technique to find boundary points'''
-        if np.size(Mesh,1) == 2:
-            pointsOnBoundary = alpha_shape(Mesh, tri, alpha, only_outer=True)
-        elif np.size(Mesh,1) ==3:
-            pointsOnBoundary = alpha_shape_3D(Mesh, tri, alpha)
+        # if dimension == 2:
+        #     pointsOnBoundary = alpha_shape(Mesh, tri, alpha, only_outer=True)
+        # elif dimension ==3:
+            # pointsOnBoundary = alpha_shape_3D(Mesh, tri, alpha)
+        pointsOnBoundary = ND_Alpha_Shape(Mesh, tri, alpha, dimension)
             # fig = plt.figure()
             # ax = fig.add_subplot(projection='3d')
             # # ax.scatter(Mesh[:,0], Mesh[:,1], Mesh[:,2])
@@ -211,120 +217,151 @@ def addPointsRadially(point, mesh, numPointsToAdd, minDistanceBetweenPoints, max
                 mesh = np.vstack((mesh,newPoint))
         
         return np.asarray(points)
+ 
     
-
-# https://stackoverflow.com/questions/23073170/calculate-bounding-polygon-of-alpha-shape-from-the-delaunay-triangulation
-def alpha_shape(points, triangulation, alpha, only_outer=True):
-    """
-    Compute the alpha shape (concave hull) of a set of points.
-    :param points: np.array of shape (n,2) points.
-    :param alpha: alpha value.
-    :param only_outer: boolean value to specify if we keep only the outer border
-    or also inner edges.
-    :return: set of (i,j) pairs representing edges of the alpha-shape. (i,j) are
-    the indices in the points array.
-    """
-    assert points.shape[0] > 3, "Need at least four points"
+def ND_Alpha_Shape(mesh, triangulation, alpha, dimension):
+    # Del = Delaunay(mesh) # Form triangulation
+    Del = triangulation
+    radii = []
+    for verts in Del.simplices:
+        c, r = CS.circumsphere(mesh[verts])
+        radii.append(r)
+      
+    r = np.asarray(radii)
+    tetras = Del.vertices[r<alpha,:]
     
-    def add_edge(edges, i, j):
-        """
-        Add an edge between the i-th and j-th points,
-        if not in the list already
-        """
-        if (i, j) in edges or (j, i) in edges:
-            # already added
-            assert (j, i) in edges, "Can't go twice over same directed edge right?"
-            if only_outer:
-                # if both neighboring triangles are in shape, it's not a boundary edge
-                edges.remove((j, i))
-            return
-        edges.add((i, j))
-
-    tri = triangulation
-    edges = set()
-    # Loop over triangles:
-    # ia, ib, ic = indices of corner points of the triangle
-    for ia, ib, ic in tri.vertices:
-        pa = points[ia]
-        pb = points[ib]
-        pc = points[ic]
-        # Computing radius of triangle circumcircle
-        # www.mathalino.com/reviewer/derivation-of-formulas/derivation-of-formula-for-radius-of-circumcircle
-        a = np.sqrt((pa[0] - pb[0]) ** 2 + (pa[1] - pb[1]) ** 2)
-        b = np.sqrt((pb[0] - pc[0]) ** 2 + (pb[1] - pc[1]) ** 2)
-        c = np.sqrt((pc[0] - pa[0]) ** 2 + (pc[1] - pa[1]) ** 2)
-        s = (a + b + c) / 2.0
-        val = s * (s - a) * (s - b) * (s - c)
-        if val <=0:
-            circum_r = float('nan')
-        else:
-            area = np.sqrt(s * (s - a) * (s - b) * (s - c))
-            circum_r = a * b * c / (4.0 * area)
-        if circum_r < alpha:
-            add_edge(edges, ia, ib)
-            add_edge(edges, ib, ic)
-            add_edge(edges, ic, ia)
-            
-    # plt.figure()
-    # plt.plot(points[:, 0], points[:, 1], '.')
-    # for i, j in edges:
-    #     plt.plot(points[[i, j], 0], points[[i, j], 1], 'r')
-    # plt.show()
+    vals = np.asarray(list(range(0,dimension+1)))
+    TriComb = np.asarray(list(combinations(vals, dimension)))
     
-    aa = list(chain(edges))
-    out = [item for t in aa for item in t]
-    pointsOnBoundary = np.sort(out)
-    pointsOnBoundary = pointsOnBoundary[1::2]  # Skip every other element to remove repeated elements
-    
-    return pointsOnBoundary
-
-
-from collections import defaultdict
-
-def alpha_shape_3D(pos, tetra, alpha):
-    """
-    Compute the alpha shape (concave hull) of a set of 3D points.
-    Parameters:
-        pos - np.array of shape (n,3) points.
-        alpha - alpha value.
-    return
-        outer surface vertex indices, edge indices, and triangle indices
-    """
-
-    tetra = Delaunay(pos)
-    # Find radius of the circumsphere.
-    # By definition, radius of the sphere fitting inside the tetrahedral needs 
-    # to be smaller than alpha value
-    # http://mathworld.wolfram.com/Circumsphere.html
-    tetrapos = np.take(pos,tetra.vertices,axis=0)
-    normsq = np.sum(tetrapos**2,axis=2)[:,:,None]
-    ones = np.ones((tetrapos.shape[0],tetrapos.shape[1],1))
-    a = np.linalg.det(np.concatenate((tetrapos,ones),axis=2))
-    Dx = np.linalg.det(np.concatenate((normsq,tetrapos[:,:,[1,2]],ones),axis=2))
-    Dy = -np.linalg.det(np.concatenate((normsq,tetrapos[:,:,[0,2]],ones),axis=2))
-    Dz = np.linalg.det(np.concatenate((normsq,tetrapos[:,:,[0,1]],ones),axis=2))
-    c = np.linalg.det(np.concatenate((normsq,tetrapos),axis=2))
-    r = np.sqrt(Dx**2+Dy**2+Dz**2-4*a*c)/(2*np.abs(a))
-
-    # Find tetrahedrals
-    tetras = tetra.vertices[r<alpha,:]
-    # triangles
-    TriComb = np.array([(0, 1, 2), (0, 1, 3), (0, 2, 3), (1, 2, 3)])
-    Triangles = tetras[:,TriComb].reshape(-1,3)
+    Triangles = tetras[:,TriComb].reshape(-1,dimension)
     Triangles = np.sort(Triangles,axis=1)
     # Remove triangles that occurs twice, because they are within shapes
     TrianglesDict = defaultdict(int)
     for tri in Triangles:TrianglesDict[tuple(tri)] += 1
     Triangles=np.array([tri for tri in TrianglesDict if TrianglesDict[tri] ==1])
     #edges
-    EdgeComb=np.array([(0, 1), (0, 2), (1, 2)])
-    Edges=Triangles[:,EdgeComb].reshape(-1,2)
+    vals = np.asarray(list(range(0,dimension)))
+    EdgeComb = np.asarray(list(combinations(vals, dimension-1)))
+    
+    Edges=Triangles[:,EdgeComb].reshape(-1,dimension-1)
     Edges=np.sort(Edges,axis=1)
     Edges=np.unique(Edges,axis=0)
-
+    
     Vertices = np.unique(Edges)
     return Vertices
-    # return Vertices,Edges,Triangles
+
+# https://stackoverflow.com/questions/23073170/calculate-bounding-polygon-of-alpha-shape-from-the-delaunay-triangulation
+# def alpha_shape(points, triangulation, alpha, only_outer=True):
+#     """
+#     Compute the alpha shape (concave hull) of a set of points.
+#     :param points: np.array of shape (n,2) points.
+#     :param alpha: alpha value.
+#     :param only_outer: boolean value to specify if we keep only the outer border
+#     or also inner edges.
+#     :return: set of (i,j) pairs representing edges of the alpha-shape. (i,j) are
+#     the indices in the points array.
+#     """
+#     assert points.shape[0] > 3, "Need at least four points"
+    
+#     def add_edge(edges, i, j):
+#         """
+#         Add an edge between the i-th and j-th points,
+#         if not in the list already
+#         """
+#         if (i, j) in edges or (j, i) in edges:
+#             # already added
+#             assert (j, i) in edges, "Can't go twice over same directed edge right?"
+#             if only_outer:
+#                 # if both neighboring triangles are in shape, it's not a boundary edge
+#                 edges.remove((j, i))
+#             return
+#         edges.add((i, j))
+
+#     tri = triangulation
+#     edges = set()
+#     # Loop over triangles:
+#     # ia, ib, ic = indices of corner points of the triangle
+#     for ia, ib, ic in tri.vertices:
+#         pa = points[ia]
+#         pb = points[ib]
+#         pc = points[ic]
+#         # Computing radius of triangle circumcircle
+#         # www.mathalino.com/reviewer/derivation-of-formulas/derivation-of-formula-for-radius-of-circumcircle
+#         a = np.sqrt((pa[0] - pb[0]) ** 2 + (pa[1] - pb[1]) ** 2)
+#         b = np.sqrt((pb[0] - pc[0]) ** 2 + (pb[1] - pc[1]) ** 2)
+#         c = np.sqrt((pc[0] - pa[0]) ** 2 + (pc[1] - pa[1]) ** 2)
+#         s = (a + b + c) / 2.0
+#         val = s * (s - a) * (s - b) * (s - c)
+#         if val <=0:
+#             circum_r = float('nan')
+#         else:
+#             area = np.sqrt(s * (s - a) * (s - b) * (s - c))
+#             circum_r = a * b * c / (4.0 * area)
+#         if circum_r < alpha:
+#             add_edge(edges, ia, ib)
+#             add_edge(edges, ib, ic)
+#             add_edge(edges, ic, ia)
+            
+#     # plt.figure()
+#     # plt.plot(points[:, 0], points[:, 1], '.')
+#     # for i, j in edges:
+#     #     plt.plot(points[[i, j], 0], points[[i, j], 1], 'r')
+#     # plt.show()
+    
+#     aa = list(chain(edges))
+#     out = [item for t in aa for item in t]
+#     pointsOnBoundary = np.sort(out)
+#     pointsOnBoundary = pointsOnBoundary[1::2]  # Skip every other element to remove repeated elements
+    
+#     return pointsOnBoundary
+
+
+# from collections import defaultdict
+
+# def alpha_shape_3D(pos, tetra, alpha):
+#     """
+#     Compute the alpha shape (concave hull) of a set of 3D points.
+#     Parameters:
+#         pos - np.array of shape (n,3) points.
+#         alpha - alpha value.
+#     return
+#         outer surface vertex indices, edge indices, and triangle indices
+#     """
+
+#     tetra = Delaunay(pos)
+#     # Find radius of the circumsphere.
+#     # By definition, radius of the sphere fitting inside the tetrahedral needs 
+#     # to be smaller than alpha value
+#     # http://mathworld.wolfram.com/Circumsphere.html
+#     tetrapos = np.take(pos,tetra.vertices,axis=0)
+#     normsq = np.sum(tetrapos**2,axis=2)[:,:,None]
+#     ones = np.ones((tetrapos.shape[0],tetrapos.shape[1],1))
+#     a = np.linalg.det(np.concatenate((tetrapos,ones),axis=2))
+#     Dx = np.linalg.det(np.concatenate((normsq,tetrapos[:,:,[1,2]],ones),axis=2))
+#     Dy = -np.linalg.det(np.concatenate((normsq,tetrapos[:,:,[0,2]],ones),axis=2))
+#     Dz = np.linalg.det(np.concatenate((normsq,tetrapos[:,:,[0,1]],ones),axis=2))
+#     c = np.linalg.det(np.concatenate((normsq,tetrapos),axis=2))
+#     r = np.sqrt(Dx**2+Dy**2+Dz**2-4*a*c)/(2*np.abs(a))
+
+#     # Find tetrahedrals
+#     tetras = tetra.vertices[r<alpha,:]
+#     # triangles
+#     TriComb = np.array([(0, 1, 2), (0, 1, 3), (0, 2, 3), (1, 2, 3)])
+#     Triangles = tetras[:,TriComb].reshape(-1,3)
+#     Triangles = np.sort(Triangles,axis=1)
+#     # Remove triangles that occurs twice, because they are within shapes
+#     TrianglesDict = defaultdict(int)
+#     for tri in Triangles:TrianglesDict[tuple(tri)] += 1
+#     Triangles=np.array([tri for tri in TrianglesDict if TrianglesDict[tri] ==1])
+#     #edges
+#     EdgeComb=np.array([(0, 1), (0, 2), (1, 2)])
+#     Edges=Triangles[:,EdgeComb].reshape(-1,2)
+#     Edges=np.sort(Edges,axis=1)
+#     Edges=np.unique(Edges,axis=0)
+
+#     Vertices = np.unique(Edges)
+#     return Vertices
+#     # return Vertices,Edges,Triangles
 
 
 import math

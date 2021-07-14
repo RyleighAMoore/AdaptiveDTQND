@@ -16,24 +16,24 @@ import Circumsphere as CS
 from itertools import combinations
 from collections import defaultdict
 
-dimension = 5
+dimension = 2
 minDistanceBetweenPoints = 0.1
-meshRadius = 0.2
+meshRadius = 0.4
 mesh = M.NDGridMesh(dimension, minDistanceBetweenPoints, meshRadius, UseNoise = False)
 
-def add_edge(edges, i, j, only_outer=True):
-       """
-       Add an edge between the i-th and j-th points,
-       if not in the list already
-       """
-       if (i, j) in edges or (j, i) in edges:
-           # already added
-           assert (j, i) in edges, "Can't go twice over same directed edge right?"
-           if only_outer:
-               # if both neighboring triangles are in shape, it's not a boundary edge
-               edges.remove((j, i))
-           return
-       edges.add((i, j))
+# def add_edge(edges, i, j, only_outer=True):
+#        """
+#        Add an edge between the i-th and j-th points,
+#        if not in the list already
+#        """
+#        if (i, j) in edges or (j, i) in edges:
+#            # already added
+#            assert (j, i) in edges, "Can't go twice over same directed edge right?"
+#            if only_outer:
+#                # if both neighboring triangles are in shape, it's not a boundary edge
+#                edges.remove((j, i))
+#            return
+#        edges.add((i, j))
 
 Del = Delaunay(mesh) # Form triangulation
 radii = []
