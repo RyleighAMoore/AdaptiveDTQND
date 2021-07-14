@@ -103,8 +103,8 @@ def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, s
             # print(value)
             if PrintStuff:
                 countUseMorePoints = countUseMorePoints+1
-        if value>10000:
-            print(value)
+        # if value>10000:
+        #     print(value)
         if value < 0:
             value = np.min(pdf)
 

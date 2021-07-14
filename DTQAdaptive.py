@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 
 
 
-def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree, meshRadius, drift, diff, dimension, SpatialDiff, parameters, PrintStuff = True, RetG = False, mesh = -10000):
-    UpdateMesh = True
+def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree, meshRadius, drift, diff, dimension, SpatialDiff, parameters, PrintStuff = True, RetG = False, Adaptive = True):
+    UpdateMesh = Adaptive
     '''Paramaters'''
     addPointsToBoundaryIfBiggerThanTolerance = 10**(-degree)
     removeZerosValuesIfLessThanTolerance = 10**(-degree-0.5)

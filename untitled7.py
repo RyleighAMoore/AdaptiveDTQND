@@ -9,7 +9,7 @@ from exactSolutions import TwoDdiffusionEquation
 from scipy.special import erf
 from NDFunctionBank import SimpleDriftSDE
 
-dimension = 3
+dimension = 6
 fun = SimpleDriftSDE(0,0.5,dimension)
 mydrift = fun.Drift
 mydiff = fun.Diff
@@ -35,7 +35,7 @@ mydiff = fun.Diff
 # mydiff = DiagDiffOne
 
 '''Initialization Parameters'''
-NumSteps = 5
+NumSteps = 6
 '''Discretization Parameters'''
 # a = 1
 h=0.01
@@ -43,16 +43,17 @@ h=0.01
 kstepMin = 0.1 # lambda
 kstepMax = 0.15 # Lambda
 beta = 3
-radius = 0.55 # R
+radius = 0.15 # R
 SpatialDiff = False
 conditionNumForAltMethod = 8
-NumLejas = 30
-numPointsForLejaCandidates = 350
-numQuadFit = 350
+NumLejas = 30 
+numPointsForLejaCandidates = 350 + 150*dimension
+numQuadFit = 350+ 350*dimension
+AdaptiveBool = False
 
 par = Param.Parameters(conditionNumForAltMethod, NumLejas, numPointsForLejaCandidates, numQuadFit)
 
-Meshes, PdfTraj, LPReuseArr, AltMethod= DTQ(NumSteps, kstepMin, kstepMax, h, beta, radius, mydrift, mydiff, dimension, SpatialDiff, par, PrintStuff=True)
+Meshes, PdfTraj, LPReuseArr, AltMethod= DTQ(NumSteps, kstepMin, kstepMax, h, beta, radius, mydrift, mydiff, dimension, SpatialDiff, par, PrintStuff=True, Adaptive = AdaptiveBool)
 
 pc = []
 for i in range(len(Meshes)-1):
@@ -84,32 +85,32 @@ for i in range(len(Meshes)):
 LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln,  plot=True)
 
 
-from mpl_toolkits.mplot3d.art3d import juggle_axes
-def update_graph(num):
-    # print(num)
-    # graph._offsets3d=(Meshes[num][:,0], Meshes[num][:,1],  Meshes[num][:,2])
-    # graph.set_array(PdfTraj[num])
-    ax.clear()
-    ax.set_zlim(np.min(Meshes[-1][:,2]),np.max(Meshes[-1][:,2]))
-    ax.set_xlim(np.min(Meshes[-1][:,0]),np.max(Meshes[-1][:,0]))
-    ax.set_ylim(np.min(Meshes[-1][:,1]),np.max(Meshes[-1][:,1]))
-    graph = ax.scatter3D(Meshes[num][:,0], Meshes[num][:,1],  Meshes[num][:,2], c=np.log(PdfTraj[num]), cmap='bone_r', vmax=max(np.log(PdfTraj[0])), vmin=0, marker=".")
+# from mpl_toolkits.mplot3d.art3d import juggle_axes
+# def update_graph(num):
+#     # print(num)
+#     # graph._offsets3d=(Meshes[num][:,0], Meshes[num][:,1],  Meshes[num][:,2])
+#     # graph.set_array(PdfTraj[num])
+#     ax.clear()
+#     ax.set_zlim(np.min(Meshes[-1][:,2]),np.max(Meshes[-1][:,2]))
+#     ax.set_xlim(np.min(Meshes[-1][:,0]),np.max(Meshes[-1][:,0]))
+#     ax.set_ylim(np.min(Meshes[-1][:,1]),np.max(Meshes[-1][:,1]))
+#     graph = ax.scatter3D(Meshes[num][:,0], Meshes[num][:,1],  Meshes[num][:,2], c=np.log(PdfTraj[num]), cmap='bone_r', vmax=max(np.log(PdfTraj[0])), vmin=0, marker=".")
 
-    # graph.set_data(Meshes[num][:,0], Meshes[num][:,1])
-    # graph.set_3d_properties(Meshes[num][:,2], color=PdfTraj[num], cmap='binary')
-    # title.set_text('3D Test, time={}'.format(num))
-    return graph
+#     # graph.set_data(Meshes[num][:,0], Meshes[num][:,1])
+#     # graph.set_3d_properties(Meshes[num][:,2], color=PdfTraj[num], cmap='binary')
+#     # title.set_text('3D Test, time={}'.format(num))
+#     return graph
 
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-title = ax.set_title('3D Test')
-ax.set_zlim(np.min(Meshes[-1][:,2]),np.max(Meshes[-1][:,2]))
-ax.set_xlim(np.min(Meshes[-1][:,0]),np.max(Meshes[-1][:,0]))
-ax.set_ylim(np.min(Meshes[-1][:,1]),np.max(Meshes[-1][:,1]))
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+# title = ax.set_title('3D Test')
+# ax.set_zlim(np.min(Meshes[-1][:,2]),np.max(Meshes[-1][:,2]))
+# ax.set_xlim(np.min(Meshes[-1][:,0]),np.max(Meshes[-1][:,0]))
+# ax.set_ylim(np.min(Meshes[-1][:,1]),np.max(Meshes[-1][:,1]))
 
 
-ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=1000, blit=False)
-plt.show()
+# ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=1000, blit=False)
+# plt.show()
 
 
 
