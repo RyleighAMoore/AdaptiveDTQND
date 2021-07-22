@@ -10,9 +10,9 @@ from scipy.special import erf
 from NDFunctionBank import SimpleDriftSDE
 
 dimension = 3
-fun = SimpleDriftSDE(0,0.5,dimension)
-mydrift = fun.Drift
-mydiff = fun.Diff
+sde = SimpleDriftSDE(0,0.5,dimension)
+mydrift = sde.Drift
+mydiff = sde.Diff
 
 # def MovingHillDrift(mesh):
 #     if mesh.ndim ==1:
@@ -35,13 +35,13 @@ mydiff = fun.Diff
 # mydiff = DiagDiffOne
 
 '''Initialization Parameters'''
-NumSteps = 20
+NumSteps = 5
 '''Discretization Parameters'''
 # a = 1
 h=0.01
 #kstepMin = np.round(min(0.15, 0.144*mydiff(np.asarray([0,0]))[0,0]+0.0056),2)
-kstepMin = 0.1 # lambda
-kstepMax = 0.15 # Lambda
+kstepMin = 0.08 # lambda
+kstepMax = kstepMin+0.05 # Lambda
 beta = 3
 radius = 0.55 # R
 SpatialDiff = False
@@ -50,7 +50,10 @@ NumLejas = 30
 numPointsForLejaCandidates = 350
 numQuadFit = 350
 
-par = Param.Parameters(conditionNumForAltMethod, NumLejas, numPointsForLejaCandidates, numQuadFit)
+par = Param.Parameters(sde, h, conditionNumForAltMethod, beta)
+par.kstepMin = kstepMin
+par.kstepMax = kstepMax
+par.radius = radius
 
 Meshes, PdfTraj, LPReuseArr, AltMethod= DTQ(NumSteps, kstepMin, kstepMax, h, beta, radius, mydrift, mydiff, dimension, SpatialDiff, par, PrintStuff=True)
 
@@ -75,7 +78,7 @@ print("Alt Method: ", mean2*100, "%")
 trueSoln = []
 from exactSolutions import ThreeDdiffusionEquation
 for i in range(len(Meshes)):
-    truepdf = fun.Solution(Meshes[i], (i+1)*h)
+    truepdf = sde.Solution(Meshes[i], (i+1)*h)
     # truepdf = ThreeDdiffusionEquation(Meshes[i], mydiff(np.asarray([0,0,0]))[0,0], (i+1)*h, mydrift(np.asarray([0,0,0]))[0,0])
     # truepdf = solution(xvec,-1,T)
     trueSoln.append(np.squeeze(np.copy(truepdf)))

@@ -16,7 +16,7 @@ import Circumsphere as CS
 from itertools import combinations
 from collections import defaultdict
 
-dimension = 2
+dimension = 3
 minDistanceBetweenPoints = 0.1
 meshRadius = 0.4
 mesh = M.NDGridMesh(dimension, minDistanceBetweenPoints, meshRadius, UseNoise = False)

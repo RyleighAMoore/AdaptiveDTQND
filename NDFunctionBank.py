@@ -24,3 +24,6 @@ class SimpleDriftSDE:
     vals = np.exp(-r/(4*D*t))*(1/(4*np.pi*D*t))**(self.dim/2)
     return vals
 
+
+
+

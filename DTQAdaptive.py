@@ -59,6 +59,10 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     # from watchpoints import watch
     pdf = fun.Gaussian(scale, mesh)
     
+    # for val in pdf:
+    #     if val < 10**(-degree*2):
+    #         mesh = np.delete(mesh, )
+    
     
     Meshes = []
     PdfTraj = []
@@ -73,7 +77,7 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     
     # needLPBool = numpy.zeros((2, 2), dtype=bool)
     '''Initialize Transition probabilities'''
-    maxDegFreedom = len(mesh)*4
+    maxDegFreedom = len(mesh)*2*dimension
     # NumLejas = 15
     # numQuadFit = max(20,20*np.max(diff(np.asarray([0,0]))).astype(int))*2
 

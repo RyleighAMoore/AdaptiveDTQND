@@ -9,51 +9,29 @@ from exactSolutions import TwoDdiffusionEquation
 from scipy.special import erf
 from NDFunctionBank import SimpleDriftSDE
 
-dimension = 2
+dimension = 3
 fun = SimpleDriftSDE(0,0.5,dimension)
 mydrift = fun.Drift
 mydiff = fun.Diff
 
-# def MovingHillDrift(mesh):
-#     if mesh.ndim ==1:
-#         mesh = np.expand_dims(mesh, axis=0)
-#     return np.asarray([np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
-#     return np.asarray([3*np.ones((np.size(mesh,0))), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
-#     # return np.asarray([mesh[:,0]*(4-mesh[:,0]**2), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
-#     x = mesh[:,0]
-#     # return np.asarray([3*erf(10*x), np.zeros((np.size(mesh,0))), np.zeros((np.size(mesh,0)))]).T
-# # return mesh*(4-mesh**2)
-    
-# def DiagDiffOne(mesh):
-#     # return np.diag([1,1, 1])
-#     return np.diag([0.5, 0.5, 0.5])
-#     # return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
-#     # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
-
-
-# mydrift = MovingHillDrift
-# mydiff = DiagDiffOne
-
 '''Initialization Parameters'''
-NumSteps = 6
+NumSteps = 5
 '''Discretization Parameters'''
 # a = 1
 h=0.01
 #kstepMin = np.round(min(0.15, 0.144*mydiff(np.asarray([0,0]))[0,0]+0.0056),2)
-kstepMin = 0.08 # lambda
-kstepMax = 0.085 # Lambda
 beta = 3
-radius = 0.35 # R
+# radius = 0.55 # R
 SpatialDiff = False
 conditionNumForAltMethod = 8
-NumLejas = 30 
-numPointsForLejaCandidates = 350
-numQuadFit = 350
-AdaptiveBool = False
+# NumLejas = 30
+# numPointsForLejaCandidates = 350
+# numQuadFit = 350
 
-par = Param.Parameters(conditionNumForAltMethod, NumLejas, numPointsForLejaCandidates, numQuadFit, fun, h)
+par = Param.Parameters(fun, h, conditionNumForAltMethod, beta)
+# par.radius = 0.5
 
-Meshes, PdfTraj, LPReuseArr, AltMethod= DTQ(NumSteps, kstepMin, kstepMax, h, beta, radius, mydrift, mydiff, dimension, SpatialDiff, par, PrintStuff=True, Adaptive = AdaptiveBool)
+Meshes, PdfTraj, LPReuseArr, AltMethod, GMat = DTQ(NumSteps, par.kstepMin, par.kstepMax, par.h, par.beta, par.radius, mydrift, mydiff, dimension, SpatialDiff, par, RetG=True)
 
 pc = []
 for i in range(len(Meshes)-1):

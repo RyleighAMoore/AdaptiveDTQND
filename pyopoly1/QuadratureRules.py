@@ -14,7 +14,7 @@ import UnorderedMesh as UM
 from pyopoly1.families import HermitePolynomials
 import pyopoly1.indexing
 import pyopoly1.LejaPoints as LP
-from QuadraticFit import leastSquares
+from QuadraticFit import leastSquares, ComputeDividedOut
 from scipy.interpolate import griddata
 import math
 np.seterr(divide='ignore', invalid='ignore')
@@ -87,38 +87,39 @@ def QuadratureByInterpolationND_DivideOutGaussian(scaling, h, poly, fullMesh, fu
         mesh, distances, ii = UM.findNearestKPoints(scaling.mu, fullMesh,numQuadPoints, getIndices = True)
         mesh =  mesh[:numQuadPoints]
         pdf = fullPDF[ii[:numQuadPoints]]
-        scale1, cc, Const, combinations = leastSquares(mesh, pdf)
+        scale1, LSFit, Const, combinations = leastSquares(mesh, pdf)
         
     else:
         QuadPoints = LPMat[index,:].astype(int)
         mesh = fullMesh[QuadPoints]
         pdf = fullPDF[QuadPoints]
-        scale1, cc, Const, combinations = leastSquares(mesh, pdf)
+        scale1, LSFit, Const, combinations = leastSquares(mesh, pdf)
 
-        
     if not math.isnan(Const): # succeeded fitting Gaussian
-        if np.size(fullMesh,1)==1:
-            vals = np.exp(-(cc[0]*fullMesh**2+cc[1]*fullMesh+cc[2])).T/Const
-            vals = vals*1/(np.sqrt(np.pi)*np.sqrt(scale1.cov))
-        else:
-            L = np.linalg.cholesky((scale1.cov))
-            JacFactor = np.prod(np.diag(L))
-            # vals = 1/(np.pi*JacFactor)*np.exp(-(cc[0]*x**2+ cc[1]*y**2 + cc[2]*x*y + cc[3]*x + cc[4]*y + cc[5]))/Const
+        # if np.size(fullMesh,1)==1:
+        #     vals = np.exp(-(cc[0]*fullMesh**2+cc[1]*fullMesh+cc[2])).T/Const
+        #     vals = vals*1/(np.sqrt(np.pi)*np.sqrt(scale1.cov))
+        # else:
+        vals = ComputeDividedOut(fullMesh, LSFit, Const, scale1, combinations)
+            # cc = LSFit
+            # L = np.linalg.cholesky((scale1.cov))
+            # JacFactor = np.prod(np.diag(L))
+            # # vals = 1/(np.pi*JacFactor)*np.exp(-(cc[0]*x**2+ cc[1]*y**2 + cc[2]*x*y + cc[3]*x + cc[4]*y + cc[5]))/Const
         
-            vals2 = np.zeros(np.size(fullPDF)).T
-            count = 0
-            dimension = np.size(fullMesh,1)
-            for i in range(dimension):
-                vals2 += cc[count]*fullMesh[:,i]**2
-                count +=1
-            for i,k in combinations:
-                vals2 += cc[count]*fullMesh[:,i]*fullMesh[:,k]
-                count +=1
-            for i in range(dimension):
-                vals2 += cc[count]*fullMesh[:,i]
-                count +=1
-            vals2 += cc[count]*np.ones(np.shape(vals2))
-            vals = 1/(np.sqrt(np.pi)**dimension*JacFactor)*np.exp(-(vals2))/Const
+            # vals2 = np.zeros(np.size(fullPDF)).T
+            # count = 0
+            # dimension = np.size(fullMesh,1)
+            # for i in range(dimension):
+            #     vals2 += cc[count]*fullMesh[:,i]**2
+            #     count +=1
+            # for i,k in combinations:
+            #     vals2 += cc[count]*fullMesh[:,i]*fullMesh[:,k]
+            #     count +=1
+            # for i in range(dimension):
+            #     vals2 += cc[count]*fullMesh[:,i]
+            #     count +=1
+            # vals2 += cc[count]*np.ones(np.shape(vals2))
+            # vals = 1/(np.sqrt(np.pi)**dimension*JacFactor)*np.exp(-(vals2))/Const
         # plt.figure()
         # plt.plot(fullMesh,fullPDF, 'o')
         # plt.plot(fullMesh,vals.T, '.')

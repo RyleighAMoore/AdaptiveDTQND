@@ -9,9 +9,9 @@ from exactSolutions import TwoDdiffusionEquation
 from NDFunctionBank import SimpleDriftSDE
 
 dimension = 1
-fun = SimpleDriftSDE(0,1,dimension)
-mydrift = fun.Drift
-mydiff = fun.Diff
+sde = SimpleDriftSDE(0,1,dimension)
+mydrift = sde.Drift
+mydiff = sde.Diff
 
 # def MovingHillDrift(mesh):
 #     return 0*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
@@ -28,24 +28,30 @@ mydiff = fun.Diff
 # mydiff = DiagDiffOne
 
 '''Initialization Parameters'''
-NumSteps = 10
+NumSteps = 5
 '''Discretization Parameters'''
 a = 1
-h=0.1
+h=0.01
 #kstepMin = np.round(min(0.15, 0.144*mydiff(np.asarray([0,0]))[0,0]+0.0056),2)
-kstepMin = 0.051 # lambda
-kstepMax = 0.055 # Lambda
+# kstepMin = 0.051 # lambda
+# kstepMax = 0.055 # Lambda
 kstepMin = 0.1 # lambda
 kstepMax = 0.12 # Lambda
-beta = 8
-radius = 4 # R
+beta = 5
+radius = 1 # R
 dimension = 1
 SpatialDiff = False
 conditionNumForAltMethod = 10
-NumLejas = 5
-numPointsForLejaCandidates =50
+NumLejas = 10
+numPointsForLejaCandidates = 50
 numQuadFit = 50
-par = Param.Parameters(conditionNumForAltMethod, NumLejas, numPointsForLejaCandidates, numQuadFit)
+
+par = Param.Parameters(sde, h, conditionNumForAltMethod, beta)
+par.kstepMin = kstepMin
+par.kstepMax = kstepMax
+par.radius = radius
+par.numPointsForLejaCandidates = numPointsForLejaCandidates
+par.numQuadFit = numQuadFit
 
 Meshes, PdfTraj, LPReuseArr, AltMethod= DTQ(NumSteps, kstepMin, kstepMax, h, beta, radius, mydrift, mydiff, dimension, SpatialDiff, par, PrintStuff=True)
 
@@ -68,7 +74,7 @@ print("Alt Method: ", mean2*100, "%")
 trueSoln = []
 from exactSolutions import OneDdiffusionEquation
 for i in range(len(Meshes)):
-    truepdf = fun.Solution(Meshes[i], (i+1)*h)
+    truepdf = sde.Solution(Meshes[i], (i+1)*h)
     # truepdf = OneDdiffusionEquation(Meshes[i], mydiff(Meshes[i]), (i+1)*h, mydrift(Meshes[i]))
     # truepdf = solution(xvec,-1,T)
     trueSoln.append(np.squeeze(np.copy(truepdf)))
@@ -95,7 +101,7 @@ title = ax.set_title('2D Test')
     
 graph, = ax.plot(Meshes[-1], PdfTraj[-1], linestyle="", marker=".")
 ax.set_xlim(-4, 4)
-ax.set_ylim(0, np.max(PdfTraj[4]))
+ax.set_ylim(0, np.max(PdfTraj[0]))
 
 
 ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)

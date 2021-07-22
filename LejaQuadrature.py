@@ -92,7 +92,7 @@ def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, s
                 JacFactor = np.prod(np.diag(L))
             if dimension ==1:
                 L = np.sqrt(scaling.cov)
-                JacFactor = L
+                JacFactor = np.squeeze(L)
             
             g = weightExp(scaling,mesh12)*1/(np.pi*JacFactor)
             
@@ -105,8 +105,6 @@ def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, s
                 countUseMorePoints = countUseMorePoints+1
         # if value>10000:
         #     print(value)
-        if value < 0:
-            value = np.min(pdf)
 
         newPDF.append(value)
         # condNums.append(condNum)

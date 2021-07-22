@@ -71,6 +71,35 @@ def leastSquares(QuadMesh, pdf):
     return scaling, c, Const, comboList
 
 
+def ComputeDividedOut(fullMesh, LSFit, Const, scale1, combinations):
+    
+    cc = LSFit
+    dimension = np.size(fullMesh,1)
+    if np.size(fullMesh,1)==1:
+        vals = np.exp(-(cc[0]*fullMesh**2+cc[1]*fullMesh+cc[2])).T/Const
+        vals = vals*1/(np.sqrt(np.pi)*np.sqrt(scale1.cov))
+    else:
+        L = np.linalg.cholesky((scale1.cov))
+        JacFactor = np.prod(np.diag(L))
+        # vals = 1/(np.pi*JacFactor)*np.exp(-(cc[0]*x**2+ cc[1]*y**2 + cc[2]*x*y + cc[3]*x + cc[4]*y + cc[5]))/Const
+    
+        vals2 = np.zeros(np.size(fullMesh,0)).T
+        count = 0
+        dimension = np.size(fullMesh,1)
+        for i in range(dimension):
+            vals2 += cc[count]*fullMesh[:,i]**2
+            count +=1
+        for i,k in combinations:
+            vals2 += cc[count]*fullMesh[:,i]*fullMesh[:,k]
+            count +=1
+        for i in range(dimension):
+            vals2 += cc[count]*fullMesh[:,i]
+            count +=1
+        vals2 += cc[count]*np.ones(np.shape(vals2))
+        vals = 1/(np.sqrt(np.pi)**dimension*JacFactor)*np.exp(-(vals2))/Const
+    return vals
+
+
 
 from itertools import combinations
 def buildVMatForLinFit(QuadMesh, dimension, numLSBasis):

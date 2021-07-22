@@ -118,13 +118,14 @@ def houseKeepingAfterAdjustingMesh(Mesh, tri):
     tri = Delaunay(Mesh, incremental=True)
     return tri
 
-    
+import ICMeshGenerator as M
 def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerThanTolerance, removeZerosValuesIfLessThanTolerance, minDistanceBetweenPoints,maxDistanceBetweenPoints):
+    dimension = np.size(Mesh,1)
     ChangedBool = 0
     count = 0
     MeshOrig = np.copy(Mesh)
     PdfOrig = np.copy(Pdf)
-    if np.size(Mesh,1) == 1: # 1D
+    if dimension == 1: # 1D
         radius = minDistanceBetweenPoints/2 + maxDistanceBetweenPoints/2
         newPoints = []
         mm = np.min(Mesh)
@@ -150,8 +151,24 @@ def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerTha
             boundaryPointsToAddAround = checkIntegrandForAddingPointsAroundBoundaryPoints(Pdf, addPointsToBoundaryIfBiggerThanTolerance, Mesh, triangulation,maxDistanceBetweenPoints)
             iivals = np.expand_dims(np.arange(len(Mesh)),1)
             index = iivals[boundaryPointsToAddAround]
+            candPoints = M.NDGridMesh(dimension, minDistanceBetweenPoints/2 + maxDistanceBetweenPoints/2,maxDistanceBetweenPoints*1.5, UseNoise = True)
             for indx in index:
-                newPoints = addPointsRadially(Mesh[indx,:], Mesh, 8, minDistanceBetweenPoints, maxDistanceBetweenPoints)
+                # newPoints = addPointsRadially(Mesh[indx,:], Mesh, 8, minDistanceBetweenPoints, maxDistanceBetweenPoints)
+                curr =  np.repeat(np.expand_dims(Mesh[indx,:],1), np.size(candPoints,0), axis=1)
+                newPoints = curr.T - candPoints 
+                points = []
+                for i in range(len(newPoints)):
+                    newPoint = newPoints[i,:]
+                    if len(points)>0:
+                        mesh2 = np.vstack((Mesh,points))
+                        nearestPoint,distToNearestPoint, idx = UM.findNearestPoint(newPoint, mesh2)
+                    else:
+                        nearestPoint,distToNearestPoint, idx = UM.findNearestPoint(newPoint, Mesh)
+                  
+                    if distToNearestPoint >= minDistanceBetweenPoints and distToNearestPoint <= maxDistanceBetweenPoints:
+                        points.append(newPoint)
+
+                newPoints = points                
                 if len(newPoints)>0:
                     Mesh = np.append(Mesh, newPoints, axis=0)
                     ChangedBool = 1
@@ -176,7 +193,7 @@ def addPointsRadially(point, mesh, numPointsToAdd, minDistanceBetweenPoints, max
     noise = random.uniform(0, 1)*2*np.pi
     dTheta = 2*np.pi/numPointsToAdd
     numAdded = 0
-    if np.size(mesh,1) ==2:
+    if np.size(mesh,1) == 2:
         pointX = point[0]
         pointY= point[1]
         for i in range(numPointsToAdd):
@@ -362,6 +379,8 @@ def ND_Alpha_Shape(mesh, triangulation, alpha, dimension):
 #     Vertices = np.unique(Edges)
 #     return Vertices
 #     # return Vertices,Edges,Triangles
+
+
 
 
 import math

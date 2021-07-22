@@ -4,20 +4,20 @@ import UnorderedMesh as UM
 np.random.seed(10)
 
 def NDGridMesh(dimension, stepsize, radius, UseNoise = True):
-    subdivision = radius/stepsize+1
+    subdivision = radius/stepsize
     step = radius/subdivision
     grid= np.mgrid[tuple(slice(step - radius, radius, step) for _ in range(dimension))]
     mesh = []
     for i in range(grid.shape[0]):
         new = grid[i].ravel()
-        # if UseNoise:
-            # noise = np.random.normal(0,1, size = (len(grid),2))
-            # meshSpacing = stepsize
-            # noise = np.random.uniform(-meshSpacing, meshSpacing,size = (len(new)))
+        if UseNoise:
+            noise = np.random.normal(0,1, size = (len(grid),2))
+            meshSpacing = stepsize
+            noise = np.random.uniform(-meshSpacing, meshSpacing,size = (len(new)))
             
-            # shake = 0.1
-            # noise = -meshSpacing*shake +(meshSpacing*shake - - meshSpacing*shake)/(np.max(noise)-np.min(noise))*(noise-np.min(noise))
-            # new = new+noise
+            shake = 0.2
+            noise = -meshSpacing*shake +(meshSpacing*shake - - meshSpacing*shake)/(np.max(noise)-np.min(noise))*(noise-np.min(noise))
+            new = new+noise
         mesh.append(new)
     grid = np.asarray(mesh).T
     noise = np.random.uniform(-0.001, 0.001, size = (np.shape(grid)))

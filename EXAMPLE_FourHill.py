@@ -3,23 +3,32 @@ import numpy as np
 from DriftDiffFunctionBank import FourHillDrift, DiagDiffptSevenFive
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import ParametersClass as Param
+
 
 mydrift = FourHillDrift
 mydiff = DiagDiffptSevenFive
 
 '''Initialization Parameters'''
-NumSteps = 20
+NumSteps = 25
 '''Discretization Parameters'''
 a = 1
 h=0.01
 #kstepMin = np.round(min(0.15, 0.144*mydiff(np.asarray([0,0]))[0,0]+0.0056),2)
-kstepMin = 0.12 # lambda
-kstepMax = 0.14 # Lambda
+kstepMin = 0.1 # lambda
+kstepMax = 0.13 # Lambda
 beta = 3
 radius = 1 # R
 dimension = 2
+SpatialDiff = False
+conditionNumForAltMethod = 8
+NumLejas = 10
+numPointsForLejaCandidates = 40
+numQuadFit = 20
 
-Meshes, PdfTraj, LPReuseArr, AltMethod= DTQ(NumSteps, kstepMin, kstepMax, h, beta, radius, mydrift, mydiff, dimension, PrintStuff=True)
+par = Param.Parameters(conditionNumForAltMethod, NumLejas, numPointsForLejaCandidates, numQuadFit)
+
+Meshes, PdfTraj, LPReuseArr, AltMethod= DTQ(NumSteps, kstepMin, kstepMax, h, beta, radius, mydrift, mydiff, dimension, SpatialDiff, par, PrintStuff=True)
 
 pc = []
 for i in range(len(Meshes)-1):
@@ -59,6 +68,6 @@ title = ax.set_title('3D Test')
     
 graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
 ax.set_zlim(0, 1.5)
-ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
+ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=500, blit=False)
 plt.show()
 
