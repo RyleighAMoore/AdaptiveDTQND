@@ -1,141 +1,107 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jul 21 12:06:44 2021
-
-@author: Rylei
-"""
-
-import ICMeshGenerator as M
 import Functions as F
-
-dimension = 1
-minDistanceBetweenPoints = 0.03
-meshRadius = 1
-mesh = M.NDGridMesh(dimension, minDistanceBetweenPoints, meshRadius, UseNoise = False)
-
 import numpy as np
 import Functions as fun
-from scipy.spatial import Delaunay
-import LejaQuadrature as LQ
 from pyopoly1.families import HermitePolynomials
 from pyopoly1 import indexing
-import MeshUpdates2D as MeshUp
 from pyopoly1.Scaling import GaussScale
 import ICMeshGenerator as M
-from pyopoly1.LejaPoints import getLejaSetFromPoints, getLejaPoints
 import matplotlib.pyplot as plt
-from DTQAdaptive import DTQ
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import ICMeshGenerator as MG
 import QuadraticFit as QF
-import numpy as np
-import Functions as fun
-from scipy.spatial import Delaunay
-import LejaQuadrature as LQ
-from pyopoly1.families import HermitePolynomials
-from pyopoly1 import indexing
-import MeshUpdates2D as MeshUp
-from pyopoly1.Scaling import GaussScale
-import ICMeshGenerator as M
-from pyopoly1.LejaPoints import getLejaSetFromPoints, getLejaPoints
-import matplotlib.pyplot as plt
-from pyopoly1 import variableTransformations as VT
-from pyopoly1.QuadratureRules import QuadratureByInterpolationND_KnownLP
-"""
-Created on Fri Apr  3 12:44:33 2020
-@author: Rylei
-"""
-from pyopoly1 import variableTransformations as VT
-import numpy as np
-import matplotlib.pyplot as plt
-from pyopoly1 import opolynd
-from mpl_toolkits.mplot3d import Axes3D
-from Functions import *
-from pyopoly1.Scaling import GaussScale
-from pyopoly1.Plotting import productGaussians2D
-import UnorderedMesh as UM
-from pyopoly1.families import HermitePolynomials
-import pyopoly1.indexing
-import pyopoly1.LejaPoints as LP
-from QuadraticFit import leastSquares, ComputeDividedOut
-from scipy.interpolate import griddata
-import math
 np.seterr(divide='ignore', invalid='ignore')
-
-
-
-
 from NDFunctionBank import SimpleDriftSDE
+import pyopoly1.QuadratureRules as QR
+
+
+T =0.1
+s = 0.75
+h=0.1
+init = 0
+numsteps = int(np.ceil(T/h))-1
+k = h**s
+k=0.2
+yM = k*(np.pi/(k**2))
+yM=5
+M = int(np.ceil(yM/k))
+meshO = k*np.linspace(-M,M,2*M+1)
+meshO = np.expand_dims(np.asarray(meshO),1)
+
+
 dimension = 1
 sde = SimpleDriftSDE(1,1,dimension)
 theta = 0.5
 a1 = F.alpha1(theta)
 a2 = F.alpha2(theta)
-h=0.01
-
-# indexOfMesh=int(len(mesh)/2)
-# indexOfMesh2 = int(len(mesh)/2)
-
-# val, scaleComb = F.AndersonMattingly(indexOfMesh, indexOfMesh2, mesh, h, sde.Drift, sde.Diff, False, theta, a1, a2, dimension)
-
-# val = np.expand_dims(val,1)
-# scale1, LSFit, Const, combinations = QF.leastSquares(mesh, val)
-
-# vals = QF.ComputeDividedOut(mesh, LSFit, Const, scale1, combinations)
-
-# final = val/vals.T
 
 
 poly = HermitePolynomials(rho=0)
 d=dimension
-k = 40    
-lambdas = indexing.total_degree_indices(d, k)
+# k = 40    
+lambdas = indexing.total_degree_indices(d, 40)
 poly.lambdas = lambdas
 
 '''Generate Alt Leja Points'''
 # lejaPointsFinal, new = getLejaPoints(10, np.zeros((dimension,1)), poly, num_candidate_samples=5000, candidateSampleMesh = [], returnIndices = False)
 
 # mesh = VT.map_from_canonical_space(lejaPointsFinal, scale1)
-ii=2
-ALp = np.zeros((len(mesh)-ii*2, len(mesh)-ii*2))
-for i in range(ii,len(mesh)-ii):
-    for j in range(ii,len(mesh)-ii):
-        indexOfMesh= mesh[j]
-        indexOfMesh2 =mesh[i]
+ALp = np.zeros((len(meshO), len(meshO)))
+for i in range(len(meshO)):
+    for j in range(len(meshO)):
+        indexOfMesh = meshO[j]
+        indexOfMesh2 = meshO[i]
+        M2 = 5*h
+    
+        mesh = np.linspace(-M2,M2,10) + (indexOfMesh2 + indexOfMesh)/2
+        mesh = np.expand_dims(np.asarray(mesh),1)
+        
         
         val, scaleComb = F.AndersonMattingly(indexOfMesh, indexOfMesh2, mesh, h, sde.Drift, sde.Diff, False, theta, a1, a2, dimension)
         val = np.expand_dims(val,1)
+        val = np.where(val <= 0, np.min(val), val)
+        # if np.max(val) < 10**(-16):
+        #     ALp[i-ii,j-ii] = 0
+        #     continue
         
         scale1, LSFit, Const, combinations = QF.leastSquares(mesh, val)
         
         vals = QF.ComputeDividedOut(mesh, LSFit, Const, scale1, combinations)
         
-        lejaPointsFinal, new = getLejaPoints(10, np.zeros((dimension,1)), poly, num_candidate_samples=5000, candidateSampleMesh = [], returnIndices = False)
-        meshLP = VT.map_from_canonical_space(lejaPointsFinal, scale1)
-        
-        valLP, temp = F.AndersonMattingly(indexOfMesh, indexOfMesh2, meshLP, h, sde.Drift, sde.Diff, False, theta, a1, a2, dimension)
-        valLP = np.expand_dims(valLP,1)
-        
-        valsLP = QF.ComputeDividedOut(meshLP, LSFit, Const, scale1, combinations)
-        
-        
-        finalLP = valLP/valsLP.T
-        
-        # value, condNum = QuadratureByInterpolationND_KnownLP(poly, scale1, meshLP, pdf2, LejaIndices)
-        V = opolynd.opolynd_eval(meshLP, poly.lambdas[:len(meshLP),:], poly.ab, poly)
-        
-        vinv = np.linalg.inv(V)
-          
-        c = np.matmul(vinv[0,:], finalLP)
-        ALp[i-ii,j-ii] = c
+        c, cond, ind = QR.QuadratureByInterpolationND(poly, scale1, mesh, val/vals.T, 10, sde.Diff, 5000)
         print(c)
-        print(np.sum(np.abs(vinv[0,:])))
+        print(cond)
+        ALp[i,j] = c
 
+driftfun = sde.Drift
+difffun = sde.Diff
+# A = A[2:-2,2:-2]
+init = np.asarray([0])
+xvec = meshO
+mymu = init + driftfun(init)*h
+mysigma = abs(difffun(init))*np.sqrt(h)
+scale = GaussScale(1)
+scale.setMu(np.asarray([mymu]))
+scale.setCov(np.asarray([mysigma**2]))
+phat = fun.Gaussian(scale, xvec)
 
+PdfTraj =[]
+PdfTraj.append(phat)
+for i in range(14): 
+    phat = k*(ALp@phat)
+    PdfTraj.append(phat)
+    
+    
+trueSoln = []
+from exactSolutions import OneDdiffusionEquation
+for i in range(len(PdfTraj)):
+    truepdf = OneDdiffusionEquation(np.expand_dims(xvec,1), sde.Diff(xvec), (i+1)*h, sde.Drift(xvec))
+    # truepdf = solution(xvec,-1,T)
+    trueSoln.append(np.squeeze(np.copy(truepdf)))
+from Errors import ErrorValsExact
+LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(xvec, PdfTraj, trueSoln, plot=False)
 
-
+# compare solutions
+plt.figure()
+plt.plot(xvec,PdfTraj[-1],'o')
+plt.plot(xvec,trueSoln[-1],'.r')
 
 
 

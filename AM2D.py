@@ -37,19 +37,28 @@ difffun = sde.Diff
 
 
 # simulation parameters
-T =10
+T =1
 s = 0.75
 h=0.01
 numsteps = int(np.ceil(T/h))-1
 k = h**s
-k=0.01
-k=0.03
+# k=0.01
+# k=0.03
 # yM = k*(np.pi/(k**2))
 # yM=15
 # M = int(np.ceil(yM/k))
 
 # xvec = k*np.linspace(-M,M,2*M+1)
 xvec = MG.NDGridMesh(dimension, k, 1, UseNoise = False)
+
+import ICMeshGenerator as M
+import Functions as F
+
+# dimension = 1
+# minDistanceBetweenPoints = k
+# meshRadius = 5
+# xvec = M.NDGridMesh(dimension, minDistanceBetweenPoints, meshRadius, UseNoise = False)
+
 
 
 def alpha1(th):
@@ -96,158 +105,199 @@ for i in range(len(xvec)):
     pmat = np.exp(-(xjmat-mu2)**2/(2*sig2*sig2))/(sig2*np.sqrt(2*np.pi))
     
     A[:,i] = k*(pmat @ pvec)
-
-A2 = np.zeros((len(xvec),len(xvec)))
-
-for i in range(len(xvec)):
-    print(i)
-    xrow = xvec[i]
-    for j in range(len(xvec)):
-        xcol = xvec[j]
-        prow = []
-        pvec = []
-        for m,xm in enumerate(xvec):
-            xsum = xm
-            mu1 = xcol + driftfun(xcol)*theta*h
-            sig1 = abs(difffun(xcol))*np.sqrt(theta*h)
-            scale = GaussScale(dimension)
-            scale.setMu(np.asarray(mu1.T))
-            scale.setCov(np.asarray(sig1**2))
-            
-            N1 = fun.Gaussian(scale, xsum)
-            pvec.append(N1)
-            # print(N1)
-            
-            mu2 = xsum + (a1*driftfun(xsum) - a2*driftfun(xcol))*(1-theta)*h
-            sig2 = np.sqrt(rho2(a1*difffun(xsum)**2 - a2*difffun(xcol)**2))*np.sqrt((1-theta)*h)
-            
-            scale2 = GaussScale(dimension)
-            scale2.setMu(np.asarray(mu2.T))
-            scale2.setCov(np.asarray(sig2**2))
-            
-            # N2 = np.exp(-(xrow-mu2)**2/(2*sig2*sig2))/(sig2*np.sqrt(2*np.pi))
-            N2 = fun.Gaussian(scale2, xrow)
-            # print(N2)
-            prow.append(N2)
-            
-        A2[i,j]= k*np.asarray(prow)@np.asarray(pvec)
     
-fullPDF = np.expand_dims(A2[100,:],1)
+    
+init = np.asarray([0])
+mymu = init + driftfun(init)*h
+mysigma = abs(difffun(init))*np.sqrt(h)
+scale = GaussScale(1)
+scale.setMu(np.asarray([mymu]))
+scale.setCov(np.asarray([mysigma**2]))
+phat = fun.Gaussian(scale, xvec)
 
-scale1, cc, Const, combinations = QF.leastSquares(xvec, fullPDF)
-
-fullMesh = xvec
-if np.size(fullMesh,1)==1:
-    vals = np.exp(-(cc[0]*fullMesh**2+cc[1]*fullMesh+cc[2])).T/Const
-    vals = vals*1/(np.sqrt(np.pi)*np.sqrt(scale1.cov))
-else:
-    L = np.linalg.cholesky((scale1.cov))
-    JacFactor = np.prod(np.diag(L))
-    # vals = 1/(np.pi*JacFactor)*np.exp(-(cc[0]*x**2+ cc[1]*y**2 + cc[2]*x*y + cc[3]*x + cc[4]*y + cc[5]))/Const
-
-    vals2 = np.zeros(np.size(fullPDF)).T
-    count = 0
-    dimension = np.size(fullMesh,1)
-    for i in range(dimension):
-        vals2 += cc[count]*fullMesh[:,i]**2
-        count +=1
-    for i,k in combinations:
-        vals2 += cc[count]*fullMesh[:,i]*fullMesh[:,k]
-        count +=1
-    for i in range(dimension):
-        vals2 += cc[count]*fullMesh[:,i]
-        count +=1
-    vals2 += cc[count]*np.ones(np.shape(vals2))
-    vals = 1/(np.sqrt(np.pi)**dimension*JacFactor)*np.exp(-(vals2))/Const
-
-value = fullPDF/vals.T
-
-
-plt.scatter(xvec, value, label="A-M")
-# plt.scatter(xvec, fullPDF, label="A-M")
-
+PdfTraj =[]
+PdfTraj.append(phat)
+for i in range(numsteps): 
+    phat = k*(A@phat)
+    PdfTraj.append(phat)
+    
+    
 
     
-# init = np.zeros(dimension).T
-# mymu = driftfun(init)*h
-# mysigma = abs(difffun(init))*np.sqrt(h)
-# scale = GaussScale(1)
-# scale.setMu(np.asarray([mymu]))
-# scale.setCov(np.asarray([mysigma**2]))
-# phat = fun.Gaussian(scale, xvec)
 
-
-
-from DTQAdaptive import DTQ
-import numpy as np
-from DriftDiffFunctionBank import FourHillDrift, DiagDiffptSevenFive
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import ParametersClass as Param
+    
+trueSoln = []
+from exactSolutions import OneDdiffusionEquation
+for i in range(len(PdfTraj)):
+    truepdf = OneDdiffusionEquation(np.expand_dims(xvec,1), difffun(xvec), (i+1)*h, 0)
+    # truepdf = solution(xvec,-1,T)
+    trueSoln.append(np.squeeze(np.copy(truepdf)))
+    
 from Errors import ErrorValsExact
-from exactSolutions import TwoDdiffusionEquation
-from scipy.special import erf
-from NDFunctionBank import SimpleDriftSDE
+LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(xvec, PdfTraj, trueSoln, plot=False)
 
-dimension = 1
-fun = SimpleDriftSDE(2,0.5,dimension)
-# mydrift = fun.Drift
-mydrift = driftfun
-mydiff = fun.Diff
+# compare solutions
+plt.figure()
+plt.plot(xvec,PdfTraj[-1],'o')
+plt.plot(xvec,trueSoln[-1],'.r')
 
-'''Initialization Parameters'''
-NumSteps = 1
-'''Discretization Parameters'''
-# a = 1
-h=0.01
-#kstepMin = np.round(min(0.15, 0.144*mydiff(np.asarray([0,0]))[0,0]+0.0056),2)
-beta = 3
-# radius = 0.55 # R
-SpatialDiff = False
-conditionNumForAltMethod = 8
-# NumLejas = 30
-# numPointsForLejaCandidates = 350
-# numQuadFit = 350
+# A2 = np.zeros((len(xvec),len(xvec)))
 
-par = Param.Parameters(fun, h, conditionNumForAltMethod, beta)
-par.radius = 1
-par.kstepMin = k
-# par.minDistanceBetweenPoints = 0.09
-
-Meshes, PdfTraj, LPReuseArr, AltMethod, GMat = DTQ(NumSteps, par.kstepMin, par.kstepMax, par.h, par.beta, par.radius, mydrift, mydiff, dimension, SpatialDiff, par, RetG=True)
-
-fullPDF2 = np.expand_dims(GMat[100,:len(Meshes[0])],1)
-
-scale1, cc, Const, combinations = QF.leastSquares(Meshes[0], fullPDF2)
-
-fullMesh = Meshes[0]
-if np.size(fullMesh,1)==1:
-    vals = np.exp(-(cc[0]*fullMesh**2+cc[1]*fullMesh+cc[2])).T/Const
-    vals = vals*1/(np.sqrt(np.pi)*np.sqrt(scale1.cov))
-else:
-    L = np.linalg.cholesky((scale1.cov))
-    JacFactor = np.prod(np.diag(L))
-    # vals = 1/(np.pi*JacFactor)*np.exp(-(cc[0]*x**2+ cc[1]*y**2 + cc[2]*x*y + cc[3]*x + cc[4]*y + cc[5]))/Const
-
-    vals2 = np.zeros(np.size(fullPDF)).T
-    count = 0
-    dimension = np.size(fullMesh,1)
-    for i in range(dimension):
-        vals2 += cc[count]*fullMesh[:,i]**2
-        count +=1
-    for i,k in combinations:
-        vals2 += cc[count]*fullMesh[:,i]*fullMesh[:,k]
-        count +=1
-    for i in range(dimension):
-        vals2 += cc[count]*fullMesh[:,i]
-        count +=1
-    vals2 += cc[count]*np.ones(np.shape(vals2))
-    vals = 1/(np.sqrt(np.pi)**dimension*JacFactor)*np.exp(-(vals2))/Const
-
-value = fullPDF2/vals.T
+# for i in range(len(xvec)):
+#     print(i)
+#     xrow = xvec[i]
+#     for j in range(len(xvec)):
+#         xcol = xvec[j]
+#         prow = []
+#         pvec = []
+#         for m,xm in enumerate(xvec):
+#             xsum = xm
+#             mu1 = xcol + driftfun(xcol)*theta*h
+#             sig1 = abs(difffun(xcol))*np.sqrt(theta*h)
+#             scale = GaussScale(dimension)
+#             scale.setMu(np.asarray(mu1.T))
+#             scale.setCov(np.asarray(sig1**2))
+            
+#             N1 = fun.Gaussian(scale, xsum)
+#             pvec.append(N1)
+#             # print(N1)
+            
+#             mu2 = xsum + (a1*driftfun(xsum) - a2*driftfun(xcol))*(1-theta)*h
+#             sig2 = np.sqrt(rho2(a1*difffun(xsum)**2 - a2*difffun(xcol)**2))*np.sqrt((1-theta)*h)
+            
+#             scale2 = GaussScale(dimension)
+#             scale2.setMu(np.asarray(mu2.T))
+#             scale2.setCov(np.asarray(sig2**2))
+            
+#             # N2 = np.exp(-(xrow-mu2)**2/(2*sig2*sig2))/(sig2*np.sqrt(2*np.pi))
+#             N2 = fun.Gaussian(scale2, xrow)
+#             # print(N2)
+#             prow.append(N2)
+            
+#         A2[i,j]= k*np.asarray(prow)@np.asarray(pvec)
 
 
-plt.scatter(fullMesh, value, label="E-M")
-# plt.scatter(fullMesh, fullPDF2, label="E-M")
 
-plt.legend()
+
+
+    
+
+# fullPDF = np.expand_dims(A2[100,:],1)
+
+# scale1, cc, Const, combinations = QF.leastSquares(xvec, fullPDF)
+
+# fullMesh = xvec
+# if np.size(fullMesh,1)==1:
+#     vals = np.exp(-(cc[0]*fullMesh**2+cc[1]*fullMesh+cc[2])).T/Const
+#     vals = vals*1/(np.sqrt(np.pi)*np.sqrt(scale1.cov))
+# else:
+#     L = np.linalg.cholesky((scale1.cov))
+#     JacFactor = np.prod(np.diag(L))
+#     # vals = 1/(np.pi*JacFactor)*np.exp(-(cc[0]*x**2+ cc[1]*y**2 + cc[2]*x*y + cc[3]*x + cc[4]*y + cc[5]))/Const
+
+#     vals2 = np.zeros(np.size(fullPDF)).T
+#     count = 0
+#     dimension = np.size(fullMesh,1)
+#     for i in range(dimension):
+#         vals2 += cc[count]*fullMesh[:,i]**2
+#         count +=1
+#     for i,k in combinations:
+#         vals2 += cc[count]*fullMesh[:,i]*fullMesh[:,k]
+#         count +=1
+#     for i in range(dimension):
+#         vals2 += cc[count]*fullMesh[:,i]
+#         count +=1
+#     vals2 += cc[count]*np.ones(np.shape(vals2))
+#     vals = 1/(np.sqrt(np.pi)**dimension*JacFactor)*np.exp(-(vals2))/Const
+
+# value = fullPDF/vals.T
+
+
+# plt.scatter(xvec, value, label="A-M")
+# # plt.scatter(xvec, fullPDF, label="A-M")
+
+
+    
+# # init = np.zeros(dimension).T
+# # mymu = driftfun(init)*h
+# # mysigma = abs(difffun(init))*np.sqrt(h)
+# # scale = GaussScale(1)
+# # scale.setMu(np.asarray([mymu]))
+# # scale.setCov(np.asarray([mysigma**2]))
+# # phat = fun.Gaussian(scale, xvec)
+
+
+
+# from DTQAdaptive import DTQ
+# import numpy as np
+# from DriftDiffFunctionBank import FourHillDrift, DiagDiffptSevenFive
+# import matplotlib.pyplot as plt
+# import matplotlib.animation as animation
+# import ParametersClass as Param
+# from Errors import ErrorValsExact
+# from exactSolutions import TwoDdiffusionEquation
+# from scipy.special import erf
+# from NDFunctionBank import SimpleDriftSDE
+
+# dimension = 1
+# fun = SimpleDriftSDE(2,0.5,dimension)
+# # mydrift = fun.Drift
+# mydrift = driftfun
+# mydiff = fun.Diff
+
+# '''Initialization Parameters'''
+# NumSteps = 1
+# '''Discretization Parameters'''
+# # a = 1
+# h=0.01
+# #kstepMin = np.round(min(0.15, 0.144*mydiff(np.asarray([0,0]))[0,0]+0.0056),2)
+# beta = 3
+# # radius = 0.55 # R
+# SpatialDiff = False
+# conditionNumForAltMethod = 8
+# # NumLejas = 30
+# # numPointsForLejaCandidates = 350
+# # numQuadFit = 350
+
+# par = Param.Parameters(fun, h, conditionNumForAltMethod, beta)
+# par.radius = 1
+# par.kstepMin = k
+# # par.minDistanceBetweenPoints = 0.09
+
+# Meshes, PdfTraj, LPReuseArr, AltMethod, GMat = DTQ(NumSteps, par.kstepMin, par.kstepMax, par.h, par.beta, par.radius, mydrift, mydiff, dimension, SpatialDiff, par, RetG=True)
+
+# fullPDF2 = np.expand_dims(GMat[100,:len(Meshes[0])],1)
+
+# scale1, cc, Const, combinations = QF.leastSquares(Meshes[0], fullPDF2)
+
+# fullMesh = Meshes[0]
+# if np.size(fullMesh,1)==1:
+#     vals = np.exp(-(cc[0]*fullMesh**2+cc[1]*fullMesh+cc[2])).T/Const
+#     vals = vals*1/(np.sqrt(np.pi)*np.sqrt(scale1.cov))
+# else:
+#     L = np.linalg.cholesky((scale1.cov))
+#     JacFactor = np.prod(np.diag(L))
+#     # vals = 1/(np.pi*JacFactor)*np.exp(-(cc[0]*x**2+ cc[1]*y**2 + cc[2]*x*y + cc[3]*x + cc[4]*y + cc[5]))/Const
+
+#     vals2 = np.zeros(np.size(fullPDF)).T
+#     count = 0
+#     dimension = np.size(fullMesh,1)
+#     for i in range(dimension):
+#         vals2 += cc[count]*fullMesh[:,i]**2
+#         count +=1
+#     for i,k in combinations:
+#         vals2 += cc[count]*fullMesh[:,i]*fullMesh[:,k]
+#         count +=1
+#     for i in range(dimension):
+#         vals2 += cc[count]*fullMesh[:,i]
+#         count +=1
+#     vals2 += cc[count]*np.ones(np.shape(vals2))
+#     vals = 1/(np.sqrt(np.pi)**dimension*JacFactor)*np.exp(-(vals2))/Const
+
+# value = fullPDF2/vals.T
+
+
+# plt.scatter(fullMesh, value, label="E-M")
+# # plt.scatter(fullMesh, fullPDF2, label="E-M")
+
+# plt.legend()

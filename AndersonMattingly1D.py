@@ -17,24 +17,27 @@ import matplotlib.animation as animation
 
 def driftfun(mesh):
     # return -1/2*np.tanh(mesh)*(1/np.cosh(mesh))**2
-    return 0*mesh
+    return np.ones(np.shape(mesh))
 
 def difffun(mesh):
     # return 1/np.cosh(mesh)
     return np.ones(np.shape(mesh))
 
 # simulation parameters
-T =10
+T =1
 s = 0.75
 h=0.1
 init = 0
 numsteps = int(np.ceil(T/h))-1
 k = h**s
+# k=0.1
 yM = k*(np.pi/(k**2))
 # yM=15
 M = int(np.ceil(yM/k))
+M=20
 
 xvec = k*np.linspace(-M,M,2*M+1)
+
 
 def alpha1(th):
     return(1/(2*th*(1-th)))
@@ -137,9 +140,10 @@ for i in range(numsteps):
 trueSoln = []
 from exactSolutions import OneDdiffusionEquation
 for i in range(len(PdfTraj)):
-    truepdf = OneDdiffusionEquation(np.expand_dims(xvec,1), difffun(xvec), (i+1)*h, 0)
+    truepdf = OneDdiffusionEquation(np.expand_dims(xvec,1), difffun(xvec), (i+1)*h, driftfun(init))
     # truepdf = solution(xvec,-1,T)
     trueSoln.append(np.squeeze(np.copy(truepdf)))
+    
 from Errors import ErrorValsExact
 LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(xvec, PdfTraj, trueSoln, plot=False)
 

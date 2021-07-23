@@ -28,7 +28,7 @@ mydiff = sde.Diff
 # mydiff = DiagDiffOne
 
 '''Initialization Parameters'''
-NumSteps = 5
+NumSteps = 50
 '''Discretization Parameters'''
 a = 1
 h=0.01
