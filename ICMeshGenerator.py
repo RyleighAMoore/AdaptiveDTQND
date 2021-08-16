@@ -20,8 +20,8 @@ def NDGridMesh(dimension, stepsize, radius, UseNoise = True):
             new = new+noise
         mesh.append(new)
     grid = np.asarray(mesh).T
-    noise = np.random.uniform(-0.001, 0.001, size = (np.shape(grid)))
-    grid = grid+noise
+    # noise = np.random.uniform(-0.001, 0.001, size = (np.shape(grid)))
+    # grid = grid+noise
     distance = 0
     for i in range(dimension):
         distance += grid[:,i]**2

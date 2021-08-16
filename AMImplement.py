@@ -14,13 +14,13 @@ import pyopoly1.QuadratureRules as QR
 
 T =0.1
 s = 0.75
-h=0.1
+h = 0.1
 init = 0
 numsteps = int(np.ceil(T/h))-1
 k = h**s
-k=0.2
+# k=0.1
 yM = k*(np.pi/(k**2))
-yM=5
+yM=4
 M = int(np.ceil(yM/k))
 meshO = k*np.linspace(-M,M,2*M+1)
 meshO = np.expand_dims(np.asarray(meshO),1)
@@ -48,24 +48,25 @@ for i in range(len(meshO)):
     for j in range(len(meshO)):
         indexOfMesh = meshO[j]
         indexOfMesh2 = meshO[i]
-        M2 = 5*h
+        M2 = 5*h 
+        M2 = abs(sde.Diff((indexOfMesh2 + indexOfMesh)/2))*np.sqrt(theta*h)
+        M2 = 5*M2[0][0]
     
-        mesh = np.linspace(-M2,M2,10) + (indexOfMesh2 + indexOfMesh)/2
+        mesh = np.linspace(-M2,M2,25) + (indexOfMesh2 + indexOfMesh)/2
         mesh = np.expand_dims(np.asarray(mesh),1)
-        
         
         val, scaleComb = F.AndersonMattingly(indexOfMesh, indexOfMesh2, mesh, h, sde.Drift, sde.Diff, False, theta, a1, a2, dimension)
         val = np.expand_dims(val,1)
         val = np.where(val <= 0, np.min(val), val)
-        # if np.max(val) < 10**(-16):
-        #     ALp[i-ii,j-ii] = 0
-        #     continue
+        if np.max(val) < 10**(-16):
+            ALp[i,j] = 0
+            continue
         
         scale1, LSFit, Const, combinations = QF.leastSquares(mesh, val)
         
         vals = QF.ComputeDividedOut(mesh, LSFit, Const, scale1, combinations)
         
-        c, cond, ind = QR.QuadratureByInterpolationND(poly, scale1, mesh, val/vals.T, 10, sde.Diff, 5000)
+        c, cond, ind = QR.QuadratureByInterpolationND(poly, scale1, mesh, val/vals.T, 10, sde.Diff, 20)
         print(c)
         print(cond)
         ALp[i,j] = c
@@ -100,8 +101,9 @@ LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(xvec, PdfTraj, trueSo
 
 # compare solutions
 plt.figure()
-plt.plot(xvec,PdfTraj[-1],'o')
-plt.plot(xvec,trueSoln[-1],'.r')
+index = 1
+plt.plot(xvec,PdfTraj[index],'o')
+plt.plot(xvec,trueSoln[index],'.r')
 
 
 

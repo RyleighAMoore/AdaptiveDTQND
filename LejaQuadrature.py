@@ -6,7 +6,7 @@ import numpy as np
 import UnorderedMesh as UM
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from Functions import GVals, Gaussian, G, weightExp
+from Functions import GVals, Gaussian, G, weightExp, GAndersonMat
 from scipy.interpolate import griddata, interp2d 
 from pyopoly1.LejaPoints import getLejaSetFromPoints, getLejaPoints
 from pyopoly1.QuadratureRules import QuadratureByInterpolationND, QuadratureByInterpolation_Simple, QuadratureByInterpolationND_DivideOutGaussian
@@ -37,7 +37,7 @@ def getMeshValsThatAreClose(Mesh, pdf, sigmaX, sigmaY, muX, muY, numStd = 4):
 # poly.lambdas = lambdas
 # lejaPointsFinal, new = getLejaPoints(10, np.asarray([[0,0]]).T, poly, num_candidate_samples=5000, candidateSampleMesh = [], returnIndices = False)
     
-def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, step, GMat, LPMat, LPMatBool, numQuadFit, removeZerosValuesIfLessThanTolerance, conditionNumForAltMethod, drift, diff,numPointsForLejaCandidates, SpatialDiff,lejaPointsFinal, PrintStuff = True):
+def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, step, GMat, LPMat, LPMatBool, numQuadFit, removeZerosValuesIfLessThanTolerance, conditionNumForAltMethod, drift, diff,numPointsForLejaCandidates, SpatialDiff,lejaPointsFinal, TimeStepType, minDistanceBetweenPoints, PrintStuff = True):
     dimension = np.size(mesh,1)
     numLejas = LPMat.shape[1]
     newPDF = []
@@ -86,7 +86,11 @@ def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, s
             # plt.plot(meshLP, pdfNew, 'o')
             # plt.plot(mesh12, pdf12, '.')
             
-            v = np.expand_dims(G(0,mesh12, h, drift, diff, SpatialDiff),1)
+            if TimeStepType == "EM":
+                v = np.expand_dims(G(0,mesh12, h, drift, diff, SpatialDiff),1)
+            elif TimeStepType == "AM":
+                v = np.expand_dims(GAndersonMat(mesh12, 0, h, GMat, drift, diff, SpatialDiff, dimension, poly, numPointsForLejaCandidates, minDistanceBetweenPoints),1)
+                
             if dimension > 1:
                 L = np.linalg.cholesky((scaling.cov))
                 JacFactor = np.prod(np.diag(L))

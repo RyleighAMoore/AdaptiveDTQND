@@ -24,17 +24,21 @@ from collections import defaultdict
 random.seed(10)
 
 
-def addPointsToMeshProcedure(Mesh, Pdf, triangulation, kstep, h, poly, GMat, addPointsToBoundaryIfBiggerThanTolerance, removeZerosValuesIfLessThanTolerance, minDistanceBetweenPoints,maxDistanceBetweenPoints,drift, diff, SpatialDiff):
+def addPointsToMeshProcedure(Mesh, Pdf, triangulation, kstep, h, poly, GMat, addPointsToBoundaryIfBiggerThanTolerance, removeZerosValuesIfLessThanTolerance, minDistanceBetweenPoints,maxDistanceBetweenPoints,drift, diff, SpatialDiff, TimeStepType, dimension, numPointsForLejaCandidates):
     '''If the mesh is changed, these become 1 so we know to recompute the triangulation'''
     changedBool2 = 0 
     changedBool1 = 0
     meshSize = len(Mesh)
-    Mesh, Pdf, triangulation, changedBool1 = addPointsToBoundary(Mesh, Pdf, triangulation,addPointsToBoundaryIfBiggerThanTolerance, removeZerosValuesIfLessThanTolerance, minDistanceBetweenPoints,maxDistanceBetweenPoints)
+    Mesh, Pdf, triangulation, changedBool1 = addPointsToBoundary(Mesh, Pdf, triangulation,addPointsToBoundaryIfBiggerThanTolerance, removeZerosValuesIfLessThanTolerance, minDistanceBetweenPoints,maxDistanceBetweenPoints,h, drift, diff)
     ChangedBool = max(changedBool1, changedBool2)
     if ChangedBool==1:
         newMeshSize = len(Mesh)
         for i in range(meshSize+1, newMeshSize+1):
-            GMat = fun.AddPointToG(Mesh[:i,:], i-1, h, GMat, drift, diff, SpatialDiff)
+            if TimeStepType == "EM":
+                GMat = fun.AddPointToG(Mesh[:i,:], i-1, h, GMat, drift, diff, SpatialDiff)
+            elif TimeStepType == "AM":
+                GMat = fun.AddPointToGAndersonMat(Mesh[:i,:], i-1, h, GMat, drift, diff, SpatialDiff, dimension, poly, numPointsForLejaCandidates, minDistanceBetweenPoints)
+                
     return Mesh, Pdf, triangulation, ChangedBool, GMat
 
 def removePointsFromMeshProcedure(Mesh, Pdf, tri, boundaryOnlyBool, poly, GMat, LPMat, LPMatBool, removeZerosValuesIfLessThanTolerance):
@@ -119,7 +123,7 @@ def houseKeepingAfterAdjustingMesh(Mesh, tri):
     return tri
 
 import ICMeshGenerator as M
-def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerThanTolerance, removeZerosValuesIfLessThanTolerance, minDistanceBetweenPoints,maxDistanceBetweenPoints):
+def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerThanTolerance, removeZerosValuesIfLessThanTolerance, minDistanceBetweenPoints,maxDistanceBetweenPoints, h, drift, diff):
     dimension = np.size(Mesh,1)
     ChangedBool = 0
     count = 0
@@ -131,7 +135,8 @@ def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerTha
         mm = np.min(Mesh)
         MM = np.max(Mesh)
         
-        for i in range(1,4):
+        padding = 4 + int(50/(1/h))
+        for i in range(1,10):
             Mesh = np.append(Mesh, np.asarray([[mm-i*radius]]), axis=0)
             newPoints.append(np.asarray(mm-i*radius))
             Mesh = np.append(Mesh, np.asarray([[MM+i*radius]]), axis=0)
@@ -151,7 +156,7 @@ def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerTha
             boundaryPointsToAddAround = checkIntegrandForAddingPointsAroundBoundaryPoints(Pdf, addPointsToBoundaryIfBiggerThanTolerance, Mesh, triangulation,maxDistanceBetweenPoints)
             iivals = np.expand_dims(np.arange(len(Mesh)),1)
             index = iivals[boundaryPointsToAddAround]
-            candPoints = M.NDGridMesh(dimension, minDistanceBetweenPoints/2 + maxDistanceBetweenPoints/2,maxDistanceBetweenPoints*1.5, UseNoise = True)
+            candPoints = M.NDGridMesh(dimension, minDistanceBetweenPoints/2 + maxDistanceBetweenPoints/2,maxDistanceBetweenPoints, UseNoise = True)
             for indx in index:
                 # newPoints = addPointsRadially(Mesh[indx,:], Mesh, 8, minDistanceBetweenPoints, maxDistanceBetweenPoints)
                 curr =  np.repeat(np.expand_dims(Mesh[indx,:],1), np.size(candPoints,0), axis=1)

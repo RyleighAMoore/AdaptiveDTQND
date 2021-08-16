@@ -8,38 +8,37 @@ from Errors import ErrorValsExact
 from exactSolutions import TwoDdiffusionEquation
 from NDFunctionBank import SimpleDriftSDE
 
-dimension = 1
-sde = SimpleDriftSDE(0,1,dimension)
-mydrift = sde.Drift
-mydiff = sde.Diff
+dimension =1
+sde = SimpleDriftSDE(0,0.5,dimension)
+# mydrift = sde.Drift
+# mydiff = sde.Diff
 
-# def MovingHillDrift(mesh):
-#     return 0*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
-#     # return -1*mesh
-#     return mesh*(4-mesh**2)
+def mydrift(mesh):
+    # return 0*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+    # return -1*mesh
+    return mesh*(4-mesh**2)
     
-# def DiagDiffOne(mesh):
-#     return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
-#     return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
-#     # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
+def mydiff(mesh):
+    return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+    # return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+    # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
 
 
 # mydrift = MovingHillDrift
 # mydiff = DiagDiffOne
 
 '''Initialization Parameters'''
-NumSteps = 50
+NumSteps = 10
 '''Discretization Parameters'''
 a = 1
-h=0.01
+h=0.1
 #kstepMin = np.round(min(0.15, 0.144*mydiff(np.asarray([0,0]))[0,0]+0.0056),2)
 # kstepMin = 0.051 # lambda
 # kstepMax = 0.055 # Lambda
-kstepMin = 0.1 # lambda
-kstepMax = 0.12 # Lambda
-beta = 5
-radius = 1 # R
-dimension = 1
+kstepMin = 0.06 # lambda
+kstepMax = kstepMin + 0.005 # Lambda
+beta = 3
+radius = 3# R
 SpatialDiff = False
 conditionNumForAltMethod = 10
 NumLejas = 10
@@ -52,8 +51,9 @@ par.kstepMax = kstepMax
 par.radius = radius
 par.numPointsForLejaCandidates = numPointsForLejaCandidates
 par.numQuadFit = numQuadFit
+TSType = "AM"
 
-Meshes, PdfTraj, LPReuseArr, AltMethod= DTQ(NumSteps, kstepMin, kstepMax, h, beta, radius, mydrift, mydiff, dimension, SpatialDiff, par, PrintStuff=True)
+Meshes, PdfTraj, LPReuseArr, AltMethod= DTQ(NumSteps, kstepMin, kstepMax, h, beta, radius, mydrift, mydiff, dimension, SpatialDiff, par, PrintStuff=True, TimeStepType= TSType)
 
 pc = []
 for i in range(len(Meshes)-1):
@@ -91,16 +91,16 @@ LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, true
 #     # truepdf = solution(xvec,-1,T)
 #     trueSoln.append(np.squeeze(np.copy(truepdf)))
 
-
 def update_graph(num):
     graph.set_data(Meshes[num], PdfTraj[num])
     return title, graph
+
 fig = plt.figure()
 ax = fig.add_subplot(111)
 title = ax.set_title('2D Test')
     
 graph, = ax.plot(Meshes[-1], PdfTraj[-1], linestyle="", marker=".")
-ax.set_xlim(-4, 4)
+ax.set_xlim(-20, 20)
 ax.set_ylim(0, np.max(PdfTraj[0]))
 
 
@@ -113,5 +113,12 @@ plt.show()
 # plt.plot(Meshes[ii], trueSoln[ii], 'or')
 # plt.plot(Meshes[ii], PdfTraj[ii], '.k')
     
+
+# plt.figure()
+# ii =0
+# plt.plot(Meshes[ii], trueSoln[ii], 'or')
+# plt.plot(Meshes[ii], PdfTraj[ii], '.k')
+    
+
 
 

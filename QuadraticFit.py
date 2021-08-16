@@ -63,7 +63,7 @@ def leastSquares(QuadMesh, pdf):
         scaling.setMu(mu)
         scaling.setCov(sigma)
     else:
-        return float('nan'),float('nan'),float('nan')
+        return float('nan'),float('nan'),float('nan'), float('nan')
     # cc=pred_params
     # x,y = xy   
     # vals = np.exp(-(cc[0]*x**2+ cc[1]*y**2 + 2*cc[2]*x*y + cc[3]*x + cc[4]*y + cc[5]))/Const[0][0]

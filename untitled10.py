@@ -16,7 +16,7 @@ import Circumsphere as CS
 from itertools import combinations
 from collections import defaultdict
 
-dimension = 3
+dimension = 4
 minDistanceBetweenPoints = 0.1
 meshRadius = 0.4
 mesh = M.NDGridMesh(dimension, minDistanceBetweenPoints, meshRadius, UseNoise = False)
@@ -98,4 +98,31 @@ if dimension ==3:
     
     plt.show()
     
+if dimension ==4:
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(mesh[:,0], mesh[:,1], mesh[:,3], c="k", marker='.')
+    for e in Vertices:
+            x,y,z,w = mesh[e]
+            # plt.plot(x,y, 'ok')
+            ax.scatter(x, y, w, c="r", marker="o")
+    
+    ax.set_xlabel('X Label')
+    ax.set_ylabel('Y Label')
+    ax.set_zlabel('Z Label')
+    
+    plt.show()
+    
+    
+dist = []
+for e in Vertices:
+    x,y,z,w = mesh[e]
+    dist.append(np.sqrt(x**2+y**2+z**2+w**2))
+    print(np.sqrt(x**2 + y**2 + z**2+w**2))
+    
+dist2 = []
+for e in range(len(mesh)):
+    x,y,z,w = mesh[e]
+    dist2.append(np.sqrt(x**2+y**2+z**2+w**2))
+    print(np.sqrt(x**2 + y**2 + z**2+w**2))
     
