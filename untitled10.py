@@ -1,3 +1,4 @@
+#https://stackoverflow.com/questions/26303878/alpha-shapes-in-3d
 import numpy as np
 import Functions as fun
 import UnorderedMesh as UM
@@ -16,24 +17,11 @@ import Circumsphere as CS
 from itertools import combinations
 from collections import defaultdict
 
-dimension = 4
+dimension = 3
 minDistanceBetweenPoints = 0.1
 meshRadius = 0.4
-mesh = M.NDGridMesh(dimension, minDistanceBetweenPoints, meshRadius, UseNoise = False)
-
-# def add_edge(edges, i, j, only_outer=True):
-#        """
-#        Add an edge between the i-th and j-th points,
-#        if not in the list already
-#        """
-#        if (i, j) in edges or (j, i) in edges:
-#            # already added
-#            assert (j, i) in edges, "Can't go twice over same directed edge right?"
-#            if only_outer:
-#                # if both neighboring triangles are in shape, it's not a boundary edge
-#                edges.remove((j, i))
-#            return
-#        edges.add((i, j))
+noise = False
+mesh = M.NDGridMesh(dimension, minDistanceBetweenPoints, meshRadius, UseNoise = noise)
 
 Del = Delaunay(mesh) # Form triangulation
 radii = []
@@ -42,21 +30,11 @@ for verts in Del.simplices:
     radii.append(r)
   
 r = np.asarray(radii)
+r = np.nan_to_num(r)
 import matplotlib.pyplot as plt
-alpha = minDistanceBetweenPoints
+alpha = minDistanceBetweenPoints*2
 tetras = Del.vertices[r<alpha,:]
 
-# edges = set()
-# for rr in range(len(radii)):
-#     if radii[rr] < alpha:
-#         ia, ib, ic = tetras.simplices[rr]
-#         add_edge(edges, ia, ib)
-#         add_edge(edges, ib, ic)
-#         add_edge(edges, ic, ia)
-        
-        
- # triangles
-# TriComb = np.array([(0, 1, 2), (0, 1, 3), (0, 2, 3), (1, 2, 3)])
 vals = np.asarray(list(range(0,dimension+1)))
 TriComb = np.asarray(list(combinations(vals, dimension)))
 
@@ -64,10 +42,11 @@ Triangles = tetras[:,TriComb].reshape(-1,dimension)
 Triangles = np.sort(Triangles,axis=1)
 # Remove triangles that occurs twice, because they are within shapes
 TrianglesDict = defaultdict(int)
-for tri in Triangles:TrianglesDict[tuple(tri)] += 1
+for tri in Triangles:
+    TrianglesDict[tuple(tri)] += 1
+    
 Triangles=np.array([tri for tri in TrianglesDict if TrianglesDict[tri] ==1])
 #edges
-# EdgeComb=np.array([(0, 1), (0, 2), (1, 2)])
 vals = np.asarray(list(range(0,dimension)))
 EdgeComb = np.asarray(list(combinations(vals, dimension-1)))
 
@@ -114,15 +93,15 @@ if dimension ==4:
     plt.show()
     
     
-dist = []
-for e in Vertices:
-    x,y,z,w = mesh[e]
-    dist.append(np.sqrt(x**2+y**2+z**2+w**2))
-    print(np.sqrt(x**2 + y**2 + z**2+w**2))
+# dist = []
+# for e in Vertices:
+#     x,y,z,w = mesh[e]
+#     dist.append(np.sqrt(x**2+y**2+z**2+w**2))
+#     print(np.sqrt(x**2 + y**2 + z**2+w**2))
     
-dist2 = []
-for e in range(len(mesh)):
-    x,y,z,w = mesh[e]
-    dist2.append(np.sqrt(x**2+y**2+z**2+w**2))
-    print(np.sqrt(x**2 + y**2 + z**2+w**2))
+# dist2 = []
+# for e in range(len(mesh)):
+#     x,y,z,w = mesh[e]
+#     dist2.append(np.sqrt(x**2+y**2+z**2+w**2))
+#     print(np.sqrt(x**2 + y**2 + z**2+w**2))
     

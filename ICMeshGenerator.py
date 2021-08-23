@@ -15,7 +15,7 @@ def NDGridMesh(dimension, stepsize, radius, UseNoise = True):
             meshSpacing = stepsize
             noise = np.random.uniform(-meshSpacing, meshSpacing,size = (len(new)))
             
-            shake = 0.2
+            shake = 0.1*stepsize
             noise = -meshSpacing*shake +(meshSpacing*shake - - meshSpacing*shake)/(np.max(noise)-np.min(noise))*(noise-np.min(noise))
             new = new+noise
         mesh.append(new)

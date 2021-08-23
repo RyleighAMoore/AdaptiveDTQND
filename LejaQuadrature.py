@@ -48,8 +48,8 @@ def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, s
     '''Try to Divide out Guassian using quadratic fit'''
     for ii in range(len(mesh)):
         # print('########################',ii/len(mesh)*100, '%')
-        if ii ==596:
-            t=1
+        
+        
         dr = h*drift(mesh[ii,:])[0]
         # muX = mesh[ii,0] + dr[0][0]
         # muY = mesh[ii,1] + dr[0][1]

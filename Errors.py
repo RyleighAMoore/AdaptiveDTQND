@@ -58,7 +58,7 @@ def ErrorVals(Meshes, PdfTraj, mesh2, surfaces, PrintStuff=True):
     plt.legend()
     
     
-def ErrorValsExact(Meshes, PdfTraj, exactSoln, plot=True):
+def ErrorValsExact(Meshes, PdfTraj, exactSoln,h, plot=True):
     L2Errors = []
     LinfErrors = []
     L1Errors = []
@@ -93,13 +93,14 @@ def ErrorValsExact(Meshes, PdfTraj, exactSoln, plot=True):
     # ax.scatter(mesh2[:,0], mesh2[:,1], surfaces[0], c='k', marker='.')
     
     if plot:
-        x = range(len(L2Errors))
+        # x = range(len(L2Errors))
+        x = np.linspace(1,len(PdfTraj), len(PdfTraj))*h
         plt.figure()
         plt.semilogy(x, np.asarray(LinfErrors), label = 'Linf Error')
         plt.semilogy(x, np.asarray(L2Errors), label = 'L2 Error')
         plt.semilogy(x, np.asarray(L1Errors), label = 'L1 Error')
         plt.semilogy(x, np.asarray(L2wErrors), label = 'L2w Error')
-        plt.xlabel('Time Step')
+        plt.xlabel('Time')
         plt.ylabel('Error')
         plt.legend()
     

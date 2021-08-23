@@ -57,12 +57,12 @@ def getBoundaryPoints(Mesh, tri, alpha):
         #     pointsOnBoundary = alpha_shape(Mesh, tri, alpha, only_outer=True)
         # elif dimension ==3:
             # pointsOnBoundary = alpha_shape_3D(Mesh, tri, alpha)
-        pointsOnBoundary = ND_Alpha_Shape(Mesh, tri, alpha, dimension)
-            # fig = plt.figure()
-            # ax = fig.add_subplot(projection='3d')
-            # # ax.scatter(Mesh[:,0], Mesh[:,1], Mesh[:,2])
-            # ax.scatter(Mesh[pointsOnBoundary,0], Mesh[pointsOnBoundary,1], Mesh[pointsOnBoundary,2], 'r')
-
+        pointsOnBoundary = ND_Alpha_Shape(Mesh, tri, alpha*1.5, dimension)
+        # fig = plt.figure()
+        # ax = fig.add_subplot(projection='3d')
+        # ax.scatter(Mesh[:,0], Mesh[:,1], Mesh[:,2])
+        # ax.scatter(Mesh[pointsOnBoundary,0], Mesh[pointsOnBoundary,1], Mesh[pointsOnBoundary,2], 'r')
+        # plt.show()
     return pointsOnBoundary
 
 
@@ -156,11 +156,11 @@ def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerTha
             boundaryPointsToAddAround = checkIntegrandForAddingPointsAroundBoundaryPoints(Pdf, addPointsToBoundaryIfBiggerThanTolerance, Mesh, triangulation,maxDistanceBetweenPoints)
             iivals = np.expand_dims(np.arange(len(Mesh)),1)
             index = iivals[boundaryPointsToAddAround]
-            candPoints = M.NDGridMesh(dimension, minDistanceBetweenPoints/2 + maxDistanceBetweenPoints/2,maxDistanceBetweenPoints, UseNoise = True)
+            candPoints = M.NDGridMesh(dimension, minDistanceBetweenPoints/2 + maxDistanceBetweenPoints/2,maxDistanceBetweenPoints, UseNoise = False)
             for indx in index:
                 # newPoints = addPointsRadially(Mesh[indx,:], Mesh, 8, minDistanceBetweenPoints, maxDistanceBetweenPoints)
                 curr =  np.repeat(np.expand_dims(Mesh[indx,:],1), np.size(candPoints,0), axis=1)
-                newPoints = curr.T - candPoints 
+                newPoints = candPoints  - curr.T
                 points = []
                 for i in range(len(newPoints)):
                     newPoint = newPoints[i,:]
@@ -250,6 +250,8 @@ def ND_Alpha_Shape(mesh, triangulation, alpha, dimension):
         radii.append(r)
       
     r = np.asarray(radii)
+    r = np.nan_to_num(r)
+
     tetras = Del.vertices[r<alpha,:]
     
     vals = np.asarray(list(range(0,dimension+1)))

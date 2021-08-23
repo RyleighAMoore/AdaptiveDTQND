@@ -9,7 +9,7 @@ from exactSolutions import TwoDdiffusionEquation
 from scipy.special import erf
 from NDFunctionBank import SimpleDriftSDE
 
-dimension =3
+dimension =4
 sde = SimpleDriftSDE(0,0.5,dimension)
 mydrift = sde.Drift
 mydiff = sde.Diff
@@ -35,15 +35,13 @@ mydiff = sde.Diff
 # mydiff = DiagDiffOne
 
 '''Initialization Parameters'''
-NumSteps =10
+NumSteps = 9
 '''Discretization Parameters'''
-# a = 1
 h=0.01
-#kstepMin = np.round(min(0.15, 0.144*mydiff(np.asarray([0,0]))[0,0]+0.0056),2)
-kstepMin = 0.08 # lambda
-kstepMax = kstepMin+0.05 # Lambda
-beta = 5
-radius =0.7  # R
+kstepMin = 0.1 # lambda
+kstepMax = kstepMin+0.01 # Lambda
+beta = 4
+radius = 0.5 # R
 SpatialDiff = False
 conditionNumForAltMethod = 8
 NumLejas = 15
@@ -54,6 +52,9 @@ par = Param.Parameters(sde, h, conditionNumForAltMethod, beta)
 par.kstepMin = kstepMin
 par.kstepMax = kstepMax
 par.radius = radius
+par.numPointsForLejaCandidates = numPointsForLejaCandidates
+par.NumLejas = NumLejas
+par.numQuadFit = numQuadFit
 TS = "EM"
 
 Meshes, PdfTraj, LPReuseArr, AltMethod= DTQ(NumSteps, kstepMin, kstepMax, h, beta, radius, mydrift, mydiff, dimension, SpatialDiff, par, PrintStuff=True, TimeStepType = TS)
@@ -85,7 +86,7 @@ for i in range(len(Meshes)):
     trueSoln.append(np.squeeze(np.copy(truepdf)))
     
     
-LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, plot=True)
+LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, h, plot=True)
 
 
 if dimension ==2:

@@ -67,6 +67,9 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     '''Initialize Transition probabilities'''
     maxDegFreedom = len(mesh)*8
     
+    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, 2, UseNoise = False)
+    
+    
     if TimeStepType == "EM":
         GMat = fun.GenerateEulerMarMatrix(maxDegFreedom, mesh, h, drift, diff, SpatialDiff)
     elif TimeStepType == "AM":

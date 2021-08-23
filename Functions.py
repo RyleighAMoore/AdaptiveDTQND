@@ -133,17 +133,17 @@ def rho2(x):
     #     v=0
     return x
 
-def AndersonMattingly(yim1, yi, mesh, h, driftfun, difffun, SpatialDiff, theta, a1, a2, dimension):
+def AndersonMattingly(yim1, yi, meshAM, h, driftfun, difffun, SpatialDiff, theta, a1, a2, dimension):
     mu1 = yim1 + driftfun(yim1)*theta*h
     sig1 = abs(difffun(yim1))*np.sqrt(theta*h)
     scale = GaussScale(dimension)
     scale.setMu(np.asarray(mu1.T))
     scale.setCov(np.asarray(sig1**2))
 
-    N1 = Gaussian(scale, mesh)
+    N1 = Gaussian(scale, meshAM)
     
     xsum = []
-    for i in mesh:
+    for i in meshAM:
         mu2 = i + (a1*driftfun(i) - a2*driftfun(yim1))*(1-theta)*h
         sig2 = np.sqrt(rho2(a1*difffun(i)**2 - a2*difffun(yim1)**2))*np.sqrt((1-theta)*h)
         scale2 = GaussScale(dimension)
@@ -241,10 +241,7 @@ from pyopoly1 import variableTransformations as VT
 #     return c[0]
 import matplotlib.pyplot as plt
 
-def ComputeAndersonMattingly(index1, index2, h, Drift, Diff, DTQMesh, dimension, poly, numPointsForLejaCandidates, minDistanceBetweenPoints):
-    theta = 0.5
-    a1 = F.alpha1(theta)
-    a2 = F.alpha2(theta)
+def ComputeAndersonMattingly(index1, index2, h, Drift, Diff, DTQMesh, dimension, poly, numPointsForLejaCandidates, meshForAM, theta, a1, a2, minDistanceBetweenPoints):
     meshO = DTQMesh
     # ALp = np.zeros((len(meshO), len(meshO)))
     i = index1
@@ -256,42 +253,56 @@ def ComputeAndersonMattingly(index1, index2, h, Drift, Diff, DTQMesh, dimension,
     scale.setMu(((np.asarray(indexOfMesh + Drift(indexOfMesh)*theta*h))).T)
     scale.setCov(np.diag(np.ones(dimension)))
 
-    mesh = M.NDGridMesh(dimension, minDistanceBetweenPoints, 3, UseNoise = False)
-    mesh = VT.map_from_canonical_space(mesh, scale)    
+    meshAM = VT.map_from_canonical_space(meshForAM, scale)
+        
     
-    val, scaleComb = AndersonMattingly(indexOfMesh, indexOfMesh2, mesh, h, Drift, Diff, False, theta, a1, a2, dimension)
-    assert val[0] < 10**(-8) 
-    assert val[-1] < 10**(-8)
+    val, scaleComb = AndersonMattingly(indexOfMesh, indexOfMesh2, meshAM, h, Drift, Diff, False, theta, a1, a2, dimension)
+    # assert val[0] < 10**(-6), print(val[0])
+    # assert val[-1] < 10**(-6), print(val[0])
     val2 = np.sum(minDistanceBetweenPoints**dimension*val)   
     
     return val2
     
 from tqdm import trange
 def GenerateAndersonMatMatrix(h, Drift, Diff, DTQMesh, dimension, poly, numPointsForLejaCandidates, maxDegFreedom, minDistanceBetweenPoints):
+    theta = 0.5
+    a1 = F.alpha1(theta)
+    a2 = F.alpha2(theta)
+    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, 2, UseNoise = False)
     meshO = DTQMesh
     ALp = np.empty([maxDegFreedom, maxDegFreedom])*np.NaN
     for i in trange(len(meshO)):
         for j in range(len(meshO)):
-            c = ComputeAndersonMattingly(i, j, h, Drift, Diff, DTQMesh, dimension, poly, numPointsForLejaCandidates, minDistanceBetweenPoints)
+            c = ComputeAndersonMattingly(i, j, h, Drift, Diff, DTQMesh, dimension, poly, numPointsForLejaCandidates, meshAM, theta, a1, a2, minDistanceBetweenPoints)
             ALp[i,j] = c
     return ALp
 
 
 def AddPointToGAndersonMat(mesh, newPointindex, h, GMat, Drift, Diff, SpatialDiff, dimension, poly, numPointsForLejaCandidates, minDistanceBetweenPoints):
+    theta = 0.5
+    a1 = F.alpha1(theta)
+    a2 = F.alpha2(theta)
+    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, 2, UseNoise = False)
+
     for j in range(len(mesh)):
-        val = ComputeAndersonMattingly(newPointindex, j, h, Drift, Diff, mesh, dimension, poly, numPointsForLejaCandidates, minDistanceBetweenPoints)
+        val = ComputeAndersonMattingly(newPointindex, j, h, Drift, Diff, mesh, dimension, poly, numPointsForLejaCandidates, meshAM, theta, a1, a2, minDistanceBetweenPoints)
         GMat[newPointindex, j] = val
        
     for i in range(len(mesh)):
-        val = ComputeAndersonMattingly(i, newPointindex, h, Drift, Diff, mesh, dimension, poly, numPointsForLejaCandidates, minDistanceBetweenPoints)
+        val = ComputeAndersonMattingly(i, newPointindex, h, Drift, Diff, mesh, dimension, poly, numPointsForLejaCandidates, meshAM, theta, a1, a2, minDistanceBetweenPoints)
         GMat[i,newPointindex] = val
     return GMat
     
 
 def GAndersonMat(mesh, newPointindex, h, GMat, Drift, Diff, SpatialDiff, dimension, poly, numPointsForLejaCandidates, minDistanceBetweenPoints):
+    theta = 0.5
+    a1 = F.alpha1(theta)
+    a2 = F.alpha2(theta)
+    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, 2, UseNoise = False)
+
     vals = []
     for j in range(len(mesh)):
-        val = ComputeAndersonMattingly(newPointindex, j, h, Drift, Diff, mesh, dimension, poly, numPointsForLejaCandidates, minDistanceBetweenPoints)
+        val = ComputeAndersonMattingly(newPointindex, j, h, Drift, Diff, mesh, dimension, poly, numPointsForLejaCandidates,meshAM, theta, a1, a2, minDistanceBetweenPoints)
         vals.append(val)
     return vals
         
