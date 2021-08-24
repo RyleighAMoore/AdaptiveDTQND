@@ -30,7 +30,7 @@ EndTime = 0.5
 kstepMin = 0.05 # lambda
 kstepMax = kstepMin + 0.005 # Lambda
 beta = 20
-radius = 3# R
+radius = 4# R
 SpatialDiff = False
 conditionNumForAltMethod = 10
 NumLejas = 10
@@ -154,15 +154,15 @@ for i in timeStepAM:
     LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, h, plot=False)
     ErrorsAM.append(L2wErrors[-1])
 
-plt.semilogy(np.asarray(timeStep), ErrorsEM, label="EM")
-plt.semilogy(np.asarray(timeStepAM), ErrorsAM, '*', label="AM")
-plt.xlabel("timestep")
-plt.ylabel("Error")
-plt.legend()
+# plt.semilogy(np.asarray(timeStep), ErrorsEM, label="EM")
+# plt.semilogy(np.asarray(timeStepAM), ErrorsAM, '*', label="AM")
+# plt.xlabel("timestep")
+# plt.ylabel("Error")
+# plt.legend()
 
-plt.plot(np.asarray(timeStep), timesEM, label="EM")
-plt.plot(np.asarray(timeStepAM), timesAM, label="AM")
-plt.xlabel("timestep")
-plt.ylabel("Time (seconds)")
-plt.legend()
+# plt.plot(np.asarray(timeStep), timesEM, label="EM")
+# plt.plot(np.asarray(timeStepAM), timesAM, label="AM")
+# plt.xlabel("timestep")
+# plt.ylabel("Time (seconds)")
+# plt.legend()
 

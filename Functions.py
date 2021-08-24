@@ -134,8 +134,29 @@ def rho2(x):
     #     v=0
     return x
 
-def AndersonMattingly(yim1, yi, mesh, h, driftfun, difffun, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints):
-    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints*2, max(int(np.max(mesh)-np.min(mesh)),1), UseNoise = False)
+from tqdm import trange
+def computeN2s(mesh, h, driftfun, difffun, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints):
+    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(mesh)-np.min(mesh)),1), UseNoise = False)
+    N2s = []
+    N2Complete = []
+    count = 0
+    for yim1 in mesh:
+        count = count+1
+        print(count/len(mesh))
+        N2All = []
+        for i in meshAM:
+            mu2 = i + (a1*driftfun(i) - a2*driftfun(yim1))*(1-theta)*h
+            sig2 = np.sqrt(rho2(a1*difffun(i)**2 - a2*difffun(yim1)**2))*np.sqrt((1-theta)*h)
+            scale2 = GaussScale(dimension)
+            scale2.setMu(np.asarray(mu2.T))
+            scale2.setCov(np.asarray(sig2**2))
+            N2 = Gaussian(scale2, mesh)
+            N2All.append(np.copy(N2)) 
+        N2Complete.append(np.copy(N2All))
+    return np.asarray(N2Complete)
+
+def AndersonMattingly(N2Pre,yim1, yi, mesh, h, driftfun, difffun, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints):
+    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(mesh)-np.min(mesh)),1), UseNoise = False)    
     mu1 = yim1 + driftfun(yim1)*theta*h
     sig1 = abs(difffun(yim1))*np.sqrt(theta*h)
     scale = GaussScale(dimension)
@@ -143,16 +164,21 @@ def AndersonMattingly(yim1, yi, mesh, h, driftfun, difffun, SpatialDiff, theta, 
     scale.setCov(np.asarray(sig1**2))
     N1 = Gaussian(scale, meshAM)
     
-    xsum = []
-    for i in meshAM:
-        mu2 = i + (a1*driftfun(i) - a2*driftfun(yim1))*(1-theta)*h
-        sig2 = np.sqrt(rho2(a1*difffun(i)**2 - a2*difffun(yim1)**2))*np.sqrt((1-theta)*h)
-        scale2 = GaussScale(dimension)
-        scale2.setMu(np.asarray(mu2.T))
-        scale2.setCov(np.asarray(sig2**2))
-        N2 = Gaussian(scale2, yi) # depends on yi, yim1, i
-        xsum.append(N2)
-    return N1*np.asarray(xsum), 0
+    # xsum = []
+    # for i in meshAM:
+    #     mu2 = i + (a1*driftfun(i) - a2*driftfun(yim1))*(1-theta)*h
+    #     sig2 = np.sqrt(rho2(a1*difffun(i)**2 - a2*difffun(yim1)**2))*np.sqrt((1-theta)*h)
+    #     scale2 = GaussScale(dimension)
+    #     scale2.setMu(np.asarray(mu2.T))
+    #     scale2.setCov(np.asarray(sig2**2))
+    #     N2 = Gaussian(scale2, yi) # depends on yi, yim1, i
+    #     xsum.append(np.copy(N2))
+        
+    # N2All = computeN2s(mesh, h, driftfun, difffun, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints)
+    
+    
+    # print(np.max(abs(N2Pre-np.asarray(xsum))))
+    return N1*np.asarray(N2Pre), 0
         
 
         
@@ -168,7 +194,7 @@ from pyopoly1 import variableTransformations as VT
 
 
 
-def ComputeAndersonMattingly(index1, index2, h, Drift, Diff, DTQMesh, dimension, poly, numPointsForLejaCandidates, meshForAM, theta, a1, a2, minDistanceBetweenPoints):
+def ComputeAndersonMattingly(N2,index1, index2, h, Drift, Diff, DTQMesh, dimension, poly, numPointsForLejaCandidates, meshForAM, theta, a1, a2, minDistanceBetweenPoints):
     meshO = DTQMesh
     # ALp = np.zeros((len(meshO), len(meshO)))
     i = index1
@@ -183,7 +209,7 @@ def ComputeAndersonMattingly(index1, index2, h, Drift, Diff, DTQMesh, dimension,
     # meshAM = VT.map_from_canonical_space(meshForAM, scale)
         
     
-    val, scaleComb = AndersonMattingly(indexOfMesh, indexOfMesh2, DTQMesh, h, Drift, Diff, False, theta, a1, a2, dimension, minDistanceBetweenPoints)
+    val, scaleComb = AndersonMattingly(N2,indexOfMesh, indexOfMesh2, DTQMesh, h, Drift, Diff, False, theta, a1, a2, dimension, minDistanceBetweenPoints)
     # assert val[0] < 10**(-6), print(val[0])
     # assert val[-1] < 10**(-6), print(val[0])
     val2 = np.sum(minDistanceBetweenPoints**dimension*val)   
@@ -198,9 +224,12 @@ def GenerateAndersonMatMatrix(h, Drift, Diff, DTQMesh, dimension, poly, numPoint
     meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, 2, UseNoise = False)
     meshO = DTQMesh
     ALp = np.empty([maxDegFreedom, maxDegFreedom])*np.NaN
+
+    N2All = computeN2s(DTQMesh, h, Drift, Diff, False, theta, a1, a2, dimension, minDistanceBetweenPoints)
     for i in trange(len(meshO)):
         for j in range(len(meshO)):
-            c = ComputeAndersonMattingly(i, j, h, Drift, Diff, DTQMesh, dimension, poly, numPointsForLejaCandidates, meshAM, theta, a1, a2, minDistanceBetweenPoints)
+            N2 = N2All[j][:,i]
+            c = ComputeAndersonMattingly(N2, i, j, h, Drift, Diff, DTQMesh, dimension, poly, numPointsForLejaCandidates, meshAM, theta, a1, a2, minDistanceBetweenPoints)
             ALp[i,j] = c
     return ALp
 
