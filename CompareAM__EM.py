@@ -10,7 +10,7 @@ from NDFunctionBank import SimpleDriftSDE
 import time
 
 dimension =1
-sde = SimpleDriftSDE(0,0.5,dimension)
+sde = SimpleDriftSDE(0.5,0.5,dimension)
 mydrift = sde.Drift
 mydiff = sde.Diff
 

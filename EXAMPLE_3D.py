@@ -9,8 +9,8 @@ from exactSolutions import TwoDdiffusionEquation
 from scipy.special import erf
 from NDFunctionBank import SimpleDriftSDE
 
-dimension =4
-sde = SimpleDriftSDE(0,0.5,dimension)
+dimension =3
+sde = SimpleDriftSDE(0.5,0.5,dimension)
 mydrift = sde.Drift
 mydiff = sde.Diff
 

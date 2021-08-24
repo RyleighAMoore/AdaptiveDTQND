@@ -21,6 +21,7 @@ def Gaussian(scaling, mesh):
     soln_vals = np.asarray([rv.pdf(mesh)]).T
     return np.squeeze(soln_vals)
 
+
 def weightExp(scaling,mesh):
     if np.size(mesh,1) == 1:
         mu = scaling.mu
@@ -139,7 +140,6 @@ def AndersonMattingly(yim1, yi, meshAM, h, driftfun, difffun, SpatialDiff, theta
     scale = GaussScale(dimension)
     scale.setMu(np.asarray(mu1.T))
     scale.setCov(np.asarray(sig1**2))
-
     N1 = Gaussian(scale, meshAM)
     
     xsum = []
@@ -147,47 +147,13 @@ def AndersonMattingly(yim1, yi, meshAM, h, driftfun, difffun, SpatialDiff, theta
         mu2 = i + (a1*driftfun(i) - a2*driftfun(yim1))*(1-theta)*h
         sig2 = np.sqrt(rho2(a1*difffun(i)**2 - a2*difffun(yim1)**2))*np.sqrt((1-theta)*h)
         scale2 = GaussScale(dimension)
-        scale2. setMu(np.asarray(mu2.T))
+        scale2.setMu(np.asarray(mu2.T))
         scale2.setCov(np.asarray(sig2**2))
-        N2 = Gaussian(scale2, yi)
+        N2 = Gaussian(scale2, yi) # depends on yi, yim1, i
         xsum.append(N2)
     return N1*np.asarray(xsum), 0
         
-import Functions as F
-import QuadraticFit as QF
-import pyopoly1.QuadratureRules as QR
 
-# def AndersonMattinglyMatrix(meshOriginal, h, sde, theta, a1, a2, dimension, poly):
-#     meshO = meshOriginal
-#     ALp = np.zeros((len(meshO), len(meshO)))
-#     for i in range(len(meshO)):
-#         for j in range(len(meshO)):
-#             indexOfMesh = meshO[j]
-#             indexOfMesh2 = meshO[i]
-#             M2 = 5*h
-        
-#             mesh = np.linspace(-M2,M2,10) + (indexOfMesh2 + indexOfMesh)/2
-#             mesh = np.expand_dims(np.asarray(mesh),1)
-            
-            
-#             val, scaleComb = F.AndersonMattingly(indexOfMesh, indexOfMesh2, mesh, h, sde.Drift, sde.Diff, False, theta, a1, a2, dimension)
-#             val = np.expand_dims(val,1)
-#             val = np.where(val <= 0, np.min(val), val)
-#             # if np.max(val) < 10**(-16):
-#             #     ALp[i-ii,j-ii] = 0
-#             #     continue
-            
-#             scale1, LSFit, Const, combinations = QF.leastSquares(mesh, val)
-            
-#             vals = QF.ComputeDividedOut(mesh, LSFit, Const, scale1, combinations)
-            
-#             c, cond, ind = QR.QuadratureByInterpolationND(poly, scale1, mesh, val/vals.T, 10, sde.Diff, 5000)
-#             # print(c)
-#             # print(cond)
-#             ALp[i,j] = c
-            
-#             return ALp
-        
         
 def GenerateEulerMarMatrix(maxDegFreedom, mesh, h, drift, diff, SpatialDiff):
     GMat = np.empty([maxDegFreedom, maxDegFreedom])*np.NaN
@@ -199,47 +165,7 @@ def GenerateEulerMarMatrix(maxDegFreedom, mesh, h, drift, diff, SpatialDiff):
 
 from pyopoly1 import variableTransformations as VT
 
-# def ComputeAndersonMattingly(index1, index2, h, Drift, Diff, DTQMesh, dimension, poly, numPointsForLejaCandidates, minDistanceBetweenPoints):
-#     theta = 0.5
-#     a1 = F.alpha1(theta)
-#     a2 = F.alpha2(theta)
-#     meshO = DTQMesh
-#     ALp = np.zeros((len(meshO), len(meshO)))
-#     i = index1
-#     j = index2
-   
-#     indexOfMesh = meshO[j]
-#     indexOfMesh2 = meshO[i]
-#     # M2 = 5*h 
-#     # M2 = abs(Diff((indexOfMesh2 + indexOfMesh)/2))*np.sqrt(theta*h)
-#     # M2 = 5*M2[0][0]
 
-
-#     # mesh = np.linspace(-M2,M2,25) + (indexOfMesh2 + indexOfMesh)/2
-#     # mesh = np.expand_dims(np.asarray(mesh),1)    
-    
-#     scale = GaussScale(dimension)
-#     # scale.setMu(((indexOfMesh2 + indexOfMesh)/2).T)
-#     # import operator
-#     # index, value = max(enumerate(pdf), key=operator.itemgetter(1))
-#     scale.setMu(((np.asarray([indexOfMesh + Drift(indexOfMesh)*theta*h]))).T)
-#     scale.setCov(np.diag(np.ones(dimension)))
-
-#     mesh = M.NDGridMesh(dimension, minDistanceBetweenPoints, 2, UseNoise = False)
-#     mesh = VT.map_from_canonical_space(mesh, scale)    
-    
-#     val, scaleComb = AndersonMattingly(indexOfMesh, indexOfMesh2, mesh, h, Drift, Diff, False, theta, a1, a2, dimension)
-#     val = np.expand_dims(val,1)
-#     # val = np.where(val <= 10**(-16), 10**(-16), val)
-    
-#     if np.max(val) < 10**(-16):
-#         c = [0]
-#     else:
-#         scale1, LSFit, Const, combinations = QF.leastSquares(mesh, val)
-#         vals = QF.ComputeDividedOut(mesh, LSFit, Const, scale1, combinations)
-#         c, cond, ind = QR.QuadratureByInterpolationND(poly, scale1, mesh, val/vals.T, 10, Diff, numPointsForLejaCandidates)
-#     return c[0]
-import matplotlib.pyplot as plt
 
 def ComputeAndersonMattingly(index1, index2, h, Drift, Diff, DTQMesh, dimension, poly, numPointsForLejaCandidates, meshForAM, theta, a1, a2, minDistanceBetweenPoints):
     meshO = DTQMesh
@@ -305,5 +231,99 @@ def GAndersonMat(mesh, newPointindex, h, GMat, Drift, Diff, SpatialDiff, dimensi
         val = ComputeAndersonMattingly(newPointindex, j, h, Drift, Diff, mesh, dimension, poly, numPointsForLejaCandidates,meshAM, theta, a1, a2, minDistanceBetweenPoints)
         vals.append(val)
     return vals
+
+
+import Functions as F
+import QuadraticFit as QF
+import pyopoly1.QuadratureRules as QR
+
+# def AndersonMattinglyMatrix(meshOriginal, h, sde, theta, a1, a2, dimension, poly):
+#     meshO = meshOriginal
+#     ALp = np.zeros((len(meshO), len(meshO)))
+#     for i in range(len(meshO)):
+#         for j in range(len(meshO)):
+#             indexOfMesh = meshO[j]
+#             indexOfMesh2 = meshO[i]
+#             M2 = 5*h
+        
+#             mesh = np.linspace(-M2,M2,10) + (indexOfMesh2 + indexOfMesh)/2
+#             mesh = np.expand_dims(np.asarray(mesh),1)
+            
+            
+#             val, scaleComb = F.AndersonMattingly(indexOfMesh, indexOfMesh2, mesh, h, sde.Drift, sde.Diff, False, theta, a1, a2, dimension)
+#             val = np.expand_dims(val,1)
+#             val = np.where(val <= 0, np.min(val), val)
+#             # if np.max(val) < 10**(-16):
+#             #     ALp[i-ii,j-ii] = 0
+#             #     continue
+            
+#             scale1, LSFit, Const, combinations = QF.leastSquares(mesh, val)
+            
+#             vals = QF.ComputeDividedOut(mesh, LSFit, Const, scale1, combinations)
+            
+#             c, cond, ind = QR.QuadratureByInterpolationND(poly, scale1, mesh, val/vals.T, 10, sde.Diff, 5000)
+#             # print(c)
+#             # print(cond)
+#             ALp[i,j] = c
+            
+#             return ALp
+
+# def ComputeAndersonMattingly(index1, index2, h, Drift, Diff, DTQMesh, dimension, poly, numPointsForLejaCandidates, minDistanceBetweenPoints):
+#     theta = 0.5
+#     a1 = F.alpha1(theta)
+#     a2 = F.alpha2(theta)
+#     meshO = DTQMesh
+#     ALp = np.zeros((len(meshO), len(meshO)))
+#     i = index1
+#     j = index2
+   
+#     indexOfMesh = meshO[j]
+#     indexOfMesh2 = meshO[i]
+#     # M2 = 5*h 
+#     # M2 = abs(Diff((indexOfMesh2 + indexOfMesh)/2))*np.sqrt(theta*h)
+#     # M2 = 5*M2[0][0]
+
+
+#     # mesh = np.linspace(-M2,M2,25) + (indexOfMesh2 + indexOfMesh)/2
+#     # mesh = np.expand_dims(np.asarray(mesh),1)    
+    
+#     scale = GaussScale(dimension)
+#     # scale.setMu(((indexOfMesh2 + indexOfMesh)/2).T)
+#     # import operator
+#     # index, value = max(enumerate(pdf), key=operator.itemgetter(1))
+#     scale.setMu(((np.asarray([indexOfMesh + Drift(indexOfMesh)*theta*h]))).T)
+#     scale.setCov(np.diag(np.ones(dimension)))
+
+#     mesh = M.NDGridMesh(dimension, minDistanceBetweenPoints, 2, UseNoise = False)
+#     mesh = VT.map_from_canonical_space(mesh, scale)    
+    
+#     val, scaleComb = AndersonMattingly(indexOfMesh, indexOfMesh2, mesh, h, Drift, Diff, False, theta, a1, a2, dimension)
+#     val = np.expand_dims(val,1)
+#     # val = np.where(val <= 10**(-16), 10**(-16), val)
+    
+#     if np.max(val) < 10**(-16):
+#         c = [0]
+#     else:
+#         scale1, LSFit, Const, combinations = QF.leastSquares(mesh, val)
+#         vals = QF.ComputeDividedOut(mesh, LSFit, Const, scale1, combinations)
+#         c, cond, ind = QR.QuadratureByInterpolationND(poly, scale1, mesh, val/vals.T, 10, Diff, numPointsForLejaCandidates)
+#     return c[0]
+import matplotlib.pyplot as plt
         
 
+
+# import time
+# start_time = time.time()
+# times = 100000
+# for i in range(times):
+#     mu2 = np.asarray([0.1])
+#     sig2 = np.asarray([0.1])
+#     scale2 = GaussScale(1)
+#     scale2. setMu(np.asarray(mu2.T))
+#     scale2.setCov(np.asarray(sig2**2))
+#     N2 = Gaussian(scale2, np.asarray([1]))
+        
+# print("--- %s seconds ---" % (time.time() - start_time))
+# start_time = time.time()
+# N2 = Gaussian(scale2, np.ones(times))
+# print("--- %s seconds ---" % (time.time() - start_time))
