@@ -155,30 +155,30 @@ def computeN2s(mesh, h, driftfun, difffun, SpatialDiff, theta, a1, a2, dimension
         N2Complete.append(np.copy(N2All))
     return np.asarray(N2Complete)
 
-def AndersonMattingly(N2Pre,yim1, yi, mesh, h, driftfun, difffun, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints):
-    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(mesh)-np.min(mesh)),1), UseNoise = False)    
-    mu1 = yim1 + driftfun(yim1)*theta*h
-    sig1 = abs(difffun(yim1))*np.sqrt(theta*h)
-    scale = GaussScale(dimension)
-    scale.setMu(np.asarray(mu1.T))
-    scale.setCov(np.asarray(sig1**2))
-    N1 = Gaussian(scale, meshAM)
+# def AndersonMattingly(N2Pre,yim1, yi, mesh, h, driftfun, difffun, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints):
+#     meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(mesh)-np.min(mesh)),1), UseNoise = False)    
+#     mu1 = yim1 + driftfun(yim1)*theta*h
+#     sig1 = abs(difffun(yim1))*np.sqrt(theta*h)
+#     scale = GaussScale(dimension)
+#     scale.setMu(np.asarray(mu1.T))
+#     scale.setCov(np.asarray(sig1**2))
+#     N1 = Gaussian(scale, meshAM)
     
-    # xsum = []
-    # for i in meshAM:
-    #     mu2 = i + (a1*driftfun(i) - a2*driftfun(yim1))*(1-theta)*h
-    #     sig2 = np.sqrt(rho2(a1*difffun(i)**2 - a2*difffun(yim1)**2))*np.sqrt((1-theta)*h)
-    #     scale2 = GaussScale(dimension)
-    #     scale2.setMu(np.asarray(mu2.T))
-    #     scale2.setCov(np.asarray(sig2**2))
-    #     N2 = Gaussian(scale2, yi) # depends on yi, yim1, i
-    #     xsum.append(np.copy(N2))
+#     # xsum = []
+#     # for i in meshAM:
+#     #     mu2 = i + (a1*driftfun(i) - a2*driftfun(yim1))*(1-theta)*h
+#     #     sig2 = np.sqrt(rho2(a1*difffun(i)**2 - a2*difffun(yim1)**2))*np.sqrt((1-theta)*h)
+#     #     scale2 = GaussScale(dimension)
+#     #     scale2.setMu(np.asarray(mu2.T))
+#     #     scale2.setCov(np.asarray(sig2**2))
+#     #     N2 = Gaussian(scale2, yi) # depends on yi, yim1, i
+#     #     xsum.append(np.copy(N2))
         
-    # N2All = computeN2s(mesh, h, driftfun, difffun, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints)
+#     # N2All = computeN2s(mesh, h, driftfun, difffun, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints)
     
     
-    # print(np.max(abs(N2Pre-np.asarray(xsum))))
-    return N1*np.asarray(N2Pre), 0
+#     # print(np.max(abs(N2Pre-np.asarray(xsum))))
+#     return N1*np.asarray(N2Pre), 0
         
 
         
@@ -194,22 +194,26 @@ from pyopoly1 import variableTransformations as VT
 
 
 
-def ComputeAndersonMattingly(N2,index1, index2, h, Drift, Diff, DTQMesh, dimension, poly, numPointsForLejaCandidates, meshForAM, theta, a1, a2, minDistanceBetweenPoints):
-    meshO = DTQMesh
+def ComputeAndersonMattingly(N2,index1, index2, h, driftfun, difffun, mesh, dimension, poly, numPointsForLejaCandidates, meshForAM, theta, a1, a2, minDistanceBetweenPoints):
+    meshO = mesh
     # ALp = np.zeros((len(meshO), len(meshO)))
     i = index1
     j = index2
-    indexOfMesh = meshO[j]
-    indexOfMesh2 = meshO[i]
+    yim1 = meshO[j]
+    yi = meshO[i]
     
-    # scale = GaussScale(dimension)
-    # scale.setMu(((np.asarray(indexOfMesh + Drift(indexOfMesh)*theta*h))).T)
-    # scale.setCov(np.diag(np.ones(dimension)))
-
-    # meshAM = VT.map_from_canonical_space(meshForAM, scale)
+    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(mesh)-np.min(mesh)),1), UseNoise = False)    
+    mu1 = yim1 + driftfun(yim1)*theta*h
+    sig1 = abs(difffun(yim1))*np.sqrt(theta*h)
+    scale = GaussScale(dimension)
+    scale.setMu(np.asarray(mu1.T))
+    scale.setCov(np.asarray(sig1**2))
+    N1 = Gaussian(scale, meshAM)
+    
+    val = N1*np.asarray(N2)
         
     
-    val, scaleComb = AndersonMattingly(N2,indexOfMesh, indexOfMesh2, DTQMesh, h, Drift, Diff, False, theta, a1, a2, dimension, minDistanceBetweenPoints)
+    # val, scaleComb = AndersonMattingly(N2,indexOfMesh, indexOfMesh2, DTQMesh, h, Drift, Diff, False, theta, a1, a2, dimension, minDistanceBetweenPoints)
     # assert val[0] < 10**(-6), print(val[0])
     # assert val[-1] < 10**(-6), print(val[0])
     val2 = np.sum(minDistanceBetweenPoints**dimension*val)   
