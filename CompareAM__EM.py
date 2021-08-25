@@ -14,18 +14,18 @@ sde = SimpleDriftSDE(0.5,0.5,dimension)
 mydrift = sde.Drift
 mydiff = sde.Diff
 
-# def mydrift(mesh):
-#     # return 0*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
-#     # return -1*mesh
-#     return mesh*(4-mesh**2)
+def mydrift(mesh):
+    # return 0*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+    # return -1*mesh
+    return mesh*(4-mesh**2)
     
-# def mydiff(mesh):
-#     return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
-#     # return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
-#     # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
+def mydiff(mesh):
+    return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+    # return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+    # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
 
 timeStep = [0.1, 0.3, 0.5, 0.7, 0.9, 1.2]
-EndTime = 0.5
+EndTime = 0.6
 
 kstepMin = 0.05 # lambda
 kstepMax = kstepMin + 0.005 # Lambda
@@ -101,7 +101,7 @@ timesEM = []
 #     # plt.show()
 
 timeStepAM = [0.7, 0.9, 1.2]
-timeStepAM = [0.1]
+timeStepAM = [0.01]
 
 ErrorsAM = []
 timesAM = []

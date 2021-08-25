@@ -136,13 +136,12 @@ def rho2(x):
 
 from tqdm import trange
 def computeN2s(mesh, h, driftfun, difffun, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints):
-    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(mesh)-np.min(mesh)),1), UseNoise = False)
+    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(mesh)-np.min(mesh)),2)+1, UseNoise = False)
     N2s = []
     N2Complete = []
     count = 0
     for yim1 in mesh:
         count = count+1
-        print(count/len(mesh))
         N2All = []
         for i in meshAM:
             mu2 = i + (a1*driftfun(i) - a2*driftfun(yim1))*(1-theta)*h
@@ -194,7 +193,7 @@ from pyopoly1 import variableTransformations as VT
 
 
 
-def ComputeAndersonMattingly(N2,index1, index2, h, driftfun, difffun, mesh, dimension, poly, numPointsForLejaCandidates, meshForAM, theta, a1, a2, minDistanceBetweenPoints):
+def ComputeAndersonMattingly(N2,index1, index2, h, driftfun, difffun, mesh, dimension, poly, numPointsForLejaCandidates, theta, a1, a2, minDistanceBetweenPoints):
     meshO = mesh
     # ALp = np.zeros((len(meshO), len(meshO)))
     i = index1
@@ -202,7 +201,7 @@ def ComputeAndersonMattingly(N2,index1, index2, h, driftfun, difffun, mesh, dime
     yim1 = meshO[j]
     yi = meshO[i]
     
-    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(mesh)-np.min(mesh)),1), UseNoise = False)    
+    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(mesh)-np.min(mesh)),2)+1, UseNoise = False)
     mu1 = yim1 + driftfun(yim1)*theta*h
     sig1 = abs(difffun(yim1))*np.sqrt(theta*h)
     scale = GaussScale(dimension)
@@ -225,7 +224,7 @@ def GenerateAndersonMatMatrix(h, Drift, Diff, DTQMesh, dimension, poly, numPoint
     theta = 0.5
     a1 = F.alpha1(theta)
     a2 = F.alpha2(theta)
-    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, 2, UseNoise = False)
+    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(DTQMesh)-np.min(DTQMesh)),2)+1, UseNoise = False)
     meshO = DTQMesh
     ALp = np.empty([maxDegFreedom, maxDegFreedom])*np.NaN
 
@@ -233,7 +232,7 @@ def GenerateAndersonMatMatrix(h, Drift, Diff, DTQMesh, dimension, poly, numPoint
     for i in trange(len(meshO)):
         for j in range(len(meshO)):
             N2 = N2All[j][:,i]
-            c = ComputeAndersonMattingly(N2, i, j, h, Drift, Diff, DTQMesh, dimension, poly, numPointsForLejaCandidates, meshAM, theta, a1, a2, minDistanceBetweenPoints)
+            c = ComputeAndersonMattingly(N2, i, j, h, Drift, Diff, DTQMesh, dimension, poly, numPointsForLejaCandidates, theta, a1, a2, minDistanceBetweenPoints)
             ALp[i,j] = c
     return ALp
 
@@ -242,7 +241,7 @@ def AddPointToGAndersonMat(mesh, newPointindex, h, GMat, Drift, Diff, SpatialDif
     theta = 0.5
     a1 = F.alpha1(theta)
     a2 = F.alpha2(theta)
-    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, 2, UseNoise = False)
+    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(mesh)-np.min(mesh)),2)+1, UseNoise = False)
 
     for j in range(len(mesh)):
         val = ComputeAndersonMattingly(newPointindex, j, h, Drift, Diff, mesh, dimension, poly, numPointsForLejaCandidates, theta, a1, a2, minDistanceBetweenPoints)
@@ -258,11 +257,13 @@ def GAndersonMat(mesh, newPointindex, h, GMat, Drift, Diff, SpatialDiff, dimensi
     theta = 0.5
     a1 = F.alpha1(theta)
     a2 = F.alpha2(theta)
+    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, 2, UseNoise = False)
     # meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, 2, UseNoise = False)
-
+    N2All = computeN2s(mesh, h, Drift, Diff, False, theta, a1, a2, dimension, minDistanceBetweenPoints)
     vals = []
     for j in range(len(mesh)):
-        val = ComputeAndersonMattingly(newPointindex, j, h, Drift, Diff, mesh, dimension, poly, numPointsForLejaCandidates, theta, a1, a2, minDistanceBetweenPoints)
+        N2 = N2All[j][:,newPointindex]
+        val = ComputeAndersonMattingly(N2,newPointindex, j, h, Drift, Diff, mesh, dimension, poly, numPointsForLejaCandidates, theta, a1, a2, minDistanceBetweenPoints)
         vals.append(val)
     return vals
 
