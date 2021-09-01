@@ -73,7 +73,7 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     if TimeStepType == "EM":
         GMat = fun.GenerateEulerMarMatrix(maxDegFreedom, mesh, h, drift, diff, SpatialDiff)
     elif TimeStepType == "AM":
-        GMat = fun.GenerateAndersonMatMatrix(h, drift, diff, mesh, dimension, poly, numPointsForLejaCandidates, maxDegFreedom, minDistanceBetweenPoints)
+        GMat = fun.GenerateAndersonMatMatrix(h, drift, diff, mesh, dimension, maxDegFreedom, minDistanceBetweenPoints)
 
     LPMat = np.ones([maxDegFreedom, NumLejas])*-1
     LPMatBool = np.zeros((maxDegFreedom,1), dtype=bool) # True if we have Lejas, False if we need Lejas

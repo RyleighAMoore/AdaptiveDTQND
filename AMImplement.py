@@ -45,6 +45,7 @@ poly.lambdas = lambdas
 # mesh = VT.map_from_canonical_space(lejaPointsFinal, scale1)
 ALp = np.zeros((len(meshO), len(meshO)))
 for i in range(len(meshO)):
+    print(i)
     for j in range(len(meshO)):
         indexOfMesh = meshO[j]
         indexOfMesh2 = meshO[i]

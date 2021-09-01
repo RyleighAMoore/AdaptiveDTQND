@@ -17,9 +17,19 @@ def GVals(indexOfMesh, mesh, h):
     return val
 
 def Gaussian(scaling, mesh):
-    rv = multivariate_normal(scaling.mu.T[0], scaling.cov)        
-    soln_vals = np.asarray([rv.pdf(mesh)]).T
-    return np.squeeze(soln_vals)
+    # rv = multivariate_normal(scaling.mu.T[0], scaling.cov)        
+    # soln_vals = np.asarray([rv.pdf(mesh)]).T
+    # soln = np.squeeze(soln_vals)
+    D = mesh.shape[1]
+    mu = np.expand_dims(np.repeat(scaling.mu, len(mesh),axis = 0),1)
+    invCov= np.linalg.inv(scaling.cov)
+    norm = np.zeros(len(mesh))
+    for dim in range(D):
+        norm += (mesh[:,dim] - mu[:,dim])**2
+    const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(scaling.cov))))
+    soln = const*np.exp(-1/2*invCov*norm).T
+    
+    return np.squeeze(soln)
 
 
 def weightExp(scaling,mesh):
@@ -135,12 +145,31 @@ def rho2(x):
     return x
 
 from tqdm import trange
+meshSpacingAM = 0.005
 def computeN2s(mesh, h, driftfun, difffun, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints):
-    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(mesh)-np.min(mesh)),2)+1, UseNoise = False)
+    meshAM = M.NDGridMesh(dimension, meshSpacingAM, max(int(np.ceil(np.max(mesh)-np.min(mesh))),2)+1, UseNoise = False)
     N2s = []
     N2Complete = []
     count = 0
     for yim1 in mesh:
+        count = count+1
+        N2All = []
+        for i in meshAM:
+            mu2 = i + (a1*driftfun(i) - a2*driftfun(yim1))*(1-theta)*h
+            sig2 = np.sqrt(rho2(a1*difffun(i)**2 - a2*difffun(yim1)**2))*np.sqrt((1-theta)*h)
+            scale2 = GaussScale(dimension)
+            scale2.setMu(np.asarray(mu2.T))
+            scale2.setCov(np.asarray(sig2**2))
+            N2 = Gaussian(scale2, mesh)
+            N2All.append(np.copy(N2)) 
+        N2Complete.append(np.copy(N2All))
+    return np.asarray(N2Complete)
+
+def computePartialN2s(mesh, indicesToCompute, h, driftfun, difffun, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints):
+    meshAM = M.NDGridMesh(dimension, meshSpacingAM, max(int(np.max(mesh)-np.min(mesh)),2)+1, UseNoise = False)
+    N2Complete = []
+    count = 0
+    for yim1 in mesh[indicesToCompute]:
         count = count+1
         N2All = []
         for i in meshAM:
@@ -193,15 +222,14 @@ from pyopoly1 import variableTransformations as VT
 
 
 
-def ComputeAndersonMattingly(N2,index1, index2, h, driftfun, difffun, mesh, dimension, poly, numPointsForLejaCandidates, theta, a1, a2, minDistanceBetweenPoints):
+def ComputeAndersonMattingly(N2,index1, index2, h, driftfun, difffun, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints):
     meshO = mesh
     # ALp = np.zeros((len(meshO), len(meshO)))
     i = index1
     j = index2
     yim1 = meshO[j]
     yi = meshO[i]
-    
-    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(mesh)-np.min(mesh)),2)+1, UseNoise = False)
+    meshAM = M.NDGridMesh(dimension, meshSpacingAM, max(int(np.ceil(np.max(mesh)-np.min(mesh))),2)+1, UseNoise = False)
     mu1 = yim1 + driftfun(yim1)*theta*h
     sig1 = abs(difffun(yim1))*np.sqrt(theta*h)
     scale = GaussScale(dimension)
@@ -215,16 +243,16 @@ def ComputeAndersonMattingly(N2,index1, index2, h, driftfun, difffun, mesh, dime
     # val, scaleComb = AndersonMattingly(N2,indexOfMesh, indexOfMesh2, DTQMesh, h, Drift, Diff, False, theta, a1, a2, dimension, minDistanceBetweenPoints)
     # assert val[0] < 10**(-6), print(val[0])
     # assert val[-1] < 10**(-6), print(val[0])
-    val2 = np.sum(minDistanceBetweenPoints**dimension*val)   
+    val2 = np.sum(meshSpacingAM**dimension*val)   
     
     return val2
     
 from tqdm import trange
-def GenerateAndersonMatMatrix(h, Drift, Diff, DTQMesh, dimension, poly, numPointsForLejaCandidates, maxDegFreedom, minDistanceBetweenPoints):
+def GenerateAndersonMatMatrix(h, Drift, Diff, DTQMesh, dimension,  maxDegFreedom, minDistanceBetweenPoints):
     theta = 0.5
     a1 = F.alpha1(theta)
     a2 = F.alpha2(theta)
-    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(DTQMesh)-np.min(DTQMesh)),2)+1, UseNoise = False)
+    # meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(DTQMesh)-np.min(DTQMesh)),2)+1, UseNoise = False)
     meshO = DTQMesh
     ALp = np.empty([maxDegFreedom, maxDegFreedom])*np.NaN
 
@@ -232,7 +260,7 @@ def GenerateAndersonMatMatrix(h, Drift, Diff, DTQMesh, dimension, poly, numPoint
     for i in trange(len(meshO)):
         for j in range(len(meshO)):
             N2 = N2All[j][:,i]
-            c = ComputeAndersonMattingly(N2, i, j, h, Drift, Diff, DTQMesh, dimension, poly, numPointsForLejaCandidates, theta, a1, a2, minDistanceBetweenPoints)
+            c = ComputeAndersonMattingly(N2, i, j, h, Drift, Diff, DTQMesh, dimension, theta, a1, a2, minDistanceBetweenPoints)
             ALp[i,j] = c
     return ALp
 
@@ -241,29 +269,43 @@ def AddPointToGAndersonMat(mesh, newPointindex, h, GMat, Drift, Diff, SpatialDif
     theta = 0.5
     a1 = F.alpha1(theta)
     a2 = F.alpha2(theta)
-    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(mesh)-np.min(mesh)),2)+1, UseNoise = False)
+    # meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(mesh)-np.min(mesh)),2)+1, UseNoise = False)
 
     for j in range(len(mesh)):
-        val = ComputeAndersonMattingly(newPointindex, j, h, Drift, Diff, mesh, dimension, poly, numPointsForLejaCandidates, theta, a1, a2, minDistanceBetweenPoints)
+        val = ComputeAndersonMattingly(newPointindex, j, h, Drift, Diff, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints)
         GMat[newPointindex, j] = val
        
     for i in range(len(mesh)):
-        val = ComputeAndersonMattingly(i, newPointindex, h, Drift, Diff, mesh, dimension, poly, numPointsForLejaCandidates, theta, a1, a2, minDistanceBetweenPoints)
+        val = ComputeAndersonMattingly(i, newPointindex, h, Drift, Diff, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints)
         GMat[i,newPointindex] = val
     return GMat
-    
 
-def GAndersonMat(mesh, newPointindex, h, GMat, Drift, Diff, SpatialDiff, dimension, poly, numPointsForLejaCandidates, minDistanceBetweenPoints):
+def AddPointsToGAndersonMat(mesh, newPointindices, h, GMat, Drift, Diff, dimension, minDistanceBetweenPoints):
     theta = 0.5
     a1 = F.alpha1(theta)
     a2 = F.alpha2(theta)
-    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, 2, UseNoise = False)
-    # meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, 2, UseNoise = False)
+
+    # N2All = computePartialN2s(mesh, newPointindices, h, Drift, Diff, False, theta, a1, a2, dimension, minDistanceBetweenPoints)
+    N2All = computeN2s(mesh, h, Drift, Diff, False, theta, a1, a2, dimension, minDistanceBetweenPoints)
+    for i in range(len(mesh)):
+        for j in range(len(mesh)):
+            N2 = N2All[j][:,i]
+            val = ComputeAndersonMattingly(N2, i, j, h, Drift, Diff, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints)
+            GMat[i,j] = val
+
+    return GMat
+
+    
+
+def GAndersonMat(mesh, newPointindex, h, Drift, Diff, dimension, minDistanceBetweenPoints):
+    theta = 0.5
+    a1 = F.alpha1(theta)
+    a2 = F.alpha2(theta)
     N2All = computeN2s(mesh, h, Drift, Diff, False, theta, a1, a2, dimension, minDistanceBetweenPoints)
     vals = []
     for j in range(len(mesh)):
         N2 = N2All[j][:,newPointindex]
-        val = ComputeAndersonMattingly(N2,newPointindex, j, h, Drift, Diff, mesh, dimension, poly, numPointsForLejaCandidates, theta, a1, a2, minDistanceBetweenPoints)
+        val = ComputeAndersonMattingly(N2,newPointindex, j, h, Drift, Diff, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints)
         vals.append(val)
     return vals
 
@@ -343,22 +385,36 @@ import pyopoly1.QuadratureRules as QR
 #         vals = QF.ComputeDividedOut(mesh, LSFit, Const, scale1, combinations)
 #         c, cond, ind = QR.QuadratureByInterpolationND(poly, scale1, mesh, val/vals.T, 10, Diff, numPointsForLejaCandidates)
 #     return c[0]
-import matplotlib.pyplot as plt
-        
-
-
+# import matplotlib.pyplot as plt
+# from pyopoly1.Scaling import GaussScale
+# import numpy as np
+# from Functions import Gaussian
 # import time
-# start_time = time.time()
-# times = 100000
-# for i in range(times):
-#     mu2 = np.asarray([0.1])
-#     sig2 = np.asarray([0.1])
-#     scale2 = GaussScale(1)
-#     scale2. setMu(np.asarray(mu2.T))
-#     scale2.setCov(np.asarray(sig2**2))
-#     N2 = Gaussian(scale2, np.asarray([1]))
+# # start_time = time.time()
+# times = 10
+# # for i in range(times):
+# #     mu2 = np.asarray([0.1])
+# #     sig2 = np.asarray([0.1])
+# #     scale2 = GaussScale(1)
+# #     scale2. setMu(np.asarray(mu2.T))
+# #     scale2.setCov(np.asarray(sig2**2))
+# #     N2 = Gaussian(scale2, np.asarray([1]))
         
-# print("--- %s seconds ---" % (time.time() - start_time))
+
+# mu2 = np.asarray([0.1])
+# sig2 = np.asarray([0.1])
+# scale2 = GaussScale(1)
+# scale2. setMu(np.asarray(mu2.T))
+# scale2.setCov(np.asarray(sig2**2))
+# # print("--- %s seconds ---" % (time.time() - start_time))
 # start_time = time.time()
-# N2 = Gaussian(scale2, np.ones(times))
+# aa= []
+# for i in range(times):
+#     N2 = Gaussian(scale2, np.ones(times))
+#     aa.append(N2)
+# print("--- %s seconds ---" % (time.time() - start_time))
+
+# start_time = time.time()
+# for i in range(times):
+#     N2 = Gaussian(scale2, np.ones(times*2))
 # print("--- %s seconds ---" % (time.time() - start_time))

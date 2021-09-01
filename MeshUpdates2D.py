@@ -33,11 +33,13 @@ def addPointsToMeshProcedure(Mesh, Pdf, triangulation, kstep, h, poly, GMat, add
     ChangedBool = max(changedBool1, changedBool2)
     if ChangedBool==1:
         newMeshSize = len(Mesh)
-        for i in range(meshSize+1, newMeshSize+1):
-            if TimeStepType == "EM":
-                GMat = fun.AddPointToG(Mesh[:i,:], i-1, h, GMat, drift, diff, SpatialDiff)
-            elif TimeStepType == "AM":
-                GMat = fun.AddPointToGAndersonMat(Mesh[:i,:], i-1, h, GMat, drift, diff, SpatialDiff, dimension, poly, numPointsForLejaCandidates, minDistanceBetweenPoints)
+        if TimeStepType == "EM":
+            for i in range(meshSize+1, newMeshSize+1):
+                if TimeStepType == "EM":
+                    GMat = fun.AddPointToG(Mesh[:i,:], i-1, h, GMat, drift, diff, SpatialDiff)
+        elif TimeStepType == "AM":
+            indices = list(range(meshSize, newMeshSize))
+            GMat = fun.AddPointsToGAndersonMat(Mesh, indices, h, GMat, drift, diff, dimension, minDistanceBetweenPoints)
                 
     return Mesh, Pdf, triangulation, ChangedBool, GMat
 

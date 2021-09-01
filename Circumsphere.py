@@ -99,7 +99,6 @@ def fast_2d_circumcircle(points):
     x = dx / a
     y = dy / a
     radius = sqrt(x * x + y * y)  # radius = norm([x, y])
-
     return (x + points[0][0], y + points[0][1]), radius
 
 
@@ -139,7 +138,7 @@ def fast_3d_circumcircle(points):
         center[1] + points[0][1],
         center[2] + points[0][2],
     )
-
+    # print(center, radius)
     return center, radius
 
 
