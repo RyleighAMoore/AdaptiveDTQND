@@ -49,7 +49,6 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     scale = GaussScale(dimension)
     scale.setMu(h*drift(np.zeros(dimension)).T)
     scale.setCov((h*diff(np.zeros(dimension))*diff(np.zeros(dimension)).T).T)
-    
     pdf = fun.Gaussian(scale, mesh)
     
     
@@ -73,7 +72,7 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     if TimeStepType == "EM":
         GMat = fun.GenerateEulerMarMatrix(maxDegFreedom, mesh, h, drift, diff, SpatialDiff)
     elif TimeStepType == "AM":
-        GMat = fun.GenerateAndersonMatMatrix(h, drift, diff, mesh, dimension, maxDegFreedom, minDistanceBetweenPoints)
+        GMat = fun.GenerateAndersonMatMatrix(h, drift, diff, mesh, dimension, maxDegFreedom, minDistanceBetweenPoints, SpatialDiff)
 
     LPMat = np.ones([maxDegFreedom, NumLejas])*-1
     LPMatBool = np.zeros((maxDegFreedom,1), dtype=bool) # True if we have Lejas, False if we need Lejas

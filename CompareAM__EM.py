@@ -188,7 +188,7 @@ for i in timeStep:
     scale = GaussScale(dimension)
     scale.setMu(h*mydrift(np.zeros(dimension)).T)
     scale.setCov((h*mydiff(np.zeros(dimension))*mydiff(np.zeros(dimension)).T).T)
-    
+
     p = fun.Gaussian(scale, mesh)
     PdfTraj = []
     Meshes = []
@@ -231,11 +231,11 @@ for i in timeStep:
     TSType = "AM"
     
     mesh = M.NDGridMesh(dimension, kstepMin, radius, UseNoise = False)
-    GMat = fun.GenerateAndersonMatMatrix(h, mydrift, mydiff, mesh, dimension, len(mesh), kstepMin)
+    GMat = fun.GenerateAndersonMatMatrix(h, mydrift, mydiff, mesh, dimension, len(mesh), kstepMin, SpatialDiff)
     scale = GaussScale(dimension)
     scale.setMu(h*mydrift(np.zeros(dimension)).T)
     scale.setCov((h*mydiff(np.zeros(dimension))*mydiff(np.zeros(dimension)).T).T)
-    
+
     p = fun.Gaussian(scale, mesh)
     PdfTraj = []
     Meshes = []

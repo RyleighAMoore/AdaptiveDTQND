@@ -6,6 +6,7 @@ class GaussScale:
         self.numVars = numVars
         self.mu = np.zeros((numVars,1))
         self.cov = np.zeros((numVars, numVars))
+        self.invCov = float('NaN')
         
     def getSigma(self):
         return np.sqrt(np.diagonal(self.cov))
@@ -17,6 +18,12 @@ class GaussScale:
     def setCov(self, covMat):
         # assert np.shape(covMat) == np.shape(self.cov)
         self.cov = covMat
+        self.invCov = np.linalg.inv(covMat)
+
+        
+    # def setInvCov(self, covMat):
+    #     # assert np.shape(covMat) == np.shape(self.cov)
+    #     self.invCov = np.linalg.inv(covMat)
     
     def setSigma(self, sigmas):
         # assert np.size(sigmas) == self.numVars

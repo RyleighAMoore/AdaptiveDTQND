@@ -67,6 +67,7 @@ for i in range(2*M+1):
     scale = GaussScale(1)
     scale.setMu(np.asarray([mu1]))
     scale.setCov(np.asarray([sig1**2]))
+
     
     pvec = fun.Gaussian(scale, xvec)
  
@@ -118,6 +119,7 @@ mysigma = abs(difffun(init))*np.sqrt(h)
 scale = GaussScale(1)
 scale.setMu(np.asarray([mymu]))
 scale.setCov(np.asarray([mysigma**2]))
+
 phat = fun.Gaussian(scale, xvec)
 
 PdfTraj =[]

@@ -89,7 +89,7 @@ def Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly, h, NumLejas, s
             if TimeStepType == "EM":
                 v = np.expand_dims(G(0,mesh12, h, drift, diff, SpatialDiff),1)
             elif TimeStepType == "AM":
-                v = np.expand_dims(GAndersonMat(mesh12, 0, h, drift, diff, dimension, minDistanceBetweenPoints),1)
+                v = np.expand_dims(GAndersonMat(mesh12, 0, h, drift, diff, dimension, minDistanceBetweenPoints, SpatialDiff),1)
                 
             if dimension > 1:
                 L = np.linalg.cholesky((scaling.cov))

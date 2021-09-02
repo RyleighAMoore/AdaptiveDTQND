@@ -31,8 +31,8 @@ def leastSquares(QuadMesh, pdf):
         # con = 12.499999999999986
         if math.isfinite(mean) and math.isfinite(np.sqrt(cov)):
             scaling = GaussScale(1)
-            scaling.setMu(mean)
-            scaling.setCov(1/cov)
+            scaling.setMu(np.asarray([[mean]]))
+            scaling.setCov(np.asarray([[1/cov]]))
         else:
             return float('nan'),float('nan'),float('nan'), float('nan')
         

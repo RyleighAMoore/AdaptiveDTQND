@@ -39,6 +39,7 @@ def MatrixMultiplyDTQ(NumSteps, kstep, h, drift, diff, meshRadius, TimeStepType,
     scale = GaussScale(dimension)
     scale.setMu(h*drift(np.zeros(dimension)).T)
     scale.setCov((h*diff(np.zeros(dimension))*diff(np.zeros(dimension)).T).T)
+
     # scale = GaussScale(2)
     # scale.setMu(h*mydrift(np.asarray([0,0])).T)
     # scale.setCov((h*mydiff(np.asarray([0,0]))*mydiff(np.asarray([0,0])).T).T)
@@ -74,15 +75,15 @@ import numpy as np
 from scipy.interpolate import griddata, interp2d
 
 def ApproxExactSoln(EndTime, drift, diff, TimeStepType, dimension, Meshes, PdfTraj, Times):
-    kstep = 0.005
-    h = 0.001
+    kstep = 0.003
+    h = 0.0001
     NumSteps = int(np.ceil(EndTime/h))+1
-    meshesm = abs(min(np.min(Meshes[-1]), np.min(Meshes[0])))+2
-    meshesM = abs(max(np.max(Meshes[-1]), np.max(Meshes[0])))+2
+    meshesm = abs(min(np.min(Meshes[-1]), np.min(Meshes[0])))
+    meshesM = abs(max(np.max(Meshes[-1]), np.max(Meshes[0])))
     TimeStepType = "EM"
     
     
-    meshRadius = np.ceil(max(meshesM, meshesm))
+    meshRadius = np.ceil(max(meshesM, meshesm))+2
 
     mesh, surfaces = MatrixMultiplyDTQ(NumSteps, kstep, h, drift, diff, meshRadius, TimeStepType, dimension)
     
@@ -93,12 +94,50 @@ def ApproxExactSoln(EndTime, drift, diff, TimeStepType, dimension, Meshes, PdfTr
         surfaces2.append(surfaces[int(i)])
     solns = []
     for i in range(len(surfaces2)):
-        gridSolnOnLejas = griddata(mesh, surfaces2[i], Meshes[i], method='cubic', fill_value=-1)
+        gridSolnOnLejas = griddata(mesh, surfaces2[i], Meshes[i], method='linear', fill_value=-1)
         solns.append(np.squeeze(gridSolnOnLejas))
     
     LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, solns, h, plot=False)
     
     return LinfErrors, L2Errors, L1Errors, L2wErrors, solns
+
+
+def ApproxExactSolnDense(EndTime, drift, diff, TimeStepType, dimension, Meshes, PdfTraj, Times):
+    kstep = 0.005
+    h = 0.0001
+    NumSteps = int(np.ceil(EndTime/h))+1
+    meshesm = abs(min(np.min(Meshes[-1]), np.min(Meshes[0])))+2
+    meshesM = abs(max(np.max(Meshes[-1]), np.max(Meshes[0])))+2
+    TimeStepType = "EM"
+        
+    meshRadius = np.ceil(max(meshesM, meshesm))
+
+    # mesh, surfaces = MatrixMultiplyDTQ(NumSteps, kstep, h, drift, diff, meshRadius, TimeStepType, dimension)
+    mesh = M.NDGridMesh(1, kstep, 5, UseNoise = False)
+    scale = GaussScale(dimension)
+    scale.setMu(h*drift(np.zeros(dimension)).T)
+    scale.setCov((h*diff(np.zeros(dimension))*diff(np.zeros(dimension)).T).T)
+    
+    from tqdm import trange
+    solnEndTime = []
+    for i in trange(len(mesh)):
+        p = fun.Gaussian(scale, mesh)
+        v = fun.G(i, mesh, h, drift, diff, False)
+        for j in range(NumSteps):
+            p = kstep*np.sum(v*p)
+        solnEndTime.append(np.copy(p))
+        
+    gridSolnOnLejas = griddata(mesh, np.asarray(solnEndTime), Meshes[-1], method='linear', fill_value=-1)
+    plt.scatter(np.asarray(Meshes[-1]), PdfTraj[-1])
+    plt.scatter(np.asarray(Meshes[-1]), np.asarray(gridSolnOnLejas))
+    
+    step = -1
+    l2w = np.sqrt(np.sum(np.abs((gridSolnOnLejas - PdfTraj[step]))**2*gridSolnOnLejas)/np.sum(gridSolnOnLejas))
+    
+    
+    return 0, 0, 0, l2w, gridSolnOnLejas
+
+
 from DTQAdaptive import DTQ
 import numpy as np
 from DriftDiffFunctionBank import FourHillDrift, DiagDiffptSevenFive
