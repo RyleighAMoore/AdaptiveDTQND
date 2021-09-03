@@ -46,7 +46,7 @@ def MatrixMultiplyDTQ(NumSteps, kstep, h, drift, diff, meshRadius, TimeStepType,
     
     pdf = fun.Gaussian(scale, mesh)
    
-    maxDegFreedom = len(mesh)*8
+    maxDegFreedom = len(mesh)
     SpatialDiff = False
 
     if TimeStepType == "EM":
@@ -75,7 +75,7 @@ import numpy as np
 from scipy.interpolate import griddata, interp2d
 
 def ApproxExactSoln(EndTime, drift, diff, TimeStepType, dimension, Meshes, PdfTraj, Times):
-    kstep = 0.003
+    kstep = 0.005
     h = 0.0001
     NumSteps = int(np.ceil(EndTime/h))+1
     meshesm = abs(min(np.min(Meshes[-1]), np.min(Meshes[0])))

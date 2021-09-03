@@ -146,7 +146,7 @@ def rho2(x):
     return x
 
 from tqdm import trange
-meshSpacingAM = 0.005
+meshSpacingAM = 0.02
 def computeN2s(mesh, h, driftfun, difffun, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints):
     meshAM = M.NDGridMesh(dimension, meshSpacingAM, max(int(np.ceil(np.max(mesh)-np.min(mesh))),2)+1, UseNoise = False)
     N2s = []
@@ -217,6 +217,7 @@ def computePartialN2s(mesh, indicesToCompute, h, driftfun, difffun, SpatialDiff,
 
         
 def GenerateEulerMarMatrix(maxDegFreedom, mesh, h, drift, diff, SpatialDiff):
+    maxDegFreedom = maxDegFreedom
     GMat = np.empty([maxDegFreedom, maxDegFreedom])*np.NaN
     for i in range(len(mesh)):
         v = G(i,mesh, h, drift, diff, SpatialDiff)
@@ -228,14 +229,14 @@ from pyopoly1 import variableTransformations as VT
 
 
 
-def ComputeAndersonMattingly(N2,index1, index2, h, driftfun, difffun, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints):
+def ComputeAndersonMattingly(N2,index1, index2, h, driftfun, difffun, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints, meshAM):
     meshO = mesh
     # ALp = np.zeros((len(meshO), len(meshO)))
     i = index1
     j = index2
     yim1 = meshO[j]
     yi = meshO[i]
-    meshAM = M.NDGridMesh(dimension, meshSpacingAM, max(int(np.ceil(np.max(mesh)-np.min(mesh))),2)+1, UseNoise = False)
+    # meshAM = M.NDGridMesh(dimension, meshSpacingAM, max(int(np.ceil(np.max(mesh)-np.min(mesh))),2)+1, UseNoise = False)
     mu1 = yim1 + driftfun(yim1)*theta*h
     sig1 = abs(difffun(yim1))*np.sqrt(theta*h)
     scale = GaussScale(dimension)
@@ -259,7 +260,7 @@ def GenerateAndersonMatMatrix(h, Drift, Diff, DTQMesh, dimension,  maxDegFreedom
     theta = 0.5
     a1 = F.alpha1(theta)
     a2 = F.alpha2(theta)
-    # meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(DTQMesh)-np.min(DTQMesh)),2)+1, UseNoise = False)
+    meshAM = M.NDGridMesh(dimension, meshSpacingAM, max(int(np.ceil(np.max(DTQMesh)-np.min(DTQMesh))),2)+1, UseNoise = False)
     meshO = DTQMesh
     ALp = np.empty([maxDegFreedom, maxDegFreedom])*np.NaN
 
@@ -267,37 +268,38 @@ def GenerateAndersonMatMatrix(h, Drift, Diff, DTQMesh, dimension,  maxDegFreedom
     for i in trange(len(meshO)):
         for j in range(len(meshO)):
             N2 = N2All[j][:,i]
-            c = ComputeAndersonMattingly(N2, i, j, h, Drift, Diff, DTQMesh, dimension, theta, a1, a2, minDistanceBetweenPoints)
+            c = ComputeAndersonMattingly(N2, i, j, h, Drift, Diff, DTQMesh, dimension, theta, a1, a2, minDistanceBetweenPoints, meshAM)
             ALp[i,j] = c
     return ALp
 
 
-def AddPointToGAndersonMat(mesh, newPointindex, h, GMat, Drift, Diff, SpatialDiff, dimension, poly, numPointsForLejaCandidates, minDistanceBetweenPoints):
-    theta = 0.5
-    a1 = F.alpha1(theta)
-    a2 = F.alpha2(theta)
-    # meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(mesh)-np.min(mesh)),2)+1, UseNoise = False)
+# def AddPointToGAndersonMat(mesh, newPointindex, h, GMat, Drift, Diff, SpatialDiff, dimension, poly, numPointsForLejaCandidates, minDistanceBetweenPoints):
+#     theta = 0.5
+#     a1 = F.alpha1(theta)
+#     a2 = F.alpha2(theta)
+#     # meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, max(int(np.max(mesh)-np.min(mesh)),2)+1, UseNoise = False)
 
-    for j in range(len(mesh)):
-        val = ComputeAndersonMattingly(newPointindex, j, h, Drift, Diff, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints)
-        GMat[newPointindex, j] = val
+#     for j in range(len(mesh)):
+#         val = ComputeAndersonMattingly(newPointindex, j, h, Drift, Diff, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints)
+#         GMat[newPointindex, j] = val
        
-    for i in range(len(mesh)):
-        val = ComputeAndersonMattingly(i, newPointindex, h, Drift, Diff, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints)
-        GMat[i,newPointindex] = val
-    return GMat
+#     for i in range(len(mesh)):
+#         val = ComputeAndersonMattingly(i, newPointindex, h, Drift, Diff, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints)
+#         GMat[i,newPointindex] = val
+#     return GMat
 
 def AddPointsToGAndersonMat(mesh, newPointindices, h, GMat, Drift, Diff, dimension, minDistanceBetweenPoints, SpatialDiff):
     theta = 0.5
     a1 = F.alpha1(theta)
     a2 = F.alpha2(theta)
+    meshAM = M.NDGridMesh(dimension, meshSpacingAM, max(int(np.ceil(np.max(mesh)-np.min(mesh))),2)+1, UseNoise = False)
 
     # N2All = computePartialN2s(mesh, newPointindices, h, Drift, Diff, False, theta, a1, a2, dimension, minDistanceBetweenPoints)
     N2All = computeN2s(mesh, h, Drift, Diff, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints)
     for i in range(len(mesh)):
         for j in range(len(mesh)):
             N2 = N2All[j][:,i]
-            val = ComputeAndersonMattingly(N2, i, j, h, Drift, Diff, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints)
+            val = ComputeAndersonMattingly(N2, i, j, h, Drift, Diff, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints, meshAM)
             GMat[i,j] = val
 
     return GMat
@@ -310,9 +312,11 @@ def GAndersonMat(mesh, newPointindex, h, Drift, Diff, dimension, minDistanceBetw
     a2 = F.alpha2(theta)
     N2All = computeN2s(mesh, h, Drift, Diff, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints)
     vals = []
+    meshAM = M.NDGridMesh(dimension, meshSpacingAM, max(int(np.ceil(np.max(mesh)-np.min(mesh))),2)+1, UseNoise = False)
+
     for j in range(len(mesh)):
         N2 = N2All[j][:,newPointindex]
-        val = ComputeAndersonMattingly(N2,newPointindex, j, h, Drift, Diff, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints)
+        val = ComputeAndersonMattingly(N2,newPointindex, j, h, Drift, Diff, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints, meshAM)
         vals.append(val)
     return vals
 

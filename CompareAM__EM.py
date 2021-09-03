@@ -37,12 +37,12 @@ def mydiff(mesh):
     # return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
 
-timeStep = [0.01, 0.05, 0.1]
+timeStep = [0.01, 0.05]
 EndTime = 1
 kstepMin = 0.06 # lambda
-kstepMax = kstepMin + 0.05 # Lambda
-beta = 20
-radius = 3.75# R
+kstepMax = kstepMin # Lambda
+beta = 3
+radius = 3.5# R
 SpatialDiff = False
 conditionNumForAltMethod = 10
 NumLejas = 5
@@ -168,104 +168,104 @@ for i in timeStepAM:
     
     
 
-ErrorsEMT = []
-timesEMT = []
-for i in timeStep:
-    start = time.time()
-    NumSteps = int(EndTime/i)
-    h= i
-    par = Param.Parameters(sde, h, conditionNumForAltMethod, beta)
-    par.kstepMin = kstepMin
-    par.kstepMax = kstepMax
-    par.radius = radius
-    par.numPointsForLejaCandidates = numPointsForLejaCandidates
-    par.numQuadFit = numQuadFit
-    par.NumLejas = NumLejas
-    TSType = "EM"
+# ErrorsEMT = []
+# timesEMT = []
+# for i in timeStep:
+#     start = time.time()
+#     NumSteps = int(EndTime/i)
+#     h= i
+#     par = Param.Parameters(sde, h, conditionNumForAltMethod, beta)
+#     par.kstepMin = kstepMin
+#     par.kstepMax = kstepMax
+#     par.radius = radius
+#     par.numPointsForLejaCandidates = numPointsForLejaCandidates
+#     par.numQuadFit = numQuadFit
+#     par.NumLejas = NumLejas
+#     TSType = "EM"
     
-    mesh = M.NDGridMesh(dimension, kstepMin, radius, UseNoise = False)
-    GMat = fun.GenerateEulerMarMatrix(len(mesh), mesh, h, mydrift, mydiff, SpatialDiff)
-    scale = GaussScale(dimension)
-    scale.setMu(h*mydrift(np.zeros(dimension)).T)
-    scale.setCov((h*mydiff(np.zeros(dimension))*mydiff(np.zeros(dimension)).T).T)
+#     mesh = M.NDGridMesh(dimension, kstepMin, radius, UseNoise = False)
+#     GMat = fun.GenerateEulerMarMatrix(len(mesh), mesh, h, mydrift, mydiff, SpatialDiff)
+#     scale = GaussScale(dimension)
+#     scale.setMu(h*mydrift(np.zeros(dimension)).T)
+#     scale.setCov((h*mydiff(np.zeros(dimension))*mydiff(np.zeros(dimension)).T).T)
 
-    p = fun.Gaussian(scale, mesh)
-    PdfTraj = []
-    Meshes = []
-    for i in range(NumSteps):
-        Meshes.append(mesh)
-        p = kstepMin*np.copy(GMat@p)
-        PdfTraj.append(np.copy(p))
+#     p = fun.Gaussian(scale, mesh)
+#     PdfTraj = []
+#     Meshes = []
+#     for i in range(NumSteps):
+#         Meshes.append(mesh)
+#         p = kstepMin*np.copy(GMat@p)
+#         PdfTraj.append(np.copy(p))
     
-    end = time.time()
-    timesEMT.append(end -start)
+#     end = time.time()
+#     timesEMT.append(end -start)
     
-    trueSoln = []
-    from exactSolutions import OneDdiffusionEquation
-    for i in range(len(Meshes)):
-        truepdf = sde.Solution(Meshes[i], (i+1)*h)
-        # truepdf = OneDdiffusionEquation(Meshes[i], mydiff(Meshes[i]), (i+1)*h, mydrift(Meshes[i]))
-        # truepdf = solution(xvec,-1,T)
-        trueSoln.append(np.squeeze(np.copy(truepdf)))
+#     trueSoln = []
+#     from exactSolutions import OneDdiffusionEquation
+#     for i in range(len(Meshes)):
+#         truepdf = sde.Solution(Meshes[i], (i+1)*h)
+#         # truepdf = OneDdiffusionEquation(Meshes[i], mydiff(Meshes[i]), (i+1)*h, mydrift(Meshes[i]))
+#         # truepdf = solution(xvec,-1,T)
+#         trueSoln.append(np.squeeze(np.copy(truepdf)))
         
-    from Errors import ErrorValsExact
-    # LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, h, plot=False)
-    Times = np.linspace(1,len(PdfTraj), len(PdfTraj))*h
-    LinfErrors, L2Errors, L1Errors, L2wErrors, dtqApprox= ApproxExactSoln(EndTime, mydrift, mydiff, TSType, dimension, Meshes, PdfTraj, Times)
-    ErrorsEMT.append(L2wErrors[-1])
+#     from Errors import ErrorValsExact
+#     # LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, h, plot=False)
+#     Times = np.linspace(1,len(PdfTraj), len(PdfTraj))*h
+#     LinfErrors, L2Errors, L1Errors, L2wErrors, dtqApprox= ApproxExactSoln(EndTime, mydrift, mydiff, TSType, dimension, Meshes, PdfTraj, Times)
+#     ErrorsEMT.append(L2wErrors[-1])
     
 
-ErrorsAMT = []
-timesAMT = []
-for i in timeStep:
-    start = time.time()
-    NumSteps = int(EndTime/i)
-    h= i
-    par = Param.Parameters(sde, h, conditionNumForAltMethod, beta)
-    par.kstepMin = kstepMin
-    par.kstepMax = kstepMax
-    par.radius = radius
-    par.numPointsForLejaCandidates = numPointsForLejaCandidates
-    par.numQuadFit = numQuadFit
-    par.NumLejas = NumLejas
-    TSType = "AM"
+# ErrorsAMT = []
+# timesAMT = []
+# for i in timeStep:
+#     start = time.time()
+#     NumSteps = int(EndTime/i)
+#     h= i
+#     par = Param.Parameters(sde, h, conditionNumForAltMethod, beta)
+#     par.kstepMin = kstepMin
+#     par.kstepMax = kstepMax
+#     par.radius = radius
+#     par.numPointsForLejaCandidates = numPointsForLejaCandidates
+#     par.numQuadFit = numQuadFit
+#     par.NumLejas = NumLejas
+#     TSType = "AM"
     
-    mesh = M.NDGridMesh(dimension, kstepMin, radius, UseNoise = False)
-    GMat = fun.GenerateAndersonMatMatrix(h, mydrift, mydiff, mesh, dimension, len(mesh), kstepMin, SpatialDiff)
-    scale = GaussScale(dimension)
-    scale.setMu(h*mydrift(np.zeros(dimension)).T)
-    scale.setCov((h*mydiff(np.zeros(dimension))*mydiff(np.zeros(dimension)).T).T)
+#     mesh = M.NDGridMesh(dimension, kstepMin, radius, UseNoise = False)
+#     GMat = fun.GenerateAndersonMatMatrix(h, mydrift, mydiff, mesh, dimension, len(mesh), kstepMin, SpatialDiff)
+#     scale = GaussScale(dimension)
+#     scale.setMu(h*mydrift(np.zeros(dimension)).T)
+#     scale.setCov((h*mydiff(np.zeros(dimension))*mydiff(np.zeros(dimension)).T).T)
 
-    p = fun.Gaussian(scale, mesh)
-    PdfTraj = []
-    Meshes = []
-    for i in range(NumSteps):
-        Meshes.append(mesh)
-        p = kstepMin*np.copy(GMat@p)
-        PdfTraj.append(np.copy(p))
+#     p = fun.Gaussian(scale, mesh)
+#     PdfTraj = []
+#     Meshes = []
+#     for i in range(NumSteps):
+#         Meshes.append(mesh)
+#         p = kstepMin*np.copy(GMat@p)
+#         PdfTraj.append(np.copy(p))
     
-    end = time.time()
-    timesAMT.append(end -start)
+#     end = time.time()
+#     timesAMT.append(end -start)
     
-    trueSoln = []
-    from exactSolutions import OneDdiffusionEquation
-    for i in range(len(Meshes)):
-        truepdf = sde.Solution(Meshes[i], (i+1)*h)
-        # truepdf = OneDdiffusionEquation(Meshes[i], mydiff(Meshes[i]), (i+1)*h, mydrift(Meshes[i]))
-        # truepdf = solution(xvec,-1,T)
-        trueSoln.append(np.squeeze(np.copy(truepdf)))
+#     trueSoln = []
+#     from exactSolutions import OneDdiffusionEquation
+#     for i in range(len(Meshes)):
+#         truepdf = sde.Solution(Meshes[i], (i+1)*h)
+#         # truepdf = OneDdiffusionEquation(Meshes[i], mydiff(Meshes[i]), (i+1)*h, mydrift(Meshes[i]))
+#         # truepdf = solution(xvec,-1,T)
+#         trueSoln.append(np.squeeze(np.copy(truepdf)))
         
-    from Errors import ErrorValsExact
-    # LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, h, plot=False)
-    Times = np.linspace(1,len(PdfTraj), len(PdfTraj))*h
-    LinfErrors, L2Errors, L1Errors, L2wErrors, dtqApprox= ApproxExactSoln(EndTime, mydrift, mydiff, TSType, dimension, Meshes, PdfTraj, Times)
-    ErrorsAMT.append(L2wErrors[-1])
+#     from Errors import ErrorValsExact
+#     # LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, h, plot=False)
+#     Times = np.linspace(1,len(PdfTraj), len(PdfTraj))*h
+#     LinfErrors, L2Errors, L1Errors, L2wErrors, dtqApprox= ApproxExactSoln(EndTime, mydrift, mydiff, TSType, dimension, Meshes, PdfTraj, Times)
+#     ErrorsAMT.append(L2wErrors[-1])
     
 plt.figure()
 plt.loglog(np.asarray(timeStep), ErrorsEM, '-o', label="EM")
 plt.loglog(np.asarray(timeStepAM), ErrorsAM, '-o', label="AM")
-plt.loglog(np.asarray(timeStep), ErrorsAMT, '-o', label="AM Trapezoidal")
-plt.loglog(np.asarray(timeStep), ErrorsEMT, '-o', label="EM Trapezoidal")
+# plt.loglog(np.asarray(timeStep), ErrorsAMT, '-o', label="AM Trapezoidal")
+# plt.loglog(np.asarray(timeStep), ErrorsEMT, '-o', label="EM Trapezoidal")
 plt.xlabel("timestep")
 plt.ylabel("Error")
 plt.legend()
@@ -273,8 +273,8 @@ plt.legend()
 plt.figure()
 plt.plot(np.asarray(timeStep), timesEM, '-o', label="EM")
 plt.plot(np.asarray(timeStepAM), timesAM, '-o', label="AM")
-plt.plot(np.asarray(timeStep), timesAMT, '-o', label="AM Trapezoidal")
-plt.plot(np.asarray(timeStep), timesEMT, '-o', label="EM Trapezoidal")
+# plt.plot(np.asarray(timeStep), timesAMT, '-o', label="AM Trapezoidal")
+# plt.plot(np.asarray(timeStep), timesEMT, '-o', label="EM Trapezoidal")
 plt.xlabel("timestep")
 plt.ylabel("Time (seconds)")
 plt.legend()

@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 
 def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree, meshRadius, drift, diff, dimension, SpatialDiff, parameters, PrintStuff = True, RetG = False, Adaptive = True, TimeStepType="EM"):
-    UpdateMesh = False
+    UpdateMesh = True
     # TimeStepType = "AM"
     # '''Paramaters'''
     # addPointsToBoundaryIfBiggerThanTolerance = 10**(-degree)
@@ -64,7 +64,7 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
         tri = 0
     
     '''Initialize Transition probabilities'''
-    maxDegFreedom = len(mesh)*8
+    maxDegFreedom = int(len(mesh)*1.5*dimension)
     
     meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, 2, UseNoise = False)
     
@@ -91,7 +91,7 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
             # plt.scatter(mesh[:,0], mesh[:,1])
             mesh, pdf, tri, addBool, GMat = MeshUp.addPointsToMeshProcedure(mesh, pdf, tri, minDistanceBetweenPoints, h, poly, GMat, addPointsToBoundaryIfBiggerThanTolerance, removeZerosValuesIfLessThanTolerance, minDistanceBetweenPoints,maxDistanceBetweenPoints, drift, diff, SpatialDiff, TimeStepType, dimension, numPointsForLejaCandidates)
             # plt.plot(mesh[:,0], mesh[:,1], '*r')
-        if i>=9 and i%10==1 and UpdateMesh:
+        if i>=9 and i%25==1 and UpdateMesh:
             '''Remove points from mesh'''
             mesh, pdf, GMat, LPMat, LPMatBool, tri = MeshUp.removePointsFromMeshProcedure(mesh, pdf, tri, True, poly, GMat, LPMat, LPMatBool, removeZerosValuesIfLessThanTolerance)
         

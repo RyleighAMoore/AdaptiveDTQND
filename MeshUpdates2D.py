@@ -39,7 +39,7 @@ def addPointsToMeshProcedure(Mesh, Pdf, triangulation, kstep, h, poly, GMat, add
                     GMat = fun.AddPointToG(Mesh[:i,:], i-1, h, GMat, drift, diff, SpatialDiff)
         elif TimeStepType == "AM":
             indices = list(range(meshSize, newMeshSize))
-            GMat = fun.AddPointsToGAndersonMat(Mesh, indices, h, GMat, drift, diff, dimension, minDistanceBetweenPoints)
+            GMat = fun.AddPointsToGAndersonMat(Mesh, indices, h, GMat, drift, diff, dimension, minDistanceBetweenPoints, SpatialDiff)
                 
     return Mesh, Pdf, triangulation, ChangedBool, GMat
 
@@ -138,7 +138,7 @@ def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerTha
         MM = np.max(Mesh)
         
         padding = 4 + int(50/(1/h))
-        for i in range(1,10):
+        for i in range(1,2):
             Mesh = np.append(Mesh, np.asarray([[mm-i*radius]]), axis=0)
             newPoints.append(np.asarray(mm-i*radius))
             Mesh = np.append(Mesh, np.asarray([[MM+i*radius]]), axis=0)
