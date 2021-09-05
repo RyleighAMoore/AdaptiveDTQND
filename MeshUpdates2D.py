@@ -39,7 +39,7 @@ def addPointsToMeshProcedure(Mesh, Pdf, triangulation, kstep, h, poly, GMat, add
                     GMat = fun.AddPointToG(Mesh[:i,:], i-1, h, GMat, drift, diff, SpatialDiff)
         elif TimeStepType == "AM":
             indices = list(range(meshSize, newMeshSize))
-            GMat = fun.AddPointsToGAndersonMat(Mesh, indices, h, GMat, drift, diff, dimension, minDistanceBetweenPoints, SpatialDiff)
+            GMat = fun.AddPointsToGAndersonMat(Mesh, indices, h, GMat, diff, drift, SpatialDiff, dimension, minDistanceBetweenPoints)
                 
     return Mesh, Pdf, triangulation, ChangedBool, GMat
 

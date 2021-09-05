@@ -37,7 +37,7 @@ def mydiff(mesh):
     # return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
 
-timeStep = [0.01, 0.05]
+timeStep = [0.01, 0.05, 0.08]
 EndTime = 1
 kstepMin = 0.06 # lambda
 kstepMax = kstepMin # Lambda
@@ -49,64 +49,64 @@ NumLejas = 5
 numPointsForLejaCandidates = 50
 numQuadFit = 30
 
-ErrorsEM = []
-timesEM = []
-LPE = []
-AltE =[]
-for i in timeStep:
-    start = time.time()
-    NumSteps = int(EndTime/i)
-    h= i
-    par = Param.Parameters(sde, h, conditionNumForAltMethod, beta)
-    par.kstepMin = kstepMin
-    par.kstepMax = kstepMax
-    par.radius = radius
-    par.numPointsForLejaCandidates = numPointsForLejaCandidates
-    par.numQuadFit = numQuadFit
-    par.NumLejas = NumLejas
-    TSType = "EM"
+# ErrorsEM = []
+# timesEM = []
+# LPE = []
+# AltE =[]
+# for i in timeStep:
+#     start = time.time()
+#     NumSteps = int(EndTime/i)
+#     h= i
+#     par = Param.Parameters(sde, h, conditionNumForAltMethod, beta)
+#     par.kstepMin = kstepMin
+#     par.kstepMax = kstepMax
+#     par.radius = radius
+#     par.numPointsForLejaCandidates = numPointsForLejaCandidates
+#     par.numQuadFit = numQuadFit
+#     par.NumLejas = NumLejas
+#     TSType = "EM"
     
-    Meshes, PdfTraj, LPReuseArr, AltMethod= DTQ(NumSteps, kstepMin, kstepMax, h, beta, radius, mydrift, mydiff, dimension, SpatialDiff, par, PrintStuff=True, TimeStepType= TSType)
-    end = time.time()
-    timesEM.append(end -start)
+#     Meshes, PdfTraj, LPReuseArr, AltMethod= DTQ(NumSteps, kstepMin, kstepMax, h, beta, radius, mydrift, mydiff, dimension, SpatialDiff, par, PrintStuff=True, TimeStepType= TSType)
+#     end = time.time()
+#     timesEM.append(end -start)
 
-    pc = []
-    for i in range(len(Meshes)-1):
-        l = len(Meshes[i])
-        pc.append(LPReuseArr[i]/l)
+#     pc = []
+#     for i in range(len(Meshes)-1):
+#         l = len(Meshes[i])
+#         pc.append(LPReuseArr[i]/l)
         
-    mean = np.mean(pc)
-    print("Leja Reuse: ", mean*100, "%")
-    LPE.append(mean*100)
+#     mean = np.mean(pc)
+#     print("Leja Reuse: ", mean*100, "%")
+#     LPE.append(mean*100)
 
     
-    pc = []
-    for i in range(len(Meshes)-1):
-        l = len(Meshes[i])
-        pc.append(AltMethod[i]/l)
+#     pc = []
+#     for i in range(len(Meshes)-1):
+#         l = len(Meshes[i])
+#         pc.append(AltMethod[i]/l)
         
-    mean2 = np.mean(pc)
-    print("Alt Method: ", mean2*100, "%")
-    AltE.append(mean2*100)
+#     mean2 = np.mean(pc)
+#     print("Alt Method: ", mean2*100, "%")
+#     AltE.append(mean2*100)
 
     
-    trueSoln = []
-    from exactSolutions import OneDdiffusionEquation
-    for i in range(len(Meshes)):
-        truepdf = sde.Solution(Meshes[i], (i+1)*h)
-        # truepdf = OneDdiffusionEquation(Meshes[i], mydiff(Meshes[i]), (i+1)*h, mydrift(Meshes[i]))
-        # truepdf = solution(xvec,-1,T)
-        trueSoln.append(np.squeeze(np.copy(truepdf)))
+#     trueSoln = []
+#     from exactSolutions import OneDdiffusionEquation
+#     for i in range(len(Meshes)):
+#         truepdf = sde.Solution(Meshes[i], (i+1)*h)
+#         # truepdf = OneDdiffusionEquation(Meshes[i], mydiff(Meshes[i]), (i+1)*h, mydrift(Meshes[i]))
+#         # truepdf = solution(xvec,-1,T)
+#         trueSoln.append(np.squeeze(np.copy(truepdf)))
         
-    from Errors import ErrorValsExact
-    # LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, h, plot=False)
-    Times = np.linspace(1,len(PdfTraj), len(PdfTraj))*h
-    LinfErrors, L2Errors, L1Errors, L2wErrors, dtqApprox= ApproxExactSoln(EndTime, mydrift, mydiff, TSType, dimension, Meshes, PdfTraj, Times)
-    ErrorsEM.append(L2wErrors[-1])
+#     from Errors import ErrorValsExact
+#     # LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, h, plot=False)
+#     Times = np.linspace(1,len(PdfTraj), len(PdfTraj))*h
+#     LinfErrors, L2Errors, L1Errors, L2wErrors, dtqApprox= ApproxExactSoln(EndTime, mydrift, mydiff, TSType, dimension, Meshes, PdfTraj, Times)
+#     ErrorsEM.append(L2wErrors[-1])
     
     
 
-timeStepAM = timeStep
+timeStepAM = [0.05, 0.08]
 ErrorsAM = []
 timesAM = []
 LPA = []
