@@ -40,7 +40,8 @@ def addPointsToMeshProcedure(Mesh, Pdf, triangulation, kstep, h, poly, GMat, add
         elif TimeStepType == "AM":
             indices = list(range(meshSize, newMeshSize))
             GMat = fun.AddPointsToGAndersonMat(Mesh, indices, h, GMat, diff, drift, SpatialDiff, dimension, minDistanceBetweenPoints)
-                
+            # GMat = fun.GenerateAndersonMatMatrix(h, drift, diff, Mesh, dimension, 500, minDistanceBetweenPoints, SpatialDiff)
+
     return Mesh, Pdf, triangulation, ChangedBool, GMat
 
 def removePointsFromMeshProcedure(Mesh, Pdf, tri, boundaryOnlyBool, poly, GMat, LPMat, LPMatBool, removeZerosValuesIfLessThanTolerance):
@@ -131,25 +132,39 @@ def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerTha
     count = 0
     MeshOrig = np.copy(Mesh)
     PdfOrig = np.copy(Pdf)
+
     if dimension == 1: # 1D
-        radius = minDistanceBetweenPoints/2 + maxDistanceBetweenPoints/2
-        newPoints = []
-        mm = np.min(Mesh)
-        MM = np.max(Mesh)
+        left = np.argmin(Mesh)
+        right = np.argmax(Mesh)
+        changedBool = False
+        if Pdf[left] > addPointsToBoundaryIfBiggerThanTolerance:
+            radius = minDistanceBetweenPoints/2 + maxDistanceBetweenPoints/2
+            newPoints = []
+            mm = np.min(Mesh)
+            MM = np.max(Mesh)
+            changedBool = True
         
-        padding = 4 + int(50/(1/h))
-        for i in range(1,2):
-            Mesh = np.append(Mesh, np.asarray([[mm-i*radius]]), axis=0)
-            newPoints.append(np.asarray(mm-i*radius))
-            Mesh = np.append(Mesh, np.asarray([[MM+i*radius]]), axis=0)
-            newPoints.append(np.asarray(MM+i*radius))
-        interp1 = [griddata(MeshOrig,PdfOrig, np.asarray(newPoints), method='linear', fill_value=np.min(Pdf))][0]
-        # interp2 = [griddata(MeshOrig,PdfOrig, np.max(Mesh)+radius, method='linear', fill_value=np.min(Pdf))][0]
-        interp1[interp1<0] = np.min(PdfOrig)
-        # interp2[interp2<0] = np.min(PdfOrig)
-        Pdf = np.append(Pdf, interp1)
-        # Pdf = np.append(Pdf, interp2)
-        ChangedBool=1
+            for i in range(1,5):
+                Mesh = np.append(Mesh, np.asarray([[mm-i*radius]]), axis=0)
+                newPoints.append(np.asarray(mm-i*radius))
+        if Pdf[right] > addPointsToBoundaryIfBiggerThanTolerance:
+            radius = minDistanceBetweenPoints/2 + maxDistanceBetweenPoints/2
+            newPoints = []
+            mm = np.min(Mesh)
+            MM = np.max(Mesh)
+            changedBool = True
+        
+            for i in range(1,5):                
+                Mesh = np.append(Mesh, np.asarray([[MM+i*radius]]), axis=0)
+                newPoints.append(np.asarray(MM+i*radius))
+        if changedBool:
+            interp1 = [griddata(MeshOrig,PdfOrig, np.asarray(newPoints), method='linear', fill_value=np.min(Pdf))][0]
+            # interp2 = [griddata(MeshOrig,PdfOrig, np.max(Mesh)+radius, method='linear', fill_value=np.min(Pdf))][0]
+            interp1[interp1<0] = np.min(PdfOrig)
+            # interp2[interp2<0] = np.min(PdfOrig)
+            Pdf = np.append(Pdf, interp1)
+            # Pdf = np.append(Pdf, interp2)
+            ChangedBool=1
     
     else: 
         while count < 1: 

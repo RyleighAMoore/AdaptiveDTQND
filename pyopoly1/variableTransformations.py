@@ -33,8 +33,7 @@ def map_from_canonical_space(user_samples, scale_parameters):
         mean = scale_parameters.mu
         delta = np.ones(np.shape(user_samples))*mean
         vals = L*np.asarray(user_samples).T + delta.T
-        return vals.T
-        
+        return vals.T 
     
     mean = scale_parameters.mu
     delta = np.zeros(np.shape(user_samples))

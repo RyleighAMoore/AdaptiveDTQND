@@ -25,7 +25,7 @@ def Gaussian(scaling, mesh):
     # soln = np.squeeze(soln_vals)
     # print(scaling.invCov)
     D = mesh.shape[1]
-    mu = np.expand_dims(np.repeat(scaling.mu, len(mesh),axis = 0),1)
+    mu = np.repeat(scaling.mu, len(mesh),axis = 0)
     invCov= scaling.invCov
     norm = np.zeros(len(mesh))
     for dim in range(D):
@@ -150,12 +150,15 @@ def rho2(x):
 
 from tqdm import trange
 meshSpacingAM = 0.05
-def computeN2s(mesh, h, driftfun, difffun, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints):
-    meshAM = M.NDGridMesh(dimension, meshSpacingAM, max(int(np.ceil(np.max(mesh)-np.min(mesh))),2)+1, UseNoise = False)
+meshAMPadding = 1.5
+def computeN2s(mesh, meshAM, h, driftfun, difffun, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints):
+    # MeshesAM = []
+    # meshAM = M.NDGridMesh(dimension, meshSpacingAM, int(max(int(np.ceil(np.max(mesh)-np.min(mesh))),2)+1)/2, UseNoise = False)
     N2s = []
     N2Complete = []
     count = 0
     for yim1 in mesh:
+        # meshAM = M.NDGridMesh(dimension, meshSpacingAM, max(int(np.ceil(np.max(mesh)-np.min(mesh))),2)+1, UseNoise = False)
         count = count+1
         N2All = []
         scale2 = GaussScale(dimension)
@@ -265,11 +268,22 @@ def ComputeAndersonMattingly(N2,index1, index2, h, driftfun, difffun, meshDTQ, d
         # N2Complete.append(np.copy(N2All))
         
     val = N1*np.asarray(N2)
-    plt.figure()
-    plt.plot(meshAM, val, label = "pdf")
-    plt.plot(yim1,0, '.', label = "yim1")
-    plt.plot(yi,0, '.', label = "yi")
-    plt.legend()
+    # if val[0] > 0.1 or val[-1]> 0.1:
+    #     print(val[0], val[-1])
+    #     plt.figure()
+    #     plt.plot(meshAM, val, label = "pdf")
+    #     plt.plot(yim1,0, '.', label = "yim1")
+    #     plt.plot(yi,0, '.', label = "yi")
+    #     plt.legend()
+    # assert val[0]<10**(-8)
+    # assert val[-1]< 10**(-8)
+
+    # if index1 == 0 and index2 == 0:
+    #     plt.figure()
+    #     plt.plot(meshAM, val, label = "pdf")
+    #     plt.plot(yim1,0, '.', label = "yim1")
+    #     plt.plot(yi,0, '.', label = "yi")
+    #     plt.legend()
         
     
     # val, scaleComb = AndersonMattingly(N2,indexOfMesh, indexOfMesh2, DTQMesh, h, Drift, Diff, False, theta, a1, a2, dimension, minDistanceBetweenPoints)
@@ -284,11 +298,11 @@ def GenerateAndersonMatMatrix(h, Drift, Diff, DTQMesh, dimension,  maxDegFreedom
     theta = 0.5
     a1 = F.alpha1(theta)
     a2 = F.alpha2(theta)
-    meshAM = M.NDGridMesh(dimension, meshSpacingAM, max(int(np.ceil(np.max(DTQMesh)-np.min(DTQMesh))),2)+1, UseNoise = False)
+    meshAM = M.NDGridMesh(dimension, meshSpacingAM, int(max(int(np.ceil(np.max(DTQMesh)-np.min(DTQMesh))),2)+meshAMPadding)/2, UseNoise = False)
     meshO = DTQMesh
     ALp = np.empty([maxDegFreedom, maxDegFreedom])*np.NaN
 
-    N2All = computeN2s(DTQMesh, h, Drift, Diff, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints)
+    N2All = computeN2s(DTQMesh, meshAM, h, Drift, Diff, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints)
     for i in trange(len(meshO)):
         for j in range(len(meshO)):
             N2 = N2All[j][:,i]
@@ -301,39 +315,17 @@ def AddPointsToGAndersonMat(mesh, newPointindices, h, GMat, difffun, driftfun, S
     theta = 0.5
     a1 = F.alpha1(theta)
     a2 = F.alpha2(theta)
-    meshAM = M.NDGridMesh(dimension, meshSpacingAM, max(int(np.ceil(np.max(mesh)-np.min(mesh))),2)+1, UseNoise = False)
-    
-    # # N2s = []
-    # N2New = []
-    # count = 0
-    # meshNew = mesh[newPointindices]
-    # for yim1 in meshNew:
-    #     count = count+1
-    #     N2All = N2Full[count]
-        
-    #     scale2 = GaussScale(dimension)
-    #     if SpatialDiff == False:
-    #         sig2 = np.sqrt(rho2(a1*difffun(meshAM[0])**2 - a2*difffun(meshAM[0])**2))*np.sqrt((1-theta)*h)
-    #         scale2.setCov(np.asarray(sig2**2))
-    #     count2 = 0
-    #     for i in meshAM:
-    #         mu2 = i + (a1*driftfun(i) - a2*driftfun(yim1))*(1-theta)*h
-    #         scale2.setMu(np.asarray(mu2.T))
-    #         if SpatialDiff == True:
-    #             sig2 = np.sqrt(rho2(a1*difffun(i)**2 - a2*difffun(yim1)**2))*np.sqrt((1-theta)*h)
-    #             scale2.setCov(np.asarray(sig2**2))
-    #         if count2< len(N2All): 
-    #             N2 = Gaussian(scale2, meshNew)
-    #             N2New.append(np.concatenate((N2All[count2] , np.copy(N2))))
-    #         else:
-    #             N2 = Gaussian(scale2, mesh)
-    #             N2New.append(np.concatenate((N2All[count2] , np.copy(N2))))
-    #         count2 = count2+1
-    
+    # meshAM = M.NDGridMesh(dimension, meshSpacingAM, int(max(int(np.ceil(np.max(mesh)-np.min(mesh))),2)+meshAMPadding)/2, UseNoise = False)
+    meshAM = M.NDGridMesh(dimension, meshSpacingAM, int(max(int(np.ceil(np.max(mesh)-np.min(mesh))),2)+meshAMPadding)/2, UseNoise = False)
+
     N2Complete = []
     count = 0
     meshNew = mesh[newPointindices]
     for yim1 in meshNew:
+        # mean = yim1
+        # delta = np.ones(np.shape(meshAMO))*mean
+        # vals = np.asarray(meshAMO).T + delta.T
+        # meshAM = vals.T 
         count = count+1
         N2All = []
         scale2 = GaussScale(dimension)
@@ -383,9 +375,9 @@ def GAndersonMat(mesh, newPointindex, h, Drift, Diff, dimension, minDistanceBetw
     theta = 0.5
     a1 = F.alpha1(theta)
     a2 = F.alpha2(theta)
-    N2All = computeN2s(mesh, h, Drift, Diff, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints)
+    meshAM = M.NDGridMesh(dimension, meshSpacingAM, int(max(int(np.ceil(np.max(mesh)-np.min(mesh))),3)+meshAMPadding)/2, UseNoise = False)
+    N2All = computeN2s(mesh,meshAM, h, Drift, Diff, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints)
     vals = []
-    meshAM = M.NDGridMesh(dimension, meshSpacingAM, max(int(np.ceil(np.max(mesh)-np.min(mesh))),2)+1, UseNoise = False)
 
     for j in range(len(mesh)):
         N2 = N2All[j][:,newPointindex]

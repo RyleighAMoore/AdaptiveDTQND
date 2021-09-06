@@ -66,7 +66,7 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
     '''Initialize Transition probabilities'''
     maxDegFreedom = int(len(mesh)*1.5*dimension)
     
-    meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, 2, UseNoise = False)
+    # meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, 2, UseNoise = False)
     
     
     if TimeStepType == "EM":
@@ -98,7 +98,6 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
         if PrintStuff:
             print('Length of mesh = ', len(mesh))
         if i >-1: 
-            
             '''Step forward in time'''
             pdf = np.expand_dims(pdf,axis=1)
             pdf, meshTemp, LPMat, LPMatBool, LPReuse, AltMethodCount = LQ.Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly,h,NumLejas, i, GMat, LPMat, LPMatBool, numQuadFit, removeZerosValuesIfLessThanTolerance, conditionNumForAltMethod, drift, diff, numPointsForLejaCandidates,SpatialDiff, lejaPointsFinal, TimeStepType, minDistanceBetweenPoints, PrintStuff)
