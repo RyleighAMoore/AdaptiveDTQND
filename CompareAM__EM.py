@@ -27,21 +27,23 @@ sde = SimpleDriftSDE(1,0.5,dimension)
 mydrift = sde.Drift
 mydiff = sde.Diff
 
-# def mydrift(mesh):
-#     # return 0*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
-#     # return -1*mesh
-#     return np.expand_dims(mesh*(4-mesh**2),1)
+def mydrift(mesh):
+     if mesh.ndim ==1:
+        mesh = np.expand_dims(mesh, axis=0)
+    # return 0*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+    # return -1*mesh
+     return mesh*(4-mesh**2)
     
-# def mydiff(mesh):
-#     return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
-#     # return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
-#     # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
+def mydiff(mesh):
+    return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+    # return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+    # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
 
 timeStep = [0.01, 0.05, 0.08]
-EndTime = 2
+EndTime = 1
 kstepMin = 0.06 # lambda
 kstepMax = kstepMin # Lambda
-beta =5
+beta = 5
 radius = 3 # R
 SpatialDiff = False
 conditionNumForAltMethod = 10
@@ -106,7 +108,7 @@ numQuadFit = 30
     
     
 
-timeStepAM = [0.08]
+timeStepAM = [0.05]
 ErrorsAM = []
 timesAM = []
 LPA = []

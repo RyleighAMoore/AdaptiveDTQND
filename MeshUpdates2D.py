@@ -136,28 +136,27 @@ def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerTha
     if dimension == 1: # 1D
         left = np.argmin(Mesh)
         right = np.argmax(Mesh)
-        changedBool = False
+        newPointsBool = False
+        newPoints = []
         if Pdf[left] > addPointsToBoundaryIfBiggerThanTolerance:
             radius = minDistanceBetweenPoints/2 + maxDistanceBetweenPoints/2
-            newPoints = []
             mm = np.min(Mesh)
             MM = np.max(Mesh)
-            changedBool = True
+            newPointsBool = True
         
             for i in range(1,5):
                 Mesh = np.append(Mesh, np.asarray([[mm-i*radius]]), axis=0)
                 newPoints.append(np.asarray(mm-i*radius))
         if Pdf[right] > addPointsToBoundaryIfBiggerThanTolerance:
             radius = minDistanceBetweenPoints/2 + maxDistanceBetweenPoints/2
-            newPoints = []
             mm = np.min(Mesh)
             MM = np.max(Mesh)
-            changedBool = True
+            newPointsBool = True
         
             for i in range(1,5):                
                 Mesh = np.append(Mesh, np.asarray([[MM+i*radius]]), axis=0)
                 newPoints.append(np.asarray(MM+i*radius))
-        if changedBool:
+        if newPointsBool:
             interp1 = [griddata(MeshOrig,PdfOrig, np.asarray(newPoints), method='linear', fill_value=np.min(Pdf))][0]
             # interp2 = [griddata(MeshOrig,PdfOrig, np.max(Mesh)+radius, method='linear', fill_value=np.min(Pdf))][0]
             interp1[interp1<0] = np.min(PdfOrig)
