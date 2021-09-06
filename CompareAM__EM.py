@@ -28,19 +28,20 @@ mydrift = sde.Drift
 mydiff = sde.Diff
 
 def mydrift(mesh):
-     if mesh.ndim ==1:
+      if mesh.ndim ==1:
         mesh = np.expand_dims(mesh, axis=0)
     # return 0*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     # return -1*mesh
-     return mesh*(4-mesh**2)
+      return 0.2*mesh*(4-mesh**2)
     
 def mydiff(mesh):
     return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     # return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
 
-timeStep = [0.01, 0.05, 0.08]
-EndTime = 1
+ApproxSoln = True
+timeStep = [0.01, 0.08]
+EndTime = 2
 kstepMin = 0.06 # lambda
 kstepMax = kstepMin # Lambda
 beta = 5
@@ -101,14 +102,16 @@ numQuadFit = 30
 #         trueSoln.append(np.squeeze(np.copy(truepdf)))
         
 #     from Errors import ErrorValsExact
-#     # LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, h, plot=False)
-#     Times = np.linspace(1,len(PdfTraj), len(PdfTraj))*h
-#     LinfErrors, L2Errors, L1Errors, L2wErrors, dtqApprox= ApproxExactSoln(EndTime, mydrift, mydiff, TSType, dimension, Meshes, PdfTraj, Times)
+#     if not ApproxSoln:
+#         LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, h, plot=False)
+#     else:
+#         Times = np.linspace(1,len(PdfTraj), len(PdfTraj))*h
+#         LinfErrors, L2Errors, L1Errors, L2wErrors, dtqApprox= ApproxExactSoln(EndTime, mydrift, mydiff, TSType, dimension, Meshes, PdfTraj, Times)
 #     ErrorsEM.append(L2wErrors[-1])
     
     
 
-timeStepAM = [0.05]
+timeStepAM= [0.05, 0.08]
 ErrorsAM = []
 timesAM = []
 LPA = []
@@ -162,12 +165,19 @@ for i in timeStepAM:
         trueSoln.append(np.squeeze(np.copy(truepdf)))
         
     from Errors import ErrorValsExact
-    # LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, h, plot=False)
-    Times = np.linspace(1,len(PdfTraj), len(PdfTraj))*h
-    LinfErrors, L2Errors, L1Errors, L2wErrors, dtqApprox= ApproxExactSoln(EndTime, mydrift, mydiff, TSType, dimension, Meshes, PdfTraj, Times)
+    if not ApproxSoln:
+        LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, h, plot=False)
+    else:
+        Times = np.linspace(1,len(PdfTraj), len(PdfTraj))*h
+        LinfErrors, L2Errors, L1Errors, L2wErrors, dtqApprox= ApproxExactSoln(EndTime, mydrift, mydiff, TSType, dimension, Meshes, PdfTraj, Times)
+    
+    # plt.figure()
+    # plt.semilogy(Meshes[-1], PdfTraj[-1]- trueSoln[-1])
+    # plt.show()
     ErrorsAM.append(L2wErrors[-1])  
+  
     
-    
+radius = 5 # R    
     
 
 # ErrorsEMT = []
@@ -211,9 +221,11 @@ for i in timeStepAM:
 #         trueSoln.append(np.squeeze(np.copy(truepdf)))
         
 #     from Errors import ErrorValsExact
-#     # LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, h, plot=False)
-#     Times = np.linspace(1,len(PdfTraj), len(PdfTraj))*h
-#     LinfErrors, L2Errors, L1Errors, L2wErrors, dtqApprox= ApproxExactSoln(EndTime, mydrift, mydiff, TSType, dimension, Meshes, PdfTraj, Times)
+#     if not ApproxSoln:
+#         LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, h, plot=False)
+#     else:
+#         Times = np.linspace(1,len(PdfTraj), len(PdfTraj))*h
+#         LinfErrors, L2Errors, L1Errors, L2wErrors, dtqApprox= ApproxExactSoln(EndTime, mydrift, mydiff, TSType, dimension, Meshes, PdfTraj, Times)
 #     ErrorsEMT.append(L2wErrors[-1])
     
 
@@ -258,13 +270,15 @@ for i in timeStepAM:
 #         trueSoln.append(np.squeeze(np.copy(truepdf)))
         
 #     from Errors import ErrorValsExact
-#     # LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, h, plot=False)
-#     Times = np.linspace(1,len(PdfTraj), len(PdfTraj))*h
-#     LinfErrors, L2Errors, L1Errors, L2wErrors, dtqApprox= ApproxExactSoln(EndTime, mydrift, mydiff, TSType, dimension, Meshes, PdfTraj, Times)
+#     if not ApproxSoln:
+#         LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, h, plot=False)
+#     else:
+#         Times = np.linspace(1,len(PdfTraj), len(PdfTraj))*h
+#         LinfErrors, L2Errors, L1Errors, L2wErrors, dtqApprox= ApproxExactSoln(EndTime, mydrift, mydiff, TSType, dimension, Meshes, PdfTraj, Times)
 #     ErrorsAMT.append(L2wErrors[-1])
     
 plt.figure()
-# plt.loglog(np.asarray(timeStep), ErrorsEM, '-o', label="EM")
+plt.loglog(np.asarray(timeStep), ErrorsEM, '-o', label="EM")
 plt.loglog(np.asarray(timeStepAM), ErrorsAM, '-o', label="AM")
 # plt.loglog(np.asarray(timeStep), ErrorsAMT, '-o', label="AM Trapezoidal")
 # plt.loglog(np.asarray(timeStep), ErrorsEMT, '-o', label="EM Trapezoidal")
@@ -273,7 +287,7 @@ plt.ylabel("Error")
 plt.legend()
 
 plt.figure()
-# plt.plot(np.asarray(timeStep), timesEM, '-o', label="EM")
+plt.plot(np.asarray(timeStep), timesEM, '-o', label="EM")
 plt.plot(np.asarray(timeStepAM), timesAM, '-o', label="AM")
 # plt.plot(np.asarray(timeStep), timesAMT, '-o', label="AM Trapezoidal")
 # plt.plot(np.asarray(timeStep), timesEMT, '-o', label="EM Trapezoidal")
@@ -281,14 +295,14 @@ plt.xlabel("timestep")
 plt.ylabel("Time (seconds)")
 plt.legend()
 
-plt.figure()
+# plt.figure()
 # plt.plot(np.asarray(timeStep), LPE, '-o', label="EM Avg. Leja Reuse")
-plt.plot(np.asarray(timeStepAM), LPA, '-o', label="AM Avg. Leja Reuse")
+# plt.plot(np.asarray(timeStepAM), LPA, '-o', label="AM Avg. Leja Reuse")
 # plt.plot(np.asarray(timeStep), AltE, '-o', label="EM Avg. Alt Method Use")
-plt.plot(np.asarray(timeStepAM), AltA, '-o', label="AM Avg. Alt Method Use")
-plt.xlabel("timestep")
-plt.ylabel("Percent")
-plt.legend()
+# plt.plot(np.asarray(timeStepAM), AltA, '-o', label="AM Avg. Alt Method Use")
+# plt.xlabel("timestep")
+# plt.ylabel("Percent")
+# plt.legend()
 
 
 

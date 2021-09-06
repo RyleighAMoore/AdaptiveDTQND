@@ -150,7 +150,7 @@ def rho2(x):
 
 from tqdm import trange
 meshSpacingAM = 0.05
-meshAMPadding = 1.5
+meshAMPadding = 3.5
 def computeN2s(mesh, meshAM, h, driftfun, difffun, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints):
     # MeshesAM = []
     # meshAM = M.NDGridMesh(dimension, meshSpacingAM, int(max(int(np.ceil(np.max(mesh)-np.min(mesh))),2)+1)/2, UseNoise = False)
@@ -343,28 +343,51 @@ def AddPointsToGAndersonMat(mesh, newPointindices, h, GMat, difffun, driftfun, S
             N2All.append(np.copy(N2)) 
         N2Complete.append(np.copy(N2All))
     
-    #Compute new columns
+    #Compute new row
     numNew = range(len(mesh)-len(newPointindices), len(mesh))
-    count = 0
-    for k in numNew: # over col
-        N2Vals = N2Complete[count]
-        for i in range(len(mesh)): # over the row
-            N2 = N2Vals[:,i]        
-            val = ComputeAndersonMattingly(N2, i, k, h, driftfun, difffun, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints, meshAM, SpatialDiff)
-            GMat[i,k] = val
-        count = count+1
+    
+    for i in range(len(mesh)): # over col
+        countj = 0
+        for j in numNew: # over the row
+            N2 = N2Complete[countj][:,i]        
+            val = ComputeAndersonMattingly(N2, i, j, h, driftfun, difffun, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints, meshAM, SpatialDiff)
+            GMat[i,j] = val
+            countj = countj+1
             
+        
+    N2Complete = []
+    count = 0
+    meshNew = mesh[newPointindices]
+    for yim1 in mesh:
+        # mean = yim1
+        # delta = np.ones(np.shape(meshAMO))*mean
+        # vals = np.asarray(meshAMO).T + delta.T
+        # meshAM = vals.T 
+        count = count+1
+        N2All = []
+        scale2 = GaussScale(dimension)
+        if SpatialDiff == False:
+            sig2 = np.sqrt(rho2(a1*difffun(meshAM[0])**2 - a2*difffun(meshAM[0])**2))*np.sqrt((1-theta)*h)
+            scale2.setCov(np.asarray(sig2**2))
+        for i in meshAM:
+            mu2 = i + (a1*driftfun(i) - a2*driftfun(yim1))*(1-theta)*h
+            scale2.setMu(np.asarray(mu2.T))
+            if SpatialDiff == True:
+                sig2 = np.sqrt(rho2(a1*difffun(i)**2 - a2*difffun(yim1)**2))*np.sqrt((1-theta)*h)
+                scale2.setCov(np.asarray(sig2**2))
+            N2 = Gaussian(scale2, meshNew)
+            N2All.append(np.copy(N2)) 
+        N2Complete.append(np.copy(N2All))
     # Add rows
     # PartialN2s = computePartialN2s(N2,newPointindices, index1, index2, h, driftfun, difffun, meshDTQ, dimension, theta, a1, a2, minDistanceBetweenPoints, meshAM, SpatialDiff)
-    count = 0
-    for i in numNew:
-        # N2PartialVals = N2Complete[count]
-        for j in range(len(mesh)):
-            # N2 = N2PartialVals[count][:,j] 
-            # val = ComputeAndersonMattingly(N2,i, j, h, driftfun, difffun, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints, meshAM, SpatialDiff, computeN2Bool = False)
-            val2 = ComputeAndersonMattingly([],i, j, h, driftfun, difffun, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints, meshAM, SpatialDiff, computeN2Bool = True)
-
-            GMat[i,j] = val2
+    # N2All = computeN2s(mesh, meshAM, h, driftfun, difffun, SpatialDiff, theta, a1, a2, dimension, minDistanceBetweenPoints)
+    counti = 0
+    for i in numNew: # over row
+        for j in range(len(mesh)): # over the row
+            N2 = N2Complete[j][:,counti]        
+            val = ComputeAndersonMattingly(N2, i, j, h, driftfun, difffun, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints, meshAM, SpatialDiff)
+            GMat[i,j] = val
+        counti = counti+1
     
     
     return GMat

@@ -20,6 +20,8 @@ import random
 import Circumsphere as CS
 from itertools import combinations
 from collections import defaultdict
+import time
+
 
 random.seed(10)
 
@@ -39,8 +41,15 @@ def addPointsToMeshProcedure(Mesh, Pdf, triangulation, kstep, h, poly, GMat, add
                     GMat = fun.AddPointToG(Mesh[:i,:], i-1, h, GMat, drift, diff, SpatialDiff)
         elif TimeStepType == "AM":
             indices = list(range(meshSize, newMeshSize))
+            start = time.time()
             GMat = fun.AddPointsToGAndersonMat(Mesh, indices, h, GMat, diff, drift, SpatialDiff, dimension, minDistanceBetweenPoints)
-            # GMat = fun.GenerateAndersonMatMatrix(h, drift, diff, Mesh, dimension, 500, minDistanceBetweenPoints, SpatialDiff)
+            end = time.time()
+            print(end-start)
+            # start1 = time.time()
+            # GMat3 = fun.GenerateAndersonMatMatrix(h, drift, diff, Mesh, dimension, 500, minDistanceBetweenPoints, SpatialDiff)
+            # end1 = time.time()
+            # print(end1-start1)
+
 
     return Mesh, Pdf, triangulation, ChangedBool, GMat
 
