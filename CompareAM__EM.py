@@ -40,74 +40,74 @@ def mydiff(mesh):
     # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
 
 ApproxSoln = True
-timeStep = [0.01, 0.08]
-EndTime = 2
+timeStep = [0.01, 0.05, 0.08]
+EndTime =3.2
 kstepMin = 0.06 # lambda
 kstepMax = kstepMin # Lambda
 beta = 5
-radius = 3 # R
+radius = 3.75 # R
 SpatialDiff = False
 conditionNumForAltMethod = 10
 NumLejas = 5
 numPointsForLejaCandidates = 50
 numQuadFit = 30
 
-# ErrorsEM = []
-# timesEM = []
-# LPE = []
-# AltE =[]
-# for i in timeStep:
-#     start = time.time()
-#     NumSteps = int(EndTime/i)
-#     h= i
-#     par = Param.Parameters(sde, h, conditionNumForAltMethod, beta)
-#     par.kstepMin = kstepMin
-#     par.kstepMax = kstepMax
-#     par.radius = radius
-#     par.numPointsForLejaCandidates = numPointsForLejaCandidates
-#     par.numQuadFit = numQuadFit
-#     par.NumLejas = NumLejas
-#     TSType = "EM"
+ErrorsEM = []
+timesEM = []
+LPE = []
+AltE =[]
+for i in timeStep:
+    start = time.time()
+    NumSteps = int(EndTime/i)
+    h= i
+    par = Param.Parameters(sde, h, conditionNumForAltMethod, beta)
+    par.kstepMin = kstepMin
+    par.kstepMax = kstepMax
+    par.radius = radius
+    par.numPointsForLejaCandidates = numPointsForLejaCandidates
+    par.numQuadFit = numQuadFit
+    par.NumLejas = NumLejas
+    TSType = "EM"
     
-#     Meshes, PdfTraj, LPReuseArr, AltMethod= DTQ(NumSteps, kstepMin, kstepMax, h, beta, radius, mydrift, mydiff, dimension, SpatialDiff, par, PrintStuff=True, TimeStepType= TSType)
-#     end = time.time()
-#     timesEM.append(end -start)
+    Meshes, PdfTraj, LPReuseArr, AltMethod= DTQ(NumSteps, kstepMin, kstepMax, h, beta, radius, mydrift, mydiff, dimension, SpatialDiff, par, PrintStuff=True, TimeStepType= TSType)
+    end = time.time()
+    timesEM.append(end -start)
 
-#     pc = []
-#     for i in range(len(Meshes)-1):
-#         l = len(Meshes[i])
-#         pc.append(LPReuseArr[i]/l)
+    pc = []
+    for i in range(len(Meshes)-1):
+        l = len(Meshes[i])
+        pc.append(LPReuseArr[i]/l)
         
-#     mean = np.mean(pc)
-#     print("Leja Reuse: ", mean*100, "%")
-#     LPE.append(mean*100)
-
-    
-#     pc = []
-#     for i in range(len(Meshes)-1):
-#         l = len(Meshes[i])
-#         pc.append(AltMethod[i]/l)
-        
-#     mean2 = np.mean(pc)
-#     print("Alt Method: ", mean2*100, "%")
-#     AltE.append(mean2*100)
+    mean = np.mean(pc)
+    print("Leja Reuse: ", mean*100, "%")
+    LPE.append(mean*100)
 
     
-#     trueSoln = []
-#     from exactSolutions import OneDdiffusionEquation
-#     for i in range(len(Meshes)):
-#         truepdf = sde.Solution(Meshes[i], (i+1)*h)
-#         # truepdf = OneDdiffusionEquation(Meshes[i], mydiff(Meshes[i]), (i+1)*h, mydrift(Meshes[i]))
-#         # truepdf = solution(xvec,-1,T)
-#         trueSoln.append(np.squeeze(np.copy(truepdf)))
+    pc = []
+    for i in range(len(Meshes)-1):
+        l = len(Meshes[i])
+        pc.append(AltMethod[i]/l)
         
-#     from Errors import ErrorValsExact
-#     if not ApproxSoln:
-#         LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, h, plot=False)
-#     else:
-#         Times = np.linspace(1,len(PdfTraj), len(PdfTraj))*h
-#         LinfErrors, L2Errors, L1Errors, L2wErrors, dtqApprox= ApproxExactSoln(EndTime, mydrift, mydiff, TSType, dimension, Meshes, PdfTraj, Times)
-#     ErrorsEM.append(L2wErrors[-1])
+    mean2 = np.mean(pc)
+    print("Alt Method: ", mean2*100, "%")
+    AltE.append(mean2*100)
+
+    
+    trueSoln = []
+    from exactSolutions import OneDdiffusionEquation
+    for i in range(len(Meshes)):
+        truepdf = sde.Solution(Meshes[i], (i+1)*h)
+        # truepdf = OneDdiffusionEquation(Meshes[i], mydiff(Meshes[i]), (i+1)*h, mydrift(Meshes[i]))
+        # truepdf = solution(xvec,-1,T)
+        trueSoln.append(np.squeeze(np.copy(truepdf)))
+        
+    from Errors import ErrorValsExact
+    if not ApproxSoln:
+        LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, trueSoln, h, plot=False)
+    else:
+        Times = np.linspace(1,len(PdfTraj), len(PdfTraj))*h
+        LinfErrors, L2Errors, L1Errors, L2wErrors, dtqApprox= ApproxExactSoln(EndTime, mydrift, mydiff, TSType, dimension, Meshes, PdfTraj, Times)
+    ErrorsEM.append(L2wErrors[-1])
     
     
 
@@ -177,7 +177,7 @@ for i in timeStepAM:
     ErrorsAM.append(L2wErrors[-1])  
   
     
-radius = 5 # R    
+radius = 6 # R    
     
 
 # ErrorsEMT = []
@@ -195,7 +195,11 @@ radius = 5 # R
 #     par.NumLejas = NumLejas
 #     TSType = "EM"
     
-#     mesh = M.NDGridMesh(dimension, kstepMin, radius, UseNoise = False)
+#     mesh = M.NDGridMesh(dimension, kstepMin, 7.5, UseNoise = False)
+#     mean = 3
+#     delta = np.ones(np.shape(mesh))*mean
+#     mesh = np.asarray(mesh).T + delta.T
+#     mesh = mesh.T
 #     GMat = fun.GenerateEulerMarMatrix(len(mesh), mesh, h, mydrift, mydiff, SpatialDiff)
 #     scale = GaussScale(dimension)
 #     scale.setMu(h*mydrift(np.zeros(dimension)).T)
@@ -244,7 +248,12 @@ radius = 5 # R
 #     par.NumLejas = NumLejas
 #     TSType = "AM"
     
-#     mesh = M.NDGridMesh(dimension, kstepMin, radius, UseNoise = False)
+#     mesh = M.NDGridMesh(dimension, kstepMin, 7.5, UseNoise = False)
+#     mean = 3
+#     delta = np.ones(np.shape(mesh))*mean
+#     mesh = np.asarray(mesh).T + delta.T
+#     mesh = mesh.T
+    
 #     GMat = fun.GenerateAndersonMatMatrix(h, mydrift, mydiff, mesh, dimension, len(mesh), kstepMin, SpatialDiff)
 #     scale = GaussScale(dimension)
 #     scale.setMu(h*mydrift(np.zeros(dimension)).T)
@@ -304,7 +313,14 @@ plt.legend()
 # plt.ylabel("Percent")
 # plt.legend()
 
-
+plt.figure()
+plt.semilogy(timesEM, ErrorsEM, '-o', label="EM")
+plt.semilogy(timesAM, ErrorsAM, '-o', label="AM")
+# plt.semilogy(timesAMT, ErrorsAMT, '-o', label="AM Trapezoidal")
+# plt.semilogy(timesEMT, ErrorsEMT, '-o', label="EM Trapezoidal")
+plt.xlabel("Runtime (Seconds)")
+plt.ylabel("Error")
+plt.legend()
 
 def update_graph(num):
     graph.set_data(Meshes[num], PdfTraj[num])
@@ -319,6 +335,6 @@ ax.set_xlim(-20, 20)
 ax.set_ylim(0, np.max(PdfTraj[0]))
 
 
-ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
+ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=10, blit=False)
 plt.show()
 

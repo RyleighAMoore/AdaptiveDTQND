@@ -45,6 +45,7 @@ def addPointsToMeshProcedure(Mesh, Pdf, triangulation, kstep, h, poly, GMat, add
             GMat = fun.AddPointsToGAndersonMat(Mesh, indices, h, GMat, diff, drift, SpatialDiff, dimension, minDistanceBetweenPoints)
             end = time.time()
             print(end-start)
+            
             # start1 = time.time()
             # GMat3 = fun.GenerateAndersonMatMatrix(h, drift, diff, Mesh, dimension, 500, minDistanceBetweenPoints, SpatialDiff)
             # end1 = time.time()
