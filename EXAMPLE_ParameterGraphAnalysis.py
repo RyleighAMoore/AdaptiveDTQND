@@ -7,7 +7,7 @@ import Functions as fun
 from DriftDiffFunctionBank import MovingHillDrift, DiagDiffOne
 from exactSolutions import TwoDdiffusionEquation
 from Errors import ErrorValsExact
-import ParametersClass as Param
+import Class_Parameters as Param
 
 
 mydrift = MovingHillDrift

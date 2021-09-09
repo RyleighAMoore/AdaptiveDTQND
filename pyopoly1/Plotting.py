@@ -16,7 +16,7 @@ from Functions import *
 import UnorderedMesh as UM
 
 
-from pyopoly1.Scaling import GaussScale
+from pyopoly1.Class_Gaussian import GaussScale
 
 def productGaussians2D(scaling,scaling2):
     

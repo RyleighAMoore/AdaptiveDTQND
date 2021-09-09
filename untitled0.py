@@ -3,7 +3,7 @@ import numpy as np
 from DriftDiffFunctionBank import FourHillDrift, DiagDiffptSevenFive
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-import ParametersClass as Param
+import Class_Parameters as Param
 from Errors import ErrorValsExact
 from exactSolutions import TwoDdiffusionEquation
 from NDFunctionBank import SimpleDriftSDE

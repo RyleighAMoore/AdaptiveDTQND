@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from pyopoly1 import opolynd
 from mpl_toolkits.mplot3d import Axes3D
 from Functions import *
-from pyopoly1.Scaling import GaussScale
+from pyopoly1.Class_Gaussian import GaussScale
 from pyopoly1.Plotting import productGaussians2D
 import UnorderedMesh as UM
 from pyopoly1.families import HermitePolynomials
