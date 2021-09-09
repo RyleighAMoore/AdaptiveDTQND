@@ -1,5 +1,7 @@
 import numpy as np
 from pyopoly1.Class_Gaussian import GaussScale
+import matplotlib.pyplot as plt
+
 class PDF:
     def __init__(self, sde, parameters, UseNoise=False):
         self.pdfVals = None
@@ -7,6 +9,7 @@ class PDF:
         self.meshLength = None
         self.UseNoise = UseNoise
         self.setInitialConditionMeshCoordinates(sde, parameters)
+        self.setInitialCondition(sde, parameters)
 
 
 
@@ -15,12 +18,17 @@ class PDF:
         self.meshLength = len(self.meshCoordinates)
 
 
-    def initialCondition(self, sde, mesh, parameters):
+    def setInitialCondition(self, sde, parameters):
         scale = GaussScale(sde.dimension)
-        scale.setMu(parameters.h*sde.driftfun(np.zeros(sde.dimension)).T)
-        scale.setCov((parameters.h*sde.difffun(np.zeros(sde.dimension))*sde.difffun(np.zeros(sde.dimension)).T).T)
-        pdf = scale.ComputeGaussian(mesh)
-        self.pdfVals.append(pdf)
+        scale.setMu(parameters.h*sde.driftFunction(np.zeros(sde.dimension)).T)
+        scale.setCov((parameters.h*sde.diffusionFunction(np.zeros(sde.dimension))*sde.diffusionFunction(np.zeros(sde.dimension)).T).T)
+        pdf = scale.ComputeGaussian(self, sde)
+        self.pdfVals = pdf
+
+    def plot(self):
+        plt.figure()
+        plt.scatter(self.meshCoordinates, self.pdfVals)
+        plt.show()
 
 
 

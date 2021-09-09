@@ -5,6 +5,7 @@ Created on Tue Sep  7 22:07:18 2021
 @author: Rylei
 """
 from Class_TimeDiscretizationMethod import EulerMaruyamaTimeDiscretizationMethod, AndersonMattinglyTimeDiscretizationMethod
+
 class Simulation():
     def __init__(self, sde, parameters, pdf):
         self.setTimeDiscretizationDriver(parameters)
@@ -23,6 +24,7 @@ class Simulation():
         # doMeshUpdates()
         # parameters.integrationMethod.computeIntegral()
         # return valuesAtTimestep
+
 
 
 

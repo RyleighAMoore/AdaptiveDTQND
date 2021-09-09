@@ -4,13 +4,13 @@ from Class_SDE import SDE
 from Class_Simulation import Simulation
 import numpy as np
 
+
 dimension = 1
 beta = 3
 radius = 3
 kstepMin= 0.06
 kstepMax = 0.07
 h = 0.1
-timeStepType = "AM"
 
 def driftFunction(mesh):
       if mesh.ndim ==1:
@@ -29,6 +29,7 @@ sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
 parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, timeDiscretizationType = "EM")
 pdf = PDF(sde, parameters)
 simulation = Simulation(sde, parameters, pdf)
+pdf.plot()
 
 
 
