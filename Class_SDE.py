@@ -7,7 +7,7 @@ class SDE:
         self.diffusionFunction = diffusionFunction
         self.spatialDiff = spatialDiff
 
-    def createExampleSimpleSDE(dimension, driftConstant, diffusionConstant):
-        # define the functions
-        return SDE(dimension, driftFunction, diffusionFunction)
+    # def createExampleSimpleSDE(dimension, driftConstant, diffusionConstant):
+    #     # define the functions
+    #     return SDE(dimension, driftFunction, diffusionFunction)
 

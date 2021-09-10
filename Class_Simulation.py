@@ -5,14 +5,21 @@ Created on Tue Sep  7 22:07:18 2021
 @author: Rylei
 """
 from Class_TimeDiscretizationMethod import EulerMaruyamaTimeDiscretizationMethod, AndersonMattinglyTimeDiscretizationMethod
+from Class_PDF import PDF
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+
 
 class Simulation():
-    def __init__(self, sde, parameters, pdf):
+    def __init__(self, sde, parameters, endTime):
+        self.pdf = PDF(sde, parameters)
+        self.endTime = endTime
         self.pdfTrajectory = []
         self.meshTrajectory = []
         self.setTimeDiscretizationDriver(parameters)
-        self.integrator = Integrator(self, sde, parameters, pdf)
-        self.computeTimestep(sde, pdf, parameters)
+        self.integrator = Integrator(self, sde, parameters, self.pdf)
+        self.computeAllTimes(sde, self.pdf, parameters)
+
 
     def setTimeDiscretizationDriver(self, parameters):
         if parameters.timeDiscretizationType == "EM":
@@ -23,12 +30,18 @@ class Simulation():
 
 
     def computeTimestep(self, sde, pdf, parameters):
-        newPdf = self.integrator.computeTimeStep(sde, parameters, pdf)
-        self.pdfTrajectory.append(newPdf)
-        self.meshTrajectory.append(pdf.meshCoordinates)
-        # doMeshUpdates()
-        # parameters.integrationMethod.computeIntegral()
-        # return valuesAtTimestep
+        pdf.pdfVals = self.integrator.computeTimeStep(sde, parameters, pdf)
+        self.pdfTrajectory.append(np.copy(pdf.pdfVals))
+        self.meshTrajectory.append(np.copy(pdf.meshCoordinates))
+
+    def computeAllTimes(self, sde, pdf, parameters):
+        self.pdfTrajectory.append(np.copy(pdf.pdfVals))
+        self.meshTrajectory.append(np.copy(pdf.meshCoordinates))
+        numSteps = int(self.endTime/parameters.h)
+        for i in range(4):
+            self.computeTimestep(sde, pdf, parameters)
+
+
 
 
 
@@ -79,7 +92,7 @@ class Integrator:
             pdfValuesOfQuadraticFitPoints = pdf.pdfVals[self.LejaPointIndicesMatrix[index,:].astype(int)]
             self.laplaceApproximation.copmuteleastSquares(quadraticFitMeshPoints, pdfValuesOfQuadraticFitPoints, pdf, sde, parameters)
 
-        if math.isnan(self.laplaceApproximation.constantOfGaussian): # Fit failed
+        if np.any(self.laplaceApproximation.constantOfGaussian)==None: # Fit failed
             return False
         else:
             return True
@@ -91,17 +104,15 @@ class Integrator:
 
 
     def setLejaPoints(self, pdf, index, LejasNeededBool, parameters, sde):
-        if self.LejaPointIndicesBoolVector[index]: # Don't Need LejaPoints
+        self.setIntegrand(pdf, sde, index)
+        if self.LejaPointIndicesBoolVector[index]: # Already have LejaPoints
             LejaIndices = self.LejaPointIndicesMatrix[index,:].astype(int)
             self.lejaPoints = pdf.meshCoordinates[LejaIndices,:]
-            # self.lejaPointsPdfVals = pdf.pdfVals[LejaIndices]
-            self.newIntegrand = self.getIntegrand(pdf, sde, index)
             self.lejaPointsPdfVals = self.newIntegrand[LejaIndices]
             self.indicesOfLejaPoints = LejaIndices
         else: # Need Leja points.
             mappedMesh = map_to_canonical_space(pdf.meshCoordinates, self.laplaceApproximation.scalingForGaussian)
             self.lejaPoints, self.lejaPointsPdfVals, self.indicesOfLejaPoints = LP.getLejaSetFromPoints(self.identityScaling, mappedMesh, parameters.numLejas, self.poly, pdf.pdfVals, sde.diffusionFunction, parameters.numPointsForLejaCandidates)
-            self.setIntegrand(pdf, sde, index)
             self.lejaPointsPdfVals = self.newIntegrand[self.indicesOfLejaPoints]
             if math.isnan(self.lejaPoints[0]): # Failed to get Leja points
                 self.lejaPoints = None
@@ -134,18 +145,17 @@ class Integrator:
             useLejaIntegrationProcedure = self.findQuadraticFit(sde, pdf, parameters, index)
             if not useLejaIntegrationProcedure: # Failed Quadratic Fit
                 self.computeUpdateWithAlternativeMethod()
-                value = 0
+                print("failed Q Fit")
 
-            elif self.LejaPointIndicesBoolVector[index] == False:
+            else: # Now get Leja points
                 self.setLejaPoints(pdf, index, self.LejaPointIndicesBoolVector, parameters,sde)
                 if any(self.lejaPoints) == None: #Getting Leja points failed
                      self.computeUpdateWithAlternativeMethod()
-                     value = 0
+                     print("failed Leja")
                 else:
                     value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index)
-                    print(value)
             newPdf.append(np.copy(value))
-        return newPdf
+        return np.asarray(newPdf)
 
 
 
