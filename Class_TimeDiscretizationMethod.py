@@ -8,15 +8,13 @@ class TimeDiscretizationMethod():
         pass
 
 
-
-
 class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
     def __init__(self):
-        pass
+        self.sizeTransitionMatrixIncludingEmpty = None
 
     def computeTransitionMatrix(self, pdf, sde, h):
-        sizeMatrix = pdf.meshLength
-        GMat = np.empty([sizeMatrix, sizeMatrix])*np.NaN
+        self.sizeTransitionMatrixIncludingEmpty = pdf.meshLength
+        GMat = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
         for i in range(len(pdf.meshCoordinates)):
             v = G(i,pdf.meshCoordinates, h, sde.driftFunction, sde.diffusionFunction, sde.spatialDiff)
             GMat[i,:len(v)] = v
@@ -99,7 +97,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         return transitionProb
 
     def computeTransitionMatrix(self, pdf, sde, h):
-        sizeMatrix = len(pdf.meshLength)
+        sizeMatrix = pdf.meshLength
         matrix = np.empty([sizeMatrix, sizeMatrix])*np.NaN
         self.setMeshForComputingTransitionProbability(pdf, sde)
         self.computeN2s(self, pdf, sde, h)

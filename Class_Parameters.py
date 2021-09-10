@@ -16,11 +16,11 @@ class Parameters:
 
     def setNumLejas(self, sde):
         if sde.dimension == 1:
-            self.NumLejas = 5
+            self.numLejas = 5
         elif sde.dimension == 2:
-            self.NumLejas = 10
+            self.numLejas = 10
         else:
-            self.NumLejas = 15
+            self.numLejas = 15
 
     def setNumPointsForLejaCandidates(self, sde):
         if sde.dimension == 1:
@@ -32,11 +32,11 @@ class Parameters:
 
     def setNumQuadFit(self,sde):
         if sde.dimension == 1:
-            self.set_numQuadFit = 50
+            self.numQuadFit = 50
         elif sde.dimension == 2:
-            self.set_numQuadFit = 150
+            self.numQuadFit = 150
         else:
-            self.set_numQuadFit = 150
+            self.numQuadFit = 150
 
 
 

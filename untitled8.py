@@ -3,6 +3,7 @@ from Class_PDF import PDF
 from Class_SDE import SDE
 from Class_Simulation import Simulation
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 dimension = 1
@@ -17,7 +18,7 @@ def driftFunction(mesh):
         mesh = np.expand_dims(mesh, axis=0)
     # return 0*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     # return -1*mesh
-      return 0.2*mesh*(4-mesh**2)
+      return np.ones(np.shape(mesh))
 
 def diffusionFunction(mesh):
     return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
@@ -30,6 +31,7 @@ parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, timeDiscretiza
 pdf = PDF(sde, parameters)
 simulation = Simulation(sde, parameters, pdf)
 pdf.plot()
+plt.scatter(simulation.meshTrajectory[-1],simulation.pdfTrajectory[-1])
 
 
 
