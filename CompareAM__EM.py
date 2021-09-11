@@ -68,11 +68,6 @@ class Parameters:
    #     self.numQuadFit = None
 
 
-
-
-
-
-
 class SimpleDriftSDE:
   def __init__(self, drift, diff, dimension):
     self.drift = drift
@@ -98,7 +93,7 @@ class SimpleDriftSDE:
     return vals
 
 dimension =1
-sde = SimpleDriftSDE(1,1,dimension)
+sde = SimpleDriftSDE(0,1,dimension)
 mydrift = sde.Drift
 mydiff = sde.Diff
 
@@ -116,7 +111,7 @@ mydiff = sde.Diff
 
 ApproxSoln = False
 timeStep = [0.01]
-EndTime =0.1
+EndTime =0.02
 kstepMin = 0.06 # lambda
 kstepMax = kstepMin # Lambda
 beta = 5
@@ -397,19 +392,19 @@ for i in timeStep:
 # plt.ylabel("Error")
 # plt.legend()
 
-# def update_graph(num):
-#     graph.set_data(Meshes[num], PdfTraj[num])
-#     return title, graph
+def update_graph(num):
+    graph.set_data(Meshes[num], PdfTraj[num])
+    return title, graph
 
-# fig = plt.figure()
-# ax = fig.add_subplot(111)
-# title = ax.set_title('2D Test')
+fig = plt.figure()
+ax = fig.add_subplot(111)
+title = ax.set_title('2D Test')
 
-# graph, = ax.plot(Meshes[-1], PdfTraj[-1], linestyle="", marker=".")
-# ax.set_xlim(-20, 20)
-# ax.set_ylim(0, np.max(PdfTraj[0]))
+graph, = ax.plot(Meshes[-1], PdfTraj[-1], linestyle="", marker=".")
+ax.set_xlim(-20, 20)
+ax.set_ylim(0, np.max(PdfTraj[0]))
 
 
-# ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=10, blit=False)
-# plt.show()
+ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
+plt.show()
 

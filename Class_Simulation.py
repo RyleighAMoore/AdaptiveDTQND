@@ -38,7 +38,7 @@ class Simulation():
         self.pdfTrajectory.append(np.copy(pdf.pdfVals))
         self.meshTrajectory.append(np.copy(pdf.meshCoordinates))
         numSteps = int(self.endTime/parameters.h)
-        for i in range(4):
+        for i in range(1):
             self.computeTimestep(sde, pdf, parameters)
 
 
@@ -85,11 +85,11 @@ class Integrator:
             scaling.setMu(pdf.meshCoordinates[index,:]+parameters.h*sde.driftFunction(pdf.meshCoordinates[index,:]))
             orderedPoints, distances, indicesOfOrderedPoints = findNearestKPoints(pdf.meshCoordinates[index], pdf.meshCoordinates, parameters.numQuadFit, getIndices=True)
             quadraticFitMeshPoints = orderedPoints[:parameters.numQuadFit]
-            pdfValuesOfQuadraticFitPoints = pdf.pdfVals[indicesOfOrderedPoints]
+            pdfValuesOfQuadraticFitPoints = pdf.integrandBeforeDividingOut[indicesOfOrderedPoints]
             self.laplaceApproximation.copmuteleastSquares(quadraticFitMeshPoints, pdfValuesOfQuadraticFitPoints, pdf, sde, parameters)
         else:
             quadraticFitMeshPoints = pdf.meshCoordinates[self.LejaPointIndicesMatrix[index,:].astype(int)]
-            pdfValuesOfQuadraticFitPoints = pdf.pdfVals[self.LejaPointIndicesMatrix[index,:].astype(int)]
+            pdfValuesOfQuadraticFitPoints = pdf.integrandBeforeDividingOut[self.LejaPointIndicesMatrix[index,:].astype(int)]
             self.laplaceApproximation.copmuteleastSquares(quadraticFitMeshPoints, pdfValuesOfQuadraticFitPoints, pdf, sde, parameters)
 
         if np.any(self.laplaceApproximation.constantOfGaussian)==None: # Fit failed
@@ -97,31 +97,30 @@ class Integrator:
         else:
             return True
 
-    def setIntegrand(self, pdf, sde, index):
+    def divideOutGaussian(self, pdf, sde, index):
         gaussianToDivideOut = self.laplaceApproximation.ComputeDividedOut(pdf, sde)
-        GPdf = self.TransitionMatrix[index,:pdf.meshLength]*pdf.pdfVals
-        self.newIntegrand = GPdf/gaussianToDivideOut.T
+        pdf.setIntegrandAfterDividingOut(pdf.integrandBeforeDividingOut/gaussianToDivideOut)
 
 
     def setLejaPoints(self, pdf, index, LejasNeededBool, parameters, sde):
-        self.setIntegrand(pdf, sde, index)
         if self.LejaPointIndicesBoolVector[index]: # Already have LejaPoints
             LejaIndices = self.LejaPointIndicesMatrix[index,:].astype(int)
             self.lejaPoints = pdf.meshCoordinates[LejaIndices,:]
-            self.lejaPointsPdfVals = self.newIntegrand[LejaIndices]
+            self.lejaPointsPdfVals = pdf.integrandAfterDividingOut[LejaIndices]
             self.indicesOfLejaPoints = LejaIndices
         else: # Need Leja points.
             mappedMesh = map_to_canonical_space(pdf.meshCoordinates, self.laplaceApproximation.scalingForGaussian)
-            self.lejaPoints, self.lejaPointsPdfVals, self.indicesOfLejaPoints = LP.getLejaSetFromPoints(self.identityScaling, mappedMesh, parameters.numLejas, self.poly, pdf.pdfVals, sde.diffusionFunction, parameters.numPointsForLejaCandidates)
-            self.lejaPointsPdfVals = self.newIntegrand[self.indicesOfLejaPoints]
+            self.lejaPoints, self.lejaPointsPdfVals,self.indicesOfLejaPoints = LP.getLejaSetFromPoints(self.identityScaling, mappedMesh, parameters.numLejas, self.poly, pdf.integrandAfterDividingOut, sde.diffusionFunction, parameters.numPointsForLejaCandidates)
             if math.isnan(self.lejaPoints[0]): # Failed to get Leja points
                 self.lejaPoints = None
                 self.lejaPointsPdfVals = None
                 self.idicesOfLejaPoints = None
 
-    def computeUpdateWithInterpolatoryQuadrature(self, parameters, pdf, index):
-        transformedMesh = map_to_canonical_space(self.lejaPoints, self.laplaceApproximation.scalingForGaussian)
-        V = opolynd.opolynd_eval(transformedMesh, self.poly.lambdas[:parameters.numLejas,:], self.poly.ab, self.poly)
+    def computeUpdateWithInterpolatoryQuadrature(self, parameters, pdf, index, sde):
+        self.lejaPointsPdfVals = pdf.integrandAfterDividingOut[self.indicesOfLejaPoints]
+
+        # transformedMesh = map_to_canonical_space(self.lejaPoints, self.laplaceApproximation.scalingForGaussian)
+        V = opolynd.opolynd_eval(self.lejaPoints, self.poly.lambdas[:parameters.numLejas,:], self.poly.ab, self.poly)
         vinv = np.linalg.inv(V)
         value = np.matmul(vinv[0,:], self.lejaPointsPdfVals)
         condNumber = np.sum(np.abs(vinv[0,:]))
@@ -129,7 +128,6 @@ class Integrator:
         if condNumber < 1.1: # Leja points worked really well, likely okay for next time step
             self.LejaPointIndicesBoolVector[index] = True
             self.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
-
         else:
             self.LejaPointIndicesBoolVector[index] = False
 
@@ -142,18 +140,20 @@ class Integrator:
     def computeTimeStep(self, sde, parameters, pdf):
         newPdf = []
         for index, point in enumerate(pdf.meshCoordinates):
+            pdf.setIntegrandBeforeDividingOut(self.TransitionMatrix[index,:pdf.meshLength]*pdf.pdfVals)
             useLejaIntegrationProcedure = self.findQuadraticFit(sde, pdf, parameters, index)
             if not useLejaIntegrationProcedure: # Failed Quadratic Fit
                 self.computeUpdateWithAlternativeMethod()
                 print("failed Q Fit")
 
             else: # Now get Leja points
+                vals = self.divideOutGaussian(pdf, sde, index)
                 self.setLejaPoints(pdf, index, self.LejaPointIndicesBoolVector, parameters,sde)
                 if any(self.lejaPoints) == None: #Getting Leja points failed
                      self.computeUpdateWithAlternativeMethod()
                      print("failed Leja")
                 else:
-                    value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index)
+                    value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index, sde)
             newPdf.append(np.copy(value))
         return np.asarray(newPdf)
 
