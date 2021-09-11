@@ -111,7 +111,7 @@ mydiff = sde.Diff
 
 ApproxSoln = False
 timeStep = [0.01]
-EndTime =0.02
+EndTime =1
 kstepMin = 0.06 # lambda
 kstepMax = kstepMin # Lambda
 beta = 5

@@ -38,7 +38,7 @@ class Simulation():
         self.pdfTrajectory.append(np.copy(pdf.pdfVals))
         self.meshTrajectory.append(np.copy(pdf.meshCoordinates))
         numSteps = int(self.endTime/parameters.h)
-        for i in range(1):
+        for i in range(numSteps):
             self.computeTimestep(sde, pdf, parameters)
 
 
@@ -124,13 +124,6 @@ class Integrator:
         vinv = np.linalg.inv(V)
         value = np.matmul(vinv[0,:], self.lejaPointsPdfVals)
         condNumber = np.sum(np.abs(vinv[0,:]))
-
-        if condNumber < 1.1: # Leja points worked really well, likely okay for next time step
-            self.LejaPointIndicesBoolVector[index] = True
-            self.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
-        else:
-            self.LejaPointIndicesBoolVector[index] = False
-
         return value, condNumber
 
 
@@ -154,6 +147,21 @@ class Integrator:
                      print("failed Leja")
                 else:
                     value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index, sde)
+                    if condNumber < 1.1: # Leja points worked really well, likely okay for next time step
+                        self.LejaPointIndicesBoolVector[index] = True
+                        self.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
+                    else: # try again with better leja points
+                        self.LejaPointIndicesBoolVector[index] = False
+                        self.setLejaPoints(pdf, index, self.LejaPointIndicesBoolVector, parameters,sde)
+                        value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index, sde)
+                        if condNumber < 1.1: # Leja points worked really well, likely okay for next time step
+                            self.LejaPointIndicesBoolVector[index] = True
+                            self.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
+                        else:
+                            print("reused LP")
+                        if condNumber > parameters.conditionNumForAltMethod:
+                            self.computeUpdateWithAlternativeMethod()
+
             newPdf.append(np.copy(value))
         return np.asarray(newPdf)
 
