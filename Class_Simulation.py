@@ -80,6 +80,7 @@ class Integrator:
 
     def findQuadraticFit(self, sde, pdf, parameters, index):
         ## TODO: Update this so I don't recompute drift and diff everytime
+        pdf.setIntegrandBeforeDividingOut(self.TransitionMatrix[index,:pdf.meshLength]*pdf.pdfVals)
         if not self.LejaPointIndicesBoolVector[index]:
             scaling = GaussScale(sde.dimension)
             scaling.setMu(pdf.meshCoordinates[index,:]+parameters.h*sde.driftFunction(pdf.meshCoordinates[index,:]))
@@ -97,12 +98,13 @@ class Integrator:
         else:
             return True
 
-    def divideOutGaussian(self, pdf, sde, index):
+    def divideOutGaussianAndSetIntegrand(self, pdf, sde, index):
         gaussianToDivideOut = self.laplaceApproximation.ComputeDividedOut(pdf, sde)
         pdf.setIntegrandAfterDividingOut(pdf.integrandBeforeDividingOut/gaussianToDivideOut)
 
 
-    def setLejaPoints(self, pdf, index, LejasNeededBool, parameters, sde):
+    def setLejaPoints(self, pdf, index, parameters, sde):
+        self.divideOutGaussianAndSetIntegrand(pdf, sde, index)
         if self.LejaPointIndicesBoolVector[index]: # Already have LejaPoints
             LejaIndices = self.LejaPointIndicesMatrix[index,:].astype(int)
             self.lejaPoints = pdf.meshCoordinates[LejaIndices,:]
@@ -133,33 +135,27 @@ class Integrator:
     def computeTimeStep(self, sde, parameters, pdf):
         newPdf = []
         for index, point in enumerate(pdf.meshCoordinates):
-            pdf.setIntegrandBeforeDividingOut(self.TransitionMatrix[index,:pdf.meshLength]*pdf.pdfVals)
             useLejaIntegrationProcedure = self.findQuadraticFit(sde, pdf, parameters, index)
             if not useLejaIntegrationProcedure: # Failed Quadratic Fit
                 self.computeUpdateWithAlternativeMethod()
-                print("failed Q Fit")
-
-            else: # Now get Leja points
-                vals = self.divideOutGaussian(pdf, sde, index)
-                self.setLejaPoints(pdf, index, self.LejaPointIndicesBoolVector, parameters,sde)
+            else: # Get Leja points
+                self.setLejaPoints(pdf, index, parameters,sde)
                 if any(self.lejaPoints) == None: #Getting Leja points failed
                      self.computeUpdateWithAlternativeMethod()
                      print("failed Leja")
-                else:
+                else: # Continue with integration, try to use Leja points from last step
                     value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index, sde)
                     if condNumber < 1.1: # Leja points worked really well, likely okay for next time step
                         self.LejaPointIndicesBoolVector[index] = True
                         self.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
-                    else: # try again with better leja points
+                    else: # Continue with integration, use new leja points
                         self.LejaPointIndicesBoolVector[index] = False
-                        self.setLejaPoints(pdf, index, self.LejaPointIndicesBoolVector, parameters,sde)
+                        self.setLejaPoints(pdf, index, parameters,sde)
                         value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index, sde)
                         if condNumber < 1.1: # Leja points worked really well, likely okay for next time step
                             self.LejaPointIndicesBoolVector[index] = True
                             self.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
-                        else:
-                            print("reused LP")
-                        if condNumber > parameters.conditionNumForAltMethod:
+                        if condNumber > parameters.conditionNumForAltMethod: # Nothing worked, use alt method
                             self.computeUpdateWithAlternativeMethod()
 
             newPdf.append(np.copy(value))
