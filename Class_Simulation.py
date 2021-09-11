@@ -66,6 +66,7 @@ class Integrator:
         self.setUpPolnomialFamily(sde)
         self.laplaceApproximation = LaplaceApproximation(sde)
 
+
     def setUpPolnomialFamily(self, sde):
         self.poly = HermitePolynomials(rho=0)
         d=sde.dimension
@@ -87,11 +88,11 @@ class Integrator:
             orderedPoints, distances, indicesOfOrderedPoints = findNearestKPoints(pdf.meshCoordinates[index], pdf.meshCoordinates, parameters.numQuadFit, getIndices=True)
             quadraticFitMeshPoints = orderedPoints[:parameters.numQuadFit]
             pdfValuesOfQuadraticFitPoints = pdf.integrandBeforeDividingOut[indicesOfOrderedPoints]
-            self.laplaceApproximation.copmuteleastSquares(quadraticFitMeshPoints, pdfValuesOfQuadraticFitPoints, pdf, sde, parameters)
+            self.laplaceApproximation.copmuteleastSquares(quadraticFitMeshPoints, pdfValuesOfQuadraticFitPoints, sde.dimension)
         else:
             quadraticFitMeshPoints = pdf.meshCoordinates[self.LejaPointIndicesMatrix[index,:].astype(int)]
             pdfValuesOfQuadraticFitPoints = pdf.integrandBeforeDividingOut[self.LejaPointIndicesMatrix[index,:].astype(int)]
-            self.laplaceApproximation.copmuteleastSquares(quadraticFitMeshPoints, pdfValuesOfQuadraticFitPoints, pdf, sde, parameters)
+            self.laplaceApproximation.copmuteleastSquares(quadraticFitMeshPoints, pdfValuesOfQuadraticFitPoints,sde.dimension)
 
         if np.any(self.laplaceApproximation.constantOfGaussian)==None: # Fit failed
             return False
@@ -99,7 +100,7 @@ class Integrator:
             return True
 
     def divideOutGaussianAndSetIntegrand(self, pdf, sde, index):
-        gaussianToDivideOut = self.laplaceApproximation.ComputeDividedOut(pdf, sde)
+        gaussianToDivideOut = self.laplaceApproximation.ComputeDividedOut(pdf, sde.dimension)
         pdf.setIntegrandAfterDividingOut(pdf.integrandBeforeDividingOut/gaussianToDivideOut)
 
 
