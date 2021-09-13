@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 
 dimension = 1
-beta = 3.5
-radius = 2
+beta = 3
+radius = 3
 kstepMin= 0.06
 kstepMax = 0.065
 h = 0.01
@@ -19,10 +19,10 @@ def driftFunction(mesh):
         mesh = np.expand_dims(mesh, axis=0)
     # return 0*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     # return -1*mesh
-      return np.ones(np.shape(mesh))
+      return np.zeros(np.shape(mesh))
 
 def diffusionFunction(mesh):
-    return np.expand_dims(np.asarray(0.5*np.ones((np.size(mesh)))),1)
+    return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     # return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
 

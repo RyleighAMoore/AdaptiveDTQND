@@ -114,7 +114,7 @@ def mydrift(mesh):
         mesh = np.expand_dims(mesh, axis=0)
     # return 0*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     # return -1*mesh
-      return np.ones(np.shape(mesh))
+      return np.zeros(np.shape(mesh))
 
 def mydiff(mesh):
     return np.expand_dims(np.asarray(1*np.ones((np.size(mesh)))),1)
@@ -123,7 +123,7 @@ def mydiff(mesh):
 
 ApproxSoln = False
 timeStep = [0.01]
-EndTime =1
+EndTime =0.05
 kstepMin = 0.06 # lambda
 kstepMax = kstepMin # Lambda
 beta = 3
