@@ -40,11 +40,11 @@ class Simulation():
         self.meshTrajectory.append(np.copy(pdf.meshCoordinates))
         numSteps = int(self.endTime/parameters.h)
         for i in range(1, numSteps):
-            if i>2:
-                self.integrator.checkIncreaseSizeStorageMatrices(pdf,parameters)
-                self.meshUpdater.addPointsToMeshProcedure(pdf, parameters, self, sde)
-                if i>=9 and i%25==1:
-                    self.meshUpdater.removePointsFromMeshProcedure(pdf, self, parameters, sde)
+            # if i>2:
+            #     self.integrator.checkIncreaseSizeStorageMatrices(pdf,parameters)
+            #     self.meshUpdater.addPointsToMeshProcedure(pdf, parameters, self, sde)
+            #     if i>=9 and i%25==1:
+            #         self.meshUpdater.removePointsFromMeshProcedure(pdf, self, parameters, sde)
 
             self.computeTimestep(sde, pdf, parameters)
 
@@ -85,7 +85,7 @@ class Integrator:
 
 
     def checkIncreaseSizeStorageMatrices(self, pdf, parameters):
-        sizer = 2*pdf.meshLength
+        sizer = 5*pdf.meshLength
         if pdf.meshLength*2 >= np.size(self.TransitionMatrix,1):
             GMat2 = np.empty([2*sizer, 2*sizer])*np.NaN
             GMat2[:pdf.meshLength, :pdf.meshLength]= self.TransitionMatrix[:pdf.meshLength, :pdf.meshLength]

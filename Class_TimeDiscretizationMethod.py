@@ -15,7 +15,7 @@ class TimeDiscretizationMethod():
 
 class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
     def __init__(self, pdf):
-        self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*2
+        self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*5
 
     # def removePoints(self, index):
     #     self.TransitionMatrix = np.delete(self.TransitionMatrix, index,0)
