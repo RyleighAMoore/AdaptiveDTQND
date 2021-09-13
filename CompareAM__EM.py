@@ -123,7 +123,7 @@ def mydiff(mesh):
 
 ApproxSoln = False
 timeStep = [0.01]
-EndTime =0.05
+EndTime =1
 kstepMin = 0.06 # lambda
 kstepMax = kstepMin # Lambda
 beta = 3

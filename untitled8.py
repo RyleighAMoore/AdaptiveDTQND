@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 dimension = 1
 beta = 3
-radius = 3
+radius = 2
 kstepMin= 0.06
 kstepMax = 0.065
 h = 0.01
