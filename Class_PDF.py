@@ -33,8 +33,6 @@ class PDF:
     def setIntegrandAfterDividingOut(self, integrandAfterDividingOut):
         self.integrandAfterDividingOut = integrandAfterDividingOut
 
-
-
     def setInitialConditionMeshCoordinates(self, sde, parameters):
         self.meshCoordinates = nDGridMeshCenteredAtOrigin(sde.dimension, parameters.radius, parameters.kstepMin)
         self.meshLength = len(self.meshCoordinates)
