@@ -16,11 +16,11 @@ endTime =1
 
 dimension = 3
 beta = 3
-radius =0.6
-kstepMin= 0.08
-kstepMax = 0.09
+radius =0.4
+kstepMin= 0.1
+kstepMax = 0.11
 h = 0.01
-endTime = 0.01
+endTime = 0.1
 
 # def driftFunction(mesh):
 #       if mesh.ndim ==1:
@@ -38,16 +38,16 @@ def driftFunction(mesh):
     if mesh.ndim ==1:
         mesh = np.expand_dims(mesh, axis=0)
     dr = np.zeros(np.shape(mesh))
-    dr[:,0] = 2
+    dr[:,0] = 0.5
     return dr
 
 def diffusionFunction(mesh):
     if mesh.ndim ==1:
         mesh = np.expand_dims(mesh, axis=0)
     if dimension ==1:
-        return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+        return 0.5*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     else:
-        return 1*np.diag(np.ones(dimension))
+        return 0.5*np.diag(np.ones(dimension))
 
 
 spatialDiff = False
@@ -133,7 +133,7 @@ from exactSolutions import Solution
 
 trueSoln = []
 for i in range(len(simulation.meshTrajectory)): #diff, drift, mesh, t, dim
-    truepdf = Solution(1, 2, simulation.meshTrajectory[i], (i+1)*h, dimension)
+    truepdf = Solution(0.5, 0.5, simulation.meshTrajectory[i], (i+1)*h, dimension)
     # truepdf = solution(xvec,-1,T)
     trueSoln.append(np.squeeze(np.copy(truepdf)))
 

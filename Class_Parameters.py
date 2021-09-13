@@ -1,6 +1,6 @@
 class Parameters:
     def __init__(self,sde, beta, radius, kstepMin, kstepMax, h, timeDiscretizationType = "EM"):
-        self.conditionNumForAltMethod = 10
+        self.conditionNumForAltMethod = 8
         self.h = h
         self.kstepMin = kstepMin
         self.minDistanceBetweenPoints = kstepMin
