@@ -31,7 +31,6 @@ class MeshUpdater:
             count = 0
             MeshOrig = np.copy(pdf.meshCoordinates)
             PdfOrig = np.copy(pdf.pdfVals)
-
             if sde.dimension == 1: # 1D
                 left = np.argmin(pdf.meshCoordinates)
                 right = np.argmax(pdf.meshCoordinates)

@@ -25,10 +25,9 @@ import time
 
 random.seed(10)
 
-
 def addPointsToMeshProcedure(Mesh, Pdf, triangulation, kstep, h, poly, GMat, addPointsToBoundaryIfBiggerThanTolerance, removeZerosValuesIfLessThanTolerance, minDistanceBetweenPoints,maxDistanceBetweenPoints,drift, diff, SpatialDiff, TimeStepType, dimension, numPointsForLejaCandidates):
     '''If the mesh is changed, these become 1 so we know to recompute the triangulation'''
-    changedBool2 = 0 
+    changedBool2 = 0
     changedBool1 = 0
     meshSize = len(Mesh)
     Mesh, Pdf, triangulation, changedBool1 = addPointsToBoundary(Mesh, Pdf, triangulation,addPointsToBoundaryIfBiggerThanTolerance, removeZerosValuesIfLessThanTolerance, minDistanceBetweenPoints,maxDistanceBetweenPoints,h, drift, diff)
@@ -45,7 +44,7 @@ def addPointsToMeshProcedure(Mesh, Pdf, triangulation, kstep, h, poly, GMat, add
             GMat = fun.AddPointsToGAndersonMat(Mesh, indices, h, GMat, diff, drift, SpatialDiff, dimension, minDistanceBetweenPoints)
             end = time.time()
             print(end-start)
-            
+
             # start1 = time.time()
             # GMat3 = fun.GenerateAndersonMatMatrix(h, drift, diff, Mesh, dimension, 500, minDistanceBetweenPoints, SpatialDiff)
             # end1 = time.time()
@@ -112,20 +111,20 @@ def removeSmallPoints(Mesh, Pdf, tri, boundaryOnlyBool, GMat, LPMat, LPMatBool, 
         GMat = np.delete(GMat, index,0)
         GMat = np.delete(GMat, index,1)
         largerLPMat = np.zeros(np.shape(LPMat))
-        
+
         for ii in index:
             LPUpdateList = np.where(LPMat == ii)[0]
             for i in LPUpdateList:
                 LPMatBool[i] = False
             largerLP = LPMat >= ii
             largerLPMat = largerLPMat + largerLP
-        
+
         LPMat = LPMat - largerLPMat
-        
+
         LPMatBool = np.delete(LPMatBool, index,0)
         LPMat = np.delete(LPMat, index, 0)
         tri = houseKeepingAfterAdjustingMesh(Mesh, tri)
-    
+
     return Mesh, Pdf, GMat, LPMat, LPMatBool, tri
 
 def houseKeepingAfterAdjustingMesh(Mesh, tri):
@@ -153,7 +152,7 @@ def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerTha
             mm = np.min(Mesh)
             MM = np.max(Mesh)
             newPointsBool = True
-        
+
             for i in range(1,5):
                 Mesh = np.append(Mesh, np.asarray([[mm-i*radius]]), axis=0)
                 newPoints.append(np.asarray(mm-i*radius))
@@ -162,8 +161,8 @@ def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerTha
             mm = np.min(Mesh)
             MM = np.max(Mesh)
             newPointsBool = True
-        
-            for i in range(1,5):                
+
+            for i in range(1,5):
                 Mesh = np.append(Mesh, np.asarray([[MM+i*radius]]), axis=0)
                 newPoints.append(np.asarray(MM+i*radius))
         if newPointsBool:
@@ -174,9 +173,9 @@ def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerTha
             Pdf = np.append(Pdf, interp1)
             # Pdf = np.append(Pdf, interp2)
             ChangedBool=1
-    
-    else: 
-        while count < 1: 
+
+    else:
+        while count < 1:
             count = count + 1
             numPointsAdded = 0
             boundaryPointsToAddAround = checkIntegrandForAddingPointsAroundBoundaryPoints(Pdf, addPointsToBoundaryIfBiggerThanTolerance, Mesh, triangulation,maxDistanceBetweenPoints)
@@ -195,11 +194,11 @@ def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerTha
                         nearestPoint,distToNearestPoint, idx = UM.findNearestPoint(newPoint, mesh2)
                     else:
                         nearestPoint,distToNearestPoint, idx = UM.findNearestPoint(newPoint, Mesh)
-                  
+
                     if distToNearestPoint >= minDistanceBetweenPoints and distToNearestPoint <= maxDistanceBetweenPoints:
                         points.append(newPoint)
 
-                newPoints = points                
+                newPoints = points
                 if len(newPoints)>0:
                     Mesh = np.append(Mesh, newPoints, axis=0)
                     ChangedBool = 1
@@ -211,7 +210,7 @@ def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerTha
 
                 # interp = np.exp(interp)
                 interp[interp<0] = np.min(Pdf)
-                # interp = np.ones(len(newPoints))*removeZerosValuesIfLessThanTolerance 
+                # interp = np.ones(len(newPoints))*removeZerosValuesIfLessThanTolerance
                 # interp = np.ones(len(newPoints))*10**(-8)
                 Pdf = np.append(Pdf, interp)
                 triangulation = houseKeepingAfterAdjustingMesh(Mesh, triangulation)
@@ -220,7 +219,7 @@ def addPointsToBoundary(Mesh, Pdf, triangulation, addPointsToBoundaryIfBiggerTha
 
 def addPointsRadially(point, mesh, numPointsToAdd, minDistanceBetweenPoints, maxDistanceBetweenPoints):
     radius = minDistanceBetweenPoints/2 + maxDistanceBetweenPoints/2
-    points = [] 
+    points = []
     noise = random.uniform(0, 1)*2*np.pi
     dTheta = 2*np.pi/numPointsToAdd
     numAdded = 0
@@ -230,19 +229,19 @@ def addPointsRadially(point, mesh, numPointsToAdd, minDistanceBetweenPoints, max
         for i in range(numPointsToAdd):
             newPointX = radius*np.cos(i*dTheta + noise) + pointX
             newPointY = radius*np.sin(i*dTheta + noise) + pointY
-            
+
             newPoint = np.expand_dims(np.hstack((newPointX, newPointY)),1)
             if len(points)>0:
                 mesh2 = np.vstack((mesh,points))
                 nearestPoint,distToNearestPoint, idx = UM.findNearestPoint(newPoint, mesh2)
             else:
                 nearestPoint,distToNearestPoint, idx = UM.findNearestPoint(newPoint, mesh)
-          
+
             if distToNearestPoint >= minDistanceBetweenPoints and distToNearestPoint <= maxDistanceBetweenPoints:
                 points.append([newPointX, newPointY])
                 numAdded +=1
         return np.asarray(points)
-   
+
     if np.size(mesh,1)==3:
         pointsSphere = fibonacci_sphere(10)
         r = radius
@@ -263,10 +262,10 @@ def addPointsRadially(point, mesh, numPointsToAdd, minDistanceBetweenPoints, max
             if distToNearestPoint >= minDistanceBetweenPoints and distToNearestPoint <= maxDistanceBetweenPoints:
                 points.append(newPoint)
                 mesh = np.vstack((mesh,newPoint))
-        
+
         return np.asarray(points)
- 
-    
+
+
 def ND_Alpha_Shape(mesh, triangulation, alpha, dimension):
     # Del = Delaunay(mesh) # Form triangulation
     Del = triangulation
@@ -274,15 +273,15 @@ def ND_Alpha_Shape(mesh, triangulation, alpha, dimension):
     for verts in Del.simplices:
         c, r = CS.circumsphere(mesh[verts])
         radii.append(r)
-      
+
     r = np.asarray(radii)
     r = np.nan_to_num(r)
 
     tetras = Del.vertices[r<alpha,:]
-    
+
     vals = np.asarray(list(range(0,dimension+1)))
     TriComb = np.asarray(list(combinations(vals, dimension)))
-    
+
     Triangles = tetras[:,TriComb].reshape(-1,dimension)
     Triangles = np.sort(Triangles,axis=1)
     # Remove triangles that occurs twice, because they are within shapes
@@ -292,11 +291,11 @@ def ND_Alpha_Shape(mesh, triangulation, alpha, dimension):
     #edges
     vals = np.asarray(list(range(0,dimension)))
     EdgeComb = np.asarray(list(combinations(vals, dimension-1)))
-    
+
     Edges=Triangles[:,EdgeComb].reshape(-1,dimension-1)
     Edges=np.sort(Edges,axis=1)
     Edges=np.unique(Edges,axis=0)
-    
+
     Vertices = np.unique(Edges)
     return Vertices
 
@@ -312,7 +311,7 @@ def ND_Alpha_Shape(mesh, triangulation, alpha, dimension):
 #     the indices in the points array.
 #     """
 #     assert points.shape[0] > 3, "Need at least four points"
-    
+
 #     def add_edge(edges, i, j):
 #         """
 #         Add an edge between the i-th and j-th points,
@@ -351,18 +350,18 @@ def ND_Alpha_Shape(mesh, triangulation, alpha, dimension):
 #             add_edge(edges, ia, ib)
 #             add_edge(edges, ib, ic)
 #             add_edge(edges, ic, ia)
-            
+
 #     # plt.figure()
 #     # plt.plot(points[:, 0], points[:, 1], '.')
 #     # for i, j in edges:
 #     #     plt.plot(points[[i, j], 0], points[[i, j], 1], 'r')
 #     # plt.show()
-    
+
 #     aa = list(chain(edges))
 #     out = [item for t in aa for item in t]
 #     pointsOnBoundary = np.sort(out)
 #     pointsOnBoundary = pointsOnBoundary[1::2]  # Skip every other element to remove repeated elements
-    
+
 #     return pointsOnBoundary
 
 
@@ -380,7 +379,7 @@ def ND_Alpha_Shape(mesh, triangulation, alpha, dimension):
 
 #     tetra = Delaunay(pos)
 #     # Find radius of the circumsphere.
-#     # By definition, radius of the sphere fitting inside the tetrahedral needs 
+#     # By definition, radius of the sphere fitting inside the tetrahedral needs
 #     # to be smaller than alpha value
 #     # http://mathworld.wolfram.com/Circumsphere.html
 #     tetrapos = np.take(pos,tetra.vertices,axis=0)

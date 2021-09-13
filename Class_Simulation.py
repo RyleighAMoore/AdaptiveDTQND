@@ -40,11 +40,11 @@ class Simulation():
         self.meshTrajectory.append(np.copy(pdf.meshCoordinates))
         numSteps = int(self.endTime/parameters.h)
         for i in range(1, numSteps):
-            # if i>2:
-            #     self.integrator.checkIncreaseSizeStorageMatrices(pdf,parameters)
-            #     self.meshUpdater.addPointsToMeshProcedure(pdf, parameters, self, sde)
-            #     if i>=9 and i%25==1:
-            #         self.meshUpdater.removePointsFromMeshProcedure(pdf, self, parameters, sde)
+            if i>2:
+                self.integrator.checkIncreaseSizeStorageMatrices(pdf,parameters)
+                self.meshUpdater.addPointsToMeshProcedure(pdf, parameters, self, sde)
+                if i>=9 and i%25==1:
+                    self.meshUpdater.removePointsFromMeshProcedure(pdf, self, parameters, sde)
 
             self.computeTimestep(sde, pdf, parameters)
 
