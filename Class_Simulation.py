@@ -74,7 +74,7 @@ class Integrator:
         self.conditionNumberForAcceptingLejaPointsAtNextTimeStep = 1.1
         self.setIdentityScaling(sde.dimension)
         self.setUpPolnomialFamily(sde.dimension)
-        self.altMethodLejaPoints, temp = getLejaPoints(10, np.zeros((sde.dimension,1)), self.poly, num_candidate_samples=5000, candidateSampleMesh = [], returnIndices = False)
+        self.altMethodLejaPoints, temp = getLejaPoints(parameters.numLejas, np.zeros((sde.dimension,1)), self.poly, num_candidate_samples=5000, candidateSampleMesh = [], returnIndices = False)
         self.laplaceApproximation = LaplaceApproximation(sde)
 
     def removePoints(self, index):
@@ -158,8 +158,8 @@ class Integrator:
             self.indicesOfLejaPoints = LejaIndices
         else: # Need Leja points.
             mappedMesh = map_to_canonical_space(pdf.meshCoordinates, self.laplaceApproximation.scalingForGaussian)
-            self.lejaPoints, self.lejaPointsPdfVals,self.indicesOfLejaPoints = LP.getLejaSetFromPoints(self.identityScaling, mappedMesh, parameters.numLejas, self.poly, pdf.integrandAfterDividingOut, sde.diffusionFunction, parameters.numPointsForLejaCandidates)
-            if math.isnan(self.lejaPoints[0]): # Failed to get Leja points
+            self.lejaPoints, self.lejaPointsPdfVals,self.indicesOfLejaPoints,self.lejaSuccess = LP.getLejaSetFromPoints(self.identityScaling, mappedMesh, parameters.numLejas, self.poly, pdf.integrandAfterDividingOut, sde.diffusionFunction, parameters.numPointsForLejaCandidates)
+            if self.lejaSuccess ==False: # Failed to get Leja points
                 self.lejaPoints = None
                 self.lejaPointsPdfVals = None
                 self.idicesOfLejaPoints = None
@@ -175,7 +175,7 @@ class Integrator:
 
     def computeUpdateWithAlternativeMethod(self, sde, parameters, pdf, index):
         scaling = GaussScale(sde.dimension)
-        scaling.setMu(pdf.meshCoordinates[index,:]+parameters.h*sde.driftFunction(pdf.meshCoordinates[index,:]))
+        scaling.setMu(np.asarray(pdf.meshCoordinates[index,:]+parameters.h*sde.driftFunction(pdf.meshCoordinates[index,:])).T)
         scaling.setCov((parameters.h*sde.diffusionFunction(scaling.mu*sde.diffusionFunction(scaling.mu).T).T))
         mesh12 = map_from_canonical_space(self.altMethodLejaPoints, scaling)
         meshNearest, distances, indx = findNearestKPoints(scaling.mu, pdf.meshCoordinates,parameters.numQuadFit, getIndices = True)
@@ -215,7 +215,7 @@ class Integrator:
                 value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
             else: # Get Leja points
                 self.setLejaPoints(pdf, index, parameters,sde)
-                if any(self.lejaPoints) == None: #Getting Leja points failed
+                if self.lejaSuccess == False: #Getting Leja points failed
                      value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
                      print("failed Leja")
                 else: # Continue with integration, try to use Leja points from last step

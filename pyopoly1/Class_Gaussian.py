@@ -6,7 +6,7 @@ class GaussScale:
         self.dimension = dimension
         self.mu = np.zeros((dimension,1))
         self.cov = np.zeros((dimension, dimension))
-        self.invCov = float('NaN')
+        self.invCov = None
 
     def getSigma(self):
         return np.sqrt(np.diagonal(self.cov))
@@ -26,11 +26,13 @@ class GaussScale:
             self.cov[i,i] = sigmas[i]**2
 
     def ComputeGaussian(self, pdf, sde):
-        mu = np.repeat(self.mu, pdf.meshLength, axis = 0)
-        invCov= self.invCov
-        norm = np.zeros(pdf.meshLength)
-        for dim in range(self.dimension):
-            norm += (pdf.meshCoordinates[:,dim] - mu[:,dim])**2
+        vals = []
         const = 1/(np.sqrt((2*np.pi)**sde.dimension*abs(np.linalg.det(self.cov))))
-        soln = const*np.exp(-1/2*invCov*norm).T
-        return np.squeeze(soln)
+        for x in pdf.meshCoordinates:
+            x = np.expand_dims(x,1)
+            temp = (x-self.mu)
+            val = temp.T@self.invCov@temp
+            vals.append(np.squeeze(val))
+        soln = const*np.exp(-1/2*np.asarray(vals)).T
+        return soln
+

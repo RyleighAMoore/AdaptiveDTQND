@@ -129,7 +129,7 @@ class LaplaceApproximation:
             for i in range(dimension):
                 vals2 += self.leastSqauresFit[count]*pdf.meshCoordinates[:,i]**2
                 count +=1
-            for i,k in combinations:
+            for i,k in self.combinationOfBasisFunctionsList:
                 vals2 += self.leastSqauresFit[count]*pdf.meshCoordinates[:,i]*pdf.meshCoordinates[:,k]
                 count +=1
             for i in range(dimension):

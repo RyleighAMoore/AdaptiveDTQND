@@ -67,11 +67,12 @@ class MeshUpdater:
                     boundaryPointsToAddAround = self.checkIntegrandForAddingPointsAroundBoundaryPoints(pdf, dimension, parameters, sde)
                     iivals = np.expand_dims(np.arange(len(pdf.meshCoordinates)),1)
                     index = iivals[boundaryPointsToAddAround]
-                    candPoints = M.NDGridMesh(sde.dimension, parameters.minDistanceBetweenPoints/2 + parameters.maxDistanceBetweenPoints/2, parameters.maxDistanceBetweenPoints, UseNoise = False)
+                    if len(index)>0:
+                        candPoints = M.NDGridMesh(sde.dimension,parameters.maxDistanceBetweenPoints*2, parameters.maxDistanceBetweenPoints*2.5, UseNoise = False)
                     for indx in index:
                         # newPoints = addPointsRadially(Mesh[indx,:], Mesh, 8, minDistanceBetweenPoints, maxDistanceBetweenPoints)
                         curr =  np.repeat(np.expand_dims(pdf.meshCoordinates[indx,:],1), np.size(candPoints,0), axis=1)
-                        newPoints = candPoints  - curr.T
+                        newPoints = -candPoints  + curr.T
                         points = []
                         for i in range(len(newPoints)):
                             newPoint = newPoints[i,:]
@@ -81,7 +82,7 @@ class MeshUpdater:
                             else:
                                 nearestPoint,distToNearestPoint, idx = UM.findNearestPoint(newPoint, pdf.meshCoordinates)
 
-                            if distToNearestPoint >= parameters.minDistanceBetweenPoints and distToNearestPoint <= parameters.maxDistanceBetweenPoints:
+                            if distToNearestPoint >= parameters.minDistanceBetweenPoints:
                                 points.append(newPoint)
 
                         newPoints = points
@@ -93,7 +94,7 @@ class MeshUpdater:
                         newPoints = pdf.meshCoordinates[-numPointsAdded:,:]
                         interp = [griddata(MeshOrig, PdfOrig, newPoints, method='linear', fill_value=np.min(pdf.pdfVals))][0]
                         interp[interp<0] = np.min(pdf.pdfVals)
-                        pdf.addPointsToPdf(newPoints)
+                        pdf.addPointsToPdf(interp)
                         self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)
 
     def addPointsToMeshProcedure(self, pdf, parameters, simulation, sde):
@@ -121,7 +122,7 @@ class MeshUpdater:
     def checkIntegrandForAddingPointsAroundBoundaryPoints(self, pdf, dimension, parameters, sde):
         '''Check if the points on the edge are too big and we need more points around them
         Uses alpha hull to get the boundary points if boundaryOnly is True.'''
-        valueList = -1*pdf.meshLength # Set to small values for placeholder
+        valueList = -1*np.ones(pdf.meshLength) # Set to small values for placeholder
         pointsOnEdge = self.getBoundaryPoints(pdf, dimension, parameters, sde)
         for i in pointsOnEdge:
             valueList[i]=pdf.pdfVals[i]

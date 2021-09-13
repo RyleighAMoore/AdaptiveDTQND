@@ -6,7 +6,7 @@ np.random.seed(10)
 def NDGridMesh(dimension, stepsize, radius, UseNoise = True):
     subdivision = radius/stepsize
     step = radius/subdivision
-    grid= np.mgrid[tuple(slice(step - radius, radius, step) for _ in range(dimension))]
+    grid= np.mgrid[tuple(slice(0, radius, stepsize) for _ in range(dimension))]
     mesh = []
     for i in range(grid.shape[0]):
         new = grid[i].ravel()
@@ -14,25 +14,15 @@ def NDGridMesh(dimension, stepsize, radius, UseNoise = True):
             noise = np.random.normal(0,1, size = (len(grid),2))
             meshSpacing = stepsize
             noise = np.random.uniform(-meshSpacing, meshSpacing,size = (len(new)))
-            
+
             shake = 0.1*stepsize
             noise = -meshSpacing*shake +(meshSpacing*shake - - meshSpacing*shake)/(np.max(noise)-np.min(noise))*(noise-np.min(noise))
             new = new+noise
         mesh.append(new)
     grid = np.asarray(mesh).T
-    # noise = np.random.uniform(-0.001, 0.001, size = (np.shape(grid)))
-    # grid = grid+noise
-    distance = 0
-    for i in range(dimension):
-        distance += grid[:,i]**2
-    distance = distance**(1/2)
-    distance = distance < radius
-    # grid = np.delete(grid, distance,axis=0)
-    grid  =  grid[distance,:]
-    # for i in reversed(range(len(grid))):
-    #     if distance[i] > radius:
-    #         grid = np.delete(grid, grid[i], axis=0)
-    
+    diff = -(stepsize/2)*np.ones(np.shape(grid))
+    grid = grid + diff
+
     return grid
 
 
@@ -41,13 +31,13 @@ def getICMesh(radius, stepSize, h):
     meshSpacing = stepSize #DM.separationDistance(mesh)*2
     grid, stepsX, stepsY = UM.generateOrderedGridCenteredAtZero(-radius*2, radius*2, -radius*2, radius*2, meshSpacing , includeOrigin=True)
     noise = np.random.normal(0,1, size = (len(grid),2))
-    
+
     noise = np.random.uniform(-meshSpacing, meshSpacing,size = (len(grid),2))
-    
+
     shake = 0
     noise = -meshSpacing*shake +(meshSpacing*shake - - meshSpacing*shake)/(np.max(noise)-np.min(noise))*(noise-np.min(noise))
     grid = grid+noise
-    
+
     x,y = grid.T
     X = []
     Y = []
@@ -55,7 +45,7 @@ def getICMesh(radius, stepSize, h):
         if np.sqrt(x[point]**2 + y[point]**2) < radius:
             X.append(x[point])
             Y.append(y[point])
-    
+
     newGrid = np.vstack((X,Y))
     x,y = newGrid
 
@@ -70,17 +60,17 @@ def getICMeshRadius(radius, stepSize, h, dimension):
             noise = 0.1*np.random.normal(0,1)
             newPointX = newPointX + stepSize#+noise
             newGrid = np.vstack((newGrid, newPointX))
-        
+
         newPointX = 0
         while newPointX > -radius:
             newPointX = newPointX - stepSize
             newGrid = np.vstack((newGrid, newPointX))
-        
-        
+
+
     if dimension ==2: # radial initial condition
         times = np.ceil(radius/stepSize)
         newGrid = np.asarray([0,0])
-        r = stepSize 
+        r = stepSize
         count = 1
         while times >0:
             times = times -1
@@ -93,7 +83,7 @@ def getICMeshRadius(radius, stepSize, h, dimension):
                 newGrid = np.vstack((newGrid, (newPointX, newPointY)))
             r = r+stepSize
             count = count+1
-            
+
     if dimension ==3:
         num = radius*2/stepSize
         x = np.linspace(-radius,radius, num=int(num))
@@ -103,10 +93,10 @@ def getICMeshRadius(radius, stepSize, h, dimension):
         newGrid = list(zip(*(dim.flat for dim in mesh)))
         noise = np.random.uniform(-0.001, 0.001, size = (len(newGrid),3))
         newGrid = newGrid +noise
-        
+
     #     times = np.ceil(radius/stepSize)
     #     newGrid = np.asarray([[0, 0, 0]])
-    #     r = stepSize 
+    #     r = stepSize
     #     count = 1
     #     while times > 0:
     #         times = times -1
@@ -144,7 +134,7 @@ def getICMeshRadius(radius, stepSize, h, dimension):
     return np.asarray(newGrid)
 
 
-        
+
 
 if __name__ == "__main__":
     g = getICMeshRadius(0.1, 0.05, 0.01, 3)
@@ -154,7 +144,7 @@ if __name__ == "__main__":
     fig = plt.figure()
     ax = plt.axes(projection='3d')
     ax.scatter3D(g[:,0], g[:,1], g[:,2], '.');
-    
+
     # for i in range(len(g)):
     #     for j in range(len(g)):
     #         if i != j:
@@ -163,7 +153,7 @@ if __name__ == "__main__":
     #                 print(g[i], g[j])
     #                 print(i,j)
     #                 print(dist)
-    
-    
+
+
     # g = getICMeshRadius(0.5, 0.1, 0.01, 1)
     # gg = getICMesh(0.5, 0.1, 0.01)
