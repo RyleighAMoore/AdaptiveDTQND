@@ -12,6 +12,12 @@ class PDF:
         self.setInitialCondition(sde, parameters)
 
 
+    def addPointsToMesh(self, newPoints):
+        self.meshCoordinates = np.append(self.meshCoordinates, newPoints, axis=0)
+        self.meshLength = len(self.meshCoordinates)
+
+    def addPointsToPdf(self, newPoints):
+        self.pdfVals = np.append(self.pdfVals, newPoints)
 
     def setIntegrandBeforeDividingOut(self, integrandBeforeDividingOut):
         self.integrandBeforeDividingOut = integrandBeforeDividingOut

@@ -94,8 +94,8 @@ class SimpleDriftSDE:
 
 dimension =1
 sde = SimpleDriftSDE(0,1,dimension)
-mydrift = sde.Drift
-mydiff = sde.Diff
+# mydrift = sde.Drift
+# mydiff = sde.Diff
 
 # def mydrift(mesh):
 #       if mesh.ndim ==1:
@@ -106,6 +106,18 @@ mydiff = sde.Diff
 
 # def mydiff(mesh):
 #     return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+#     return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+#     return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
+
+def mydrift(mesh):
+      if mesh.ndim ==1:
+        mesh = np.expand_dims(mesh, axis=0)
+    # return 0*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+    # return -1*mesh
+      return np.ones(np.shape(mesh))
+
+def mydiff(mesh):
+    return np.expand_dims(np.asarray(0.5*np.ones((np.size(mesh)))),1)
     # return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
 
@@ -114,8 +126,8 @@ timeStep = [0.01]
 EndTime =1
 kstepMin = 0.06 # lambda
 kstepMax = kstepMin # Lambda
-beta = 5
-radius = 3.75 # R
+beta = 3
+radius = 2 # R
 SpatialDiff = False
 conditionNumForAltMethod = 10
 NumLejas = 5
@@ -166,8 +178,8 @@ for i in timeStep:
     trueSoln = []
     from exactSolutions import OneDdiffusionEquation
     for i in range(len(Meshes)):
-        truepdf = sde.Solution(Meshes[i], (i+1)*h)
-        # truepdf = OneDdiffusionEquation(Meshes[i], mydiff(Meshes[i]), (i+1)*h, mydrift(Meshes[i]))
+        # truepdf = sde.Solution(Meshes[i], (i+1)*h)
+        truepdf = OneDdiffusionEquation(Meshes[i], mydiff(Meshes[i]), (i+1)*h, mydrift(Meshes[i]))
         # truepdf = solution(xvec,-1,T)
         trueSoln.append(np.squeeze(np.copy(truepdf)))
 

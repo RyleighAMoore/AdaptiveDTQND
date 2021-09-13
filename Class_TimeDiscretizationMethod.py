@@ -7,18 +7,42 @@ class TimeDiscretizationMethod():
     def computeTransitionMatrix(self):
         pass
 
+    def AddPointToG(self):
+        pass
 
 class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
-    def __init__(self):
-        self.sizeTransitionMatrixIncludingEmpty = None
+    def __init__(self, pdf):
+        self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*2
 
     def computeTransitionMatrix(self, pdf, sde, h):
-        self.sizeTransitionMatrixIncludingEmpty = pdf.meshLength
         GMat = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
         for i in range(len(pdf.meshCoordinates)):
             v = G(i,pdf.meshCoordinates, h, sde.driftFunction, sde.diffusionFunction, sde.spatialDiff)
             GMat[i,:len(v)] = v
         return GMat
+
+    def AddPointToG(self, meshPartial, newPointindex, parameters, sde, pdf, integrator):
+        newRow = G(newPointindex, meshPartial, parameters.h, sde.driftFunction, sde.diffusionFunction, sde.spatialDiff)
+        integrator.TransitionMatrix[newPointindex,:len(newRow)] = newRow
+        if sde.dimension == 1:
+            var = sde.diffusionFunction(meshPartial[newPointindex,:])**2*parameters.h
+            mean = meshPartial[newPointindex,:]+ sde.driftFunction(pdf.meshCoordinates[newPointindex,:])*parameters.h
+            newCol = 1/(np.sqrt(2*np.pi*var))*np.exp(-(meshPartial-mean)**2/(2*var))
+            integrator.TransitionMatrix[:len(newCol),newPointindex] = np.squeeze(newCol)
+            return
+            #Now, add new column
+        mu = meshPartial[newPointindex,:]+sde.driftFunction(np.expand_dims(meshPartial[newPointindex,:],axis=0))*parameters.h
+        mu = mu[0]
+        dfn = sde.diffusionFunction(meshPartial[newPointindex,:])
+        cov = dfn@dfn.T*parameters.h
+        newCol = np.empty(pdf.meshLength)
+        const = 1/(np.sqrt((2*np.pi)**sde.dimension*abs(np.linalg.det(cov))))
+        covInv = np.linalg.inv(cov)
+        for j in range(len(meshPartial)):
+            x = meshPartial[j,:]
+            Gs = np.exp(-1/2*((x-mu).T@covInv@(x.T-mu.T)))
+            newCol[j] = (Gs)
+        integrator.TransitionMatrix[:len(newCol),newPointindex] = newCol*const
 
 
 from Class_PDF import nDGridMeshCenteredAtOrigin

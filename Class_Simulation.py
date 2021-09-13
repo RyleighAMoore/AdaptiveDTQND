@@ -8,22 +8,24 @@ from Class_TimeDiscretizationMethod import EulerMaruyamaTimeDiscretizationMethod
 from Class_PDF import PDF
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-
+from Class_MeshUpdater import MeshUpdater
 
 class Simulation():
     def __init__(self, sde, parameters, endTime):
+        self.timeDiscretizationMethod = None
         self.pdf = PDF(sde, parameters)
         self.endTime = endTime
         self.pdfTrajectory = []
         self.meshTrajectory = []
-        self.setTimeDiscretizationDriver(parameters)
+        self.setTimeDiscretizationDriver(parameters, self.pdf)
+        self.meshUpdater = MeshUpdater(parameters, self.pdf, sde.dimension)
         self.integrator = Integrator(self, sde, parameters, self.pdf)
         self.computeAllTimes(sde, self.pdf, parameters)
 
 
-    def setTimeDiscretizationDriver(self, parameters):
+    def setTimeDiscretizationDriver(self, parameters, pdf):
         if parameters.timeDiscretizationType == "EM":
-            self.timeDiscretizationMethod = EulerMaruyamaTimeDiscretizationMethod()
+            self.timeDiscretizationMethod = EulerMaruyamaTimeDiscretizationMethod(pdf)
         if parameters.timeDiscretizationType == "AM":
             self.timeDiscretizationMethod = AndersonMattinglyTimeDiscretizationMethod()
 
@@ -38,6 +40,9 @@ class Simulation():
         self.meshTrajectory.append(np.copy(pdf.meshCoordinates))
         numSteps = int(self.endTime/parameters.h)
         for i in range(numSteps):
+            if i>2:
+                self.meshUpdater.addPointsToMeshProcedure(pdf, parameters, self, sde)
+                # self.meshUpdater.removePointsFromMeshProcedure(pdf, self, parameters, sde)
             self.computeTimestep(sde, pdf, parameters)
 
 

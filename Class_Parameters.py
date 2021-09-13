@@ -3,7 +3,9 @@ class Parameters:
         self.conditionNumForAltMethod = 10
         self.h = h
         self.kstepMin = kstepMin
+        self.minDistanceBetweenPoints = kstepMin
         self.kstepMax = kstepMax
+        self.maxDistanceBetweenPoints = kstepMax
         self.beta = beta
         self.radius = radius
         self.timeDiscretizationType = timeDiscretizationType

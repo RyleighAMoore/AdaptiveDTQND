@@ -12,7 +12,7 @@ radius = 2
 kstepMin= 0.06
 kstepMax = 0.07
 h = 0.01
-endTime = 0.5
+endTime = 1
 
 def driftFunction(mesh):
       if mesh.ndim ==1:
@@ -48,7 +48,7 @@ title = ax.set_title('2D Test')
 graph, = ax.plot(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], linestyle="", marker=".")
 ax.set_xlim(-20, 20)
 ax.set_ylim(0, np.max(simulation.pdfTrajectory[0]))
-ani = animation.FuncAnimation(fig, update_graph, frames=len(simulation.pdfTrajectory), interval=100, blit=False)
+ani = animation.FuncAnimation(fig, update_graph, frames=len(simulation.pdfTrajectory), interval=50, blit=False)
 plt.show()
 
 from exactSolutions import OneDdiffusionEquation
