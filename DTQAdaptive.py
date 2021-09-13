@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 
 def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree, meshRadius, drift, diff, dimension, SpatialDiff, parameters, PrintStuff = True, RetG = False, Adaptive = True, TimeStepType="EM"):
-    UpdateMesh = False
+    UpdateMesh = True
     # TimeStepType = "AM"
     # '''Paramaters'''
     # addPointsToBoundaryIfBiggerThanTolerance = 10**(-degree)

@@ -10,13 +10,21 @@ class TimeDiscretizationMethod():
     def AddPointToG(self):
         pass
 
+    def RemovePoints(self):
+        pass
+
 class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
     def __init__(self, pdf):
         self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*2
 
+    # def removePoints(self, index):
+    #     self.TransitionMatrix = np.delete(self.TransitionMatrix, index,0)
+    #     self.TransitionMatrix = np.delete(self.TransitionMatrix, index,1)
+
+
     def computeTransitionMatrix(self, pdf, sde, h):
         GMat = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
-        for i in range(len(pdf.meshCoordinates)):
+        for i in range(pdf.meshLength):
             v = G(i,pdf.meshCoordinates, h, sde.driftFunction, sde.diffusionFunction, sde.spatialDiff)
             GMat[i,:len(v)] = v
         return GMat

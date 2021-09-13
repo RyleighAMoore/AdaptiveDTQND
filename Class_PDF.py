@@ -19,6 +19,14 @@ class PDF:
     def addPointsToPdf(self, newPoints):
         self.pdfVals = np.append(self.pdfVals, newPoints)
 
+    def removePointsFromMesh(self, indexToRemove):
+        self.meshCoordinates = np.delete(self.meshCoordinates, indexToRemove,0)
+        self.meshLength = len(self.meshCoordinates)
+
+    def removePointsFromPdf(self, index):
+        self.pdfVals = np.delete(self.pdfVals, index)
+
+
     def setIntegrandBeforeDividingOut(self, integrandBeforeDividingOut):
         self.integrandBeforeDividingOut = integrandBeforeDividingOut
 

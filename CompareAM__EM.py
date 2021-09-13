@@ -93,7 +93,7 @@ class SimpleDriftSDE:
     return vals
 
 dimension =1
-sde = SimpleDriftSDE(0,1,dimension)
+sde = SimpleDriftSDE(1,1,dimension)
 # mydrift = sde.Drift
 # mydiff = sde.Diff
 
@@ -117,7 +117,7 @@ def mydrift(mesh):
       return np.ones(np.shape(mesh))
 
 def mydiff(mesh):
-    return np.expand_dims(np.asarray(0.5*np.ones((np.size(mesh)))),1)
+    return np.expand_dims(np.asarray(1*np.ones((np.size(mesh)))),1)
     # return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
 

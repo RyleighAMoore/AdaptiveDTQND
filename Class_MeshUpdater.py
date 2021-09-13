@@ -44,7 +44,7 @@ class MeshUpdater:
                     newPointsBool = True
 
                     for i in range(1,5):
-                        pdf.addPointsToMesh(np.asarray([[mm-i*radius]]), axis=0)
+                        pdf.addPointsToMesh(np.asarray([[mm-i*radius]]))
                         newPoints.append(np.asarray(mm-i*radius))
                 if pdf.pdfVals[right] > self.addPointsToBoundaryIfBiggerThanTolerance:
                     radius = parameters.minDistanceBetweenPoints/2 + parameters.maxDistanceBetweenPoints/2
@@ -133,25 +133,13 @@ class MeshUpdater:
         '''# Removing boundary points'''
         ZeroPointsBoolArray = np.asarray([np.asarray(pdf.pdfVals) < self.removeZerosValuesIfLessThanTolerance]).T
         iivals = np.expand_dims(np.arange(pdf.meshLength),1)
-        index = iivals[ZeroPointsBoolArray] # Points to remove
-        if len(index)>0:
-            pdf.meshCoordinates = np.delete(pdf.meshCoordinates, index, 0)
-            pdf.pdfVals = np.delete(pdf.pdfVals, index, 0)
-            simulation.integrator.TransitionMatrix = np.delete(simulation.integrator.TransitionMatrix, index,0)
-            simulation.integrator.TransitionMatrix = np.delete(simulation.integrator.TransitionMatrix, index,1)
-            largerLPMat = np.zeros(np.shape(simulation.integrator.LejaPointIndicesMatrix))
+        indices = iivals[ZeroPointsBoolArray] # Points to remove
+        if len(indices)>0:
+            pdf.removePointsFromMesh(indices)
+            pdf.removePointsFromPdf(indices)
+            simulation.integrator.removePoints(indices)
+            simulation.integrator.houseKeepingStorageMatrices(indices)
 
-            for ii in index:
-                LPUpdateList = np.where(simulation.integrator.LejaPointIndicesMatrix == ii)[0]
-                for i in LPUpdateList:
-                    simulation.integrator.LejaPointIndicesBoolVector[i] = False
-                largerLP = simulation.integrator.LejaPointIndicesMatrix >= ii
-                largerLPMat = largerLPMat + largerLP
-
-            simulation.integrator.LejaPointIndicesMatrix = simulation.integrator.LejaPointIndicesMatrix - largerLPMat
-
-            simulation.integrator.LejaPointIndicesBoolVector = np.delete(simulation.integrator.LejaPointIndicesBoolVector, index,0)
-            simulation.integrator.LejaPointIndicesMatrix = np.delete(simulation.integrator.LejaPointIndicesMatrix, index, 0)
             if not sde.dimension ==1:
                 self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)
 
