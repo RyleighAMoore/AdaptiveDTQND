@@ -12,7 +12,7 @@ radius = 4
 kstepMin= 0.06
 kstepMax = 0.07
 h = 0.1
-endTime =1
+endTime = 2
 
 
 def driftFunction(mesh):
@@ -50,6 +50,7 @@ LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(simulation.meshTrajec
 
 
 
+endTime = 2
 
 spatialDiff = False
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
@@ -68,20 +69,22 @@ LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(simulation.meshTrajec
 
 
 
-# if dimension ==1:
-#     def update_graph(num):
-#         graph.set_data(simulation.meshTrajectory[num], simulation.pdfTrajectory[num])
-#         return title, graph
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+if dimension ==1:
+    def update_graph(num):
+        graph.set_data(simulation.meshTrajectory[num], simulation.pdfTrajectory[num])
+        return title, graph
 
-#     fig = plt.figure()
-#     ax = fig.add_subplot(111)
-#     title = ax.set_title('2D Test')
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    title = ax.set_title('2D Test')
 
-#     graph, = ax.plot(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], linestyle="", marker=".")
-#     ax.set_xlim(-20, 20)
-#     ax.set_ylim(0, np.max(simulation.pdfTrajectory[0]))
-#     ani = animation.FuncAnimation(fig, update_graph, frames=len(simulation.pdfTrajectory), interval=50, blit=False)
-#     plt.show()
+    graph, = ax.plot(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], linestyle="", marker=".")
+    ax.set_xlim(-20, 20)
+    ax.set_ylim(0, np.max(simulation.pdfTrajectory[0]))
+    ani = animation.FuncAnimation(fig, update_graph, frames=len(simulation.pdfTrajectory), interval=50, blit=False)
+    plt.show()
 
 # if dimension ==2:
 #     Meshes = simulation.meshTrajectory

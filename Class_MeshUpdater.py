@@ -66,7 +66,8 @@ class MeshUpdater:
                     iivals = np.expand_dims(np.arange(len(pdf.meshCoordinates)),1)
                     index = iivals[boundaryPointsToAddAround]
                     if len(index)>0:
-                        candPoints = M.NDGridMesh(sde.dimension,parameters.maxDistanceBetweenPoints*2, parameters.maxDistanceBetweenPoints*2.5, UseNoise = False)
+                        candPoints = fun.nDGridMeshCenteredAtOrigin(sde.dimension, parameters.maxDistanceBetweenPoints*1.2, parameters.maxDistanceBetweenPoints*2, useNoiseBool = False)
+                        # candPoints = fun.NDGridMesh(sde.dimension,parameters.maxDistanceBetweenPoints*2, parameters.maxDistanceBetweenPoints*2.5, UseNoise = False)
                     for indx in index:
                         # newPoints = addPointsRadially(Mesh[indx,:], Mesh, 8, minDistanceBetweenPoints, maxDistanceBetweenPoints)
                         curr =  np.repeat(np.expand_dims(pdf.meshCoordinates[indx,:],1), np.size(candPoints,0), axis=1)
@@ -76,9 +77,9 @@ class MeshUpdater:
                             newPoint = newPoints[i,:]
                             if len(points)>0:
                                 mesh2 = np.vstack((pdf.meshCoordinates,points))
-                                nearestPoint,distToNearestPoint, idx = UM.findNearestPoint(newPoint, mesh2)
+                                nearestPoint,distToNearestPoint, idx = fun.findNearestPoint(newPoint, mesh2)
                             else:
-                                nearestPoint,distToNearestPoint, idx = UM.findNearestPoint(newPoint, pdf.meshCoordinates)
+                                nearestPoint,distToNearestPoint, idx = fun.findNearestPoint(newPoint, pdf.meshCoordinates)
 
                             if distToNearestPoint >= parameters.minDistanceBetweenPoints:
                                 points.append(newPoint)

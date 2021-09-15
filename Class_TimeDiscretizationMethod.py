@@ -202,15 +202,6 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
 
 
 
-# class TransitionMatrix:
-#     def __init__(self):
-#         self.transitionMatrix = []
-
-
-
-
-
-
 
 
 
