@@ -1,10 +1,27 @@
 import numpy as np
 from scipy.stats import multivariate_normal
-import ICMeshGenerator as M
 import Functions as F
 import matplotlib.pyplot as plt
 from Class_Gaussian import GaussScale
 
+
+def findNearestKPoints(Coord, AllPoints, numNeighbors, getIndices = False):
+    # xCoord = Coord[0]
+    # yCoord= Coord[1]
+    # normList1 = (xCoord*np.ones(len(AllPoints)) - AllPoints[:,0])**2 + (yCoord*np.ones(len(AllPoints)) - AllPoints[:,1])**2
+
+    normList = np.zeros(np.size(AllPoints,0))
+    size = np.size(AllPoints,0)
+    for i in range(np.size(AllPoints,1)):
+        normList += (Coord[i]*np.ones(size) - AllPoints[:,i])**2
+
+    idx = np.argsort(normList)
+
+
+    if getIndices:
+        return AllPoints[idx[:numNeighbors]], normList[idx[:numNeighbors]], idx[:numNeighbors]
+    else:
+        return AllPoints[idx[:numNeighbors]], normList[idx[:numNeighbors]]
 
 # Density, distribution ction, quantile ction and random generation for the
 # normal distribution with mean equal to mu and standard deviation equal to sigma.

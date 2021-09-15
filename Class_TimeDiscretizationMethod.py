@@ -111,22 +111,6 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         scale.setCov(np.asarray(sig1**2))
         N1 = Gaussian(scale, self.meshAM)
 
-        # if N2 == None:
-        #     N2 = []
-        #     scale2 = GaussScale(sde.dimension)
-        #     if sde.spatialDiff == False:
-        #         sig2 = np.sqrt(self.a1*sde.difffun(self.meshAM[0])**2 - self.a2*sde.difffun(self.meshAM[0])**2)*np.sqrt((1-self.theta)*h)
-        #         scale2.setCov(np.asarray(sig2**2))
-        #     mu2s = self.meshAM + (self.a1*sde.driftfun(self.meshAM) - self.a2*sde.driftfun(yim1))*(1-self.theta)*h
-        #     for count, i in enumerate(self.meshAM):
-        #         mu2 = np.expand_dims(mu2s[count],1)
-        #         if sde.spatialDiff == True:
-        #             sig2 = np.sqrt(self.a1*sde.difffun(i)**2 - self.a2*sde.difffun(yim1)**2)*np.sqrt((1-self.theta)*h)
-        #             scale2.setCov(np.asarray(sig2**2))
-        #         scale2.setMu(np.asarray(mu2.T))
-        #         N2a = Gaussian(scale2, np.asarray([yi])) # depends on yi, yim1, i
-        #         N2.append(np.copy(N2a))
-
         val = N1*np.asarray(N2)
         transitionProb = np.sum(self.meshSpacingAM**sde.dimension*val)
         return transitionProb
@@ -145,12 +129,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
 
 
     def AddPointToG(self, pdf, newPointindices, parameters, integrator, sde):
-        # r = int(max(int(np.ceil(np.max(pdf.meshCoordinates)-np.min(pdf.meshCoordinates))),2)+self.meshAMPadding)/2
         self.setAndersonMattinglyMeshForComputingTransitionProbability(pdf, sde)
-        # mean = (np.max(mesh)+np.min(mesh))/2
-        # delta = np.ones(np.shape(meshAM))*mean
-        # meshAM = np.asarray(meshAM).T + delta.T
-        # meshAM = meshAM.T
         N2Complete = []
         count = 0
         meshNew = pdf.meshCoordinates[newPointindices]

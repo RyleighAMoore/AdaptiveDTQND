@@ -54,7 +54,7 @@ class Simulation():
 
 from pyopoly1.Class_Gaussian import GaussScale
 import numpy as np
-from QuadraticFit import LaplaceApproximation
+from Class_LaplaceApproximation import LaplaceApproximation
 import math
 from pyopoly1.variableTransformations import map_to_canonical_space, map_from_canonical_space
 from pyopoly1.families import HermitePolynomials

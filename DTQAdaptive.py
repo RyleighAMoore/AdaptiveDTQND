@@ -1,136 +1,149 @@
+from Class_Parameters import Parameters
+from Class_PDF import PDF
+from Class_SDE import SDE
+from Class_Simulation import Simulation
 import numpy as np
-import Functions as fun
-from scipy.spatial import Delaunay
-import LejaQuadrature as LQ
-from pyopoly1.families import HermitePolynomials
-from pyopoly1 import indexing
-import MeshUpdates2D as MeshUp
-from pyopoly1.Class_Gaussian import GaussScale
-import ICMeshGenerator as M
-from pyopoly1.LejaPoints import getLejaSetFromPoints, getLejaPoints
 import matplotlib.pyplot as plt
 
 
-
-def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree, meshRadius, drift, diff, dimension, SpatialDiff, parameters, PrintStuff = True, RetG = False, Adaptive = True, TimeStepType="EM"):
-    UpdateMesh = True
-    # TimeStepType = "AM"
-    # '''Paramaters'''
-    # addPointsToBoundaryIfBiggerThanTolerance = 10**(-degree)
-    # removeZerosValuesIfLessThanTolerance = 10**(-degree-0.5)
-    # conditionNumForAltMethod = 8
-    # NumLejas = 10
-    # numPointsForLejaCandidates = 40
-    # numQuadFit = 20
-
-    '''Paramaters'''
-    addPointsToBoundaryIfBiggerThanTolerance = 10**(-degree)
-    removeZerosValuesIfLessThanTolerance = 10**(-degree-0.5)
-    conditionNumForAltMethod = parameters.conditionNumForAltMethod
-    NumLejas =parameters.NumLejas
-    numPointsForLejaCandidates = parameters.numPointsForLejaCandidates
-    numQuadFit = parameters.numQuadFit
-
-    ''' Initializd orthonormal Polynomial family'''
-    poly = HermitePolynomials(rho=0)
-    d=dimension
-    k = 40
-    lambdas = indexing.total_degree_indices(d, k)
-    poly.lambdas = lambdas
-
-    '''Generate Alt Leja Points'''
-    lejaPointsFinal, new = getLejaPoints(10, np.zeros((d,1)), poly, num_candidate_samples=5000, candidateSampleMesh = [], returnIndices = False)
+dimension = 1
+beta = 4
+radius = 4
+kstepMin= 0.06
+kstepMax = 0.07
+h = 0.1
+endTime =1
 
 
-    '''pdf after one time step with Dirac initial condition centered at the origin'''
-    mesh = M.NDGridMesh(dimension, meshRadius,minDistanceBetweenPoints, useNoiseBool = False)
+def driftFunction(mesh):
+    if mesh.ndim ==1:
+        mesh = np.expand_dims(mesh, axis=0)
+    dr = np.zeros(np.shape(mesh))
+    dr[:,0] = 0
+    return dr
 
-
-    scale = GaussScale(dimension)
-    scale.setMu(h*drift(np.zeros(dimension)).T)
-    scale.setCov((h*diff(np.zeros(dimension))*diff(np.zeros(dimension)).T).T)
-    pdf = fun.Gaussian(scale, mesh)
-
-
-    Meshes = []
-    PdfTraj = []
-    PdfTraj.append(np.copy(pdf))
-    Meshes.append(np.copy(mesh))
-
-    if dimension > 1:
-        '''Delaunay triangulation for finding the boundary '''
-        tri = Delaunay(mesh, incremental=True)
+def diffusionFunction(mesh):
+    if mesh.ndim ==1:
+        mesh = np.expand_dims(mesh, axis=0)
+    if dimension ==1:
+        return 1*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     else:
-        tri = 0
-
-    '''Initialize Transition probabilities'''
-    maxDegFreedom = int(len(mesh)*1.5*dimension)
-
-    # meshAM = M.NDGridMesh(dimension, minDistanceBetweenPoints, 2, UseNoise = False)
+        return 1*np.diag(np.ones(dimension))
 
 
-    if TimeStepType == "EM":
-        GMat = fun.GenerateEulerMarMatrix(maxDegFreedom, mesh, h, drift, diff, SpatialDiff)
-    elif TimeStepType == "AM":
-        GMat = fun.GenerateAndersonMatMatrix(h, drift, diff, mesh, dimension, maxDegFreedom, minDistanceBetweenPoints, SpatialDiff)
+spatialDiff = False
+sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
+parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, timeDiscretizationType = "AM")
+simulation = Simulation(sde, parameters, endTime)
 
-    LPMat = np.ones([maxDegFreedom, NumLejas])*-1
-    LPMatBool = np.zeros((maxDegFreedom,1), dtype=bool) # True if we have Lejas, False if we need Lejas
 
-    '''Grid updates'''
-    if PrintStuff:
-        LPReuseArr = []
-        AltMethod = []
+from exactSolutions import Solution
 
-    for i in range(1,NumSteps): # Since the first step is taken before this loop.
-        print(i)
-        if (i >= 2) and UpdateMesh:
-            # plt.plot(mesh,pdf,'.')
-            '''Add points to mesh'''
-            # plt.figure()
-            # plt.scatter(mesh[:,0], mesh[:,1])
-            mesh, pdf, tri, addBool, GMat = MeshUp.addPointsToMeshProcedure(mesh, pdf, tri, minDistanceBetweenPoints, h, poly, GMat, addPointsToBoundaryIfBiggerThanTolerance, removeZerosValuesIfLessThanTolerance, minDistanceBetweenPoints,maxDistanceBetweenPoints, drift, diff, SpatialDiff, TimeStepType, dimension, numPointsForLejaCandidates)
-            # plt.plot(mesh[:,0], mesh[:,1], '*r')
-        if i>=9 and i%25==1 and UpdateMesh:
-            '''Remove points from mesh'''
-            mesh, pdf, GMat, LPMat, LPMatBool, tri = MeshUp.removePointsFromMeshProcedure(mesh, pdf, tri, True, poly, GMat, LPMat, LPMatBool, removeZerosValuesIfLessThanTolerance)
+trueSoln = []
+for i in range(len(simulation.meshTrajectory)): #diff, drift, mesh, t, dim
+    truepdf = Solution(1, 0, simulation.meshTrajectory[i], (i+1)*h, dimension)
+    # truepdf = solution(xvec,-1,T)
+    trueSoln.append(np.squeeze(np.copy(truepdf)))
 
-        if PrintStuff:
-            print('Length of mesh = ', len(mesh))
-        if i >-1:
-            '''Step forward in time'''
-            pdf = np.expand_dims(pdf,axis=1)
-            pdf, meshTemp, LPMat, LPMatBool, LPReuse, AltMethodCount = LQ.Test_LejaQuadratureLinearizationOnLejaPoints(mesh, pdf, poly,h,NumLejas, i, GMat, LPMat, LPMatBool, numQuadFit, removeZerosValuesIfLessThanTolerance, conditionNumForAltMethod, drift, diff, numPointsForLejaCandidates,SpatialDiff, lejaPointsFinal, TimeStepType, minDistanceBetweenPoints, PrintStuff)
-            pdf = np.squeeze(pdf)
-            '''Add new values to lists for graphing'''
+from Errors import ErrorValsExact
+LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(simulation.meshTrajectory, simulation.pdfTrajectory, trueSoln, h, plot=False)
 
-            PdfTraj.append(np.copy(pdf))
-            Meshes.append(np.copy(mesh))
-            if PrintStuff:
-                LPReuseArr.append(LPReuse)
-                AltMethod.append(AltMethodCount)
 
-        else:
-            if PrintStuff:
-                print('Length of mesh = ', len(mesh))
 
-        sizer = len(mesh)
-        if np.shape(GMat)[0] - sizer < sizer:
-            GMat2 = np.empty([2*sizer, 2*sizer])*np.NaN
-            GMat2[:sizer, :sizer]= GMat[:sizer, :sizer]
-            GMat = GMat2
 
-        if np.shape(LPMat)[0] - sizer < sizer:
-            LPMat2 = np.ones([2*sizer, NumLejas])*-1
-            LPMat2[:sizer,:]= LPMat[:sizer, :]
-            LPMat = LPMat2
-            LPMatBool2 = np.zeros((2*sizer,1), dtype=bool)
-            LPMatBool2[:len(mesh)]= LPMatBool[:len(mesh)]
-            LPMatBool = LPMatBool2
+spatialDiff = False
+sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
+parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, timeDiscretizationType = "EM")
+simulation = Simulation(sde, parameters, endTime)
+from exactSolutions import Solution
 
-    if RetG:
-        return Meshes, PdfTraj, LPReuseArr, AltMethod, GMat
-    if PrintStuff:
-        return Meshes, PdfTraj, LPReuseArr, AltMethod
-    else:
-        return Meshes, PdfTraj, [], []
+trueSoln = []
+for i in range(len(simulation.meshTrajectory)): #diff, drift, mesh, t, dim
+    truepdf = Solution(1, 0, simulation.meshTrajectory[i], (i+1)*h, dimension)
+    # truepdf = solution(xvec,-1,T)
+    trueSoln.append(np.squeeze(np.copy(truepdf)))
+
+from Errors import ErrorValsExact
+LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(simulation.meshTrajectory, simulation.pdfTrajectory, trueSoln, h, plot=False)
+
+
+
+# if dimension ==1:
+#     def update_graph(num):
+#         graph.set_data(simulation.meshTrajectory[num], simulation.pdfTrajectory[num])
+#         return title, graph
+
+#     fig = plt.figure()
+#     ax = fig.add_subplot(111)
+#     title = ax.set_title('2D Test')
+
+#     graph, = ax.plot(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], linestyle="", marker=".")
+#     ax.set_xlim(-20, 20)
+#     ax.set_ylim(0, np.max(simulation.pdfTrajectory[0]))
+#     ani = animation.FuncAnimation(fig, update_graph, frames=len(simulation.pdfTrajectory), interval=50, blit=False)
+#     plt.show()
+
+# if dimension ==2:
+#     Meshes = simulation.meshTrajectory
+#     PdfTraj = simulation.pdfTrajectory
+#     def update_graph(num):
+#         graph.set_data (Meshes[num][:,0], Meshes[num][:,1])
+#         graph.set_3d_properties(PdfTraj[num])
+#         title.set_text('3D Test, time={}'.format(num))
+#         return title, graph
+
+#     fig = plt.figure()
+#     ax = fig.add_subplot(111, projection='3d')
+#     title = ax.set_title('3D Test')
+
+#     graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
+#     ax.set_zlim(0, 4.5)
+#     ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
+#     plt.show()
+
+# if dimension ==3:
+#     Meshes = simulation.meshTrajectory
+#     PdfTraj = simulation.pdfTrajectory
+#     from mpl_toolkits.mplot3d.art3d import juggle_axes
+#     def update_graph(num):
+#         # print(num)
+#         # graph._offsets3d=(Meshes[num][:,0], Meshes[num][:,1],  Meshes[num][:,2])
+#         # graph.set_array(PdfTraj[num])
+#         indx = 0
+#         indy = 1
+#         indz = 2
+#         ax.clear()
+#         ax.set_zlim(np.min(Meshes[-1][:,indz]),np.max(Meshes[-1][:,indz]))
+#         ax.set_xlim(np.min(Meshes[-1][:,indx]),np.max(Meshes[-1][:,indx]))
+#         ax.set_ylim(np.min(Meshes[-1][:,indy]),np.max(Meshes[-1][:,indy]))
+#         graph = ax.scatter3D(Meshes[num][:,0], Meshes[num][:,1],  Meshes[num][:,2], c=np.log(PdfTraj[num]), cmap='bone_r', vmax=max(np.log(PdfTraj[0])), vmin=0, marker=".")
+
+#         # graph.set_data(Meshes[num][:,0], Meshes[num][:,1])
+#         # graph.set_3d_properties(Meshes[num][:,2], color=PdfTraj[num], cmap='binary')
+#         # title.set_text('3D Test, time={}'.format(num))
+#         return graph
+
+#     fig = plt.figure()
+#     ax = fig.add_subplot(111, projection='3d')
+#     title = ax.set_title('3D Test')
+#     ax.set_zlim(np.min(Meshes[-1][:,2]),np.max(Meshes[-1][:,2]))
+#     ax.set_xlim(np.min(Meshes[-1][:,0]),np.max(Meshes[-1][:,0]))
+#     ax.set_ylim(np.min(Meshes[-1][:,1]),np.max(Meshes[-1][:,1]))
+
+
+#     ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=1000, blit=False)
+#     plt.show()
+
+
+# from exactSolutions import Solution
+
+# trueSoln = []
+# for i in range(len(simulation.meshTrajectory)): #diff, drift, mesh, t, dim
+#     truepdf = Solution(1, 0, simulation.meshTrajectory[i], (i+1)*h, dimension)
+#     # truepdf = solution(xvec,-1,T)
+#     trueSoln.append(np.squeeze(np.copy(truepdf)))
+
+# from Errors import ErrorValsExact
+# LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(simulation.meshTrajectory, simulation.pdfTrajectory, trueSoln, h, plot=False)
+
+

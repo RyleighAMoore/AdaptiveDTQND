@@ -6,11 +6,9 @@ Created on Tue Jan 21 11:21:05 2020
 """
 import matplotlib.pyplot as plt
 import numpy as np
-import UnorderedMesh as UM
 from pyopoly1 import opolynd
 from pyopoly1.LejaUtilities import get_lu_leja_samples, sqrtNormal_weights
 from pyopoly1.opolynd import opolynd_eval
-import UnorderedMesh as UM
 from mpl_toolkits.mplot3d import Axes3D
 import math
 from pyopoly1 import variableTransformations as VT
@@ -60,12 +58,12 @@ def getLejaPoints(num_leja_samples, initial_samples, poly, num_candidate_samples
             return np.asarray(samples).T, indicesLeja
         return np.asarray(samples).T, np.asarray(samples[:,num_initial_samples:]).T
 
-
+import Functions as fun
 def getLejaSetFromPoints(scale, Mesh, numLejaPointsToReturn, poly, Pdf, diff, numPointsForLejaCandidates):
     # candidatesFull = VT.map_to_canonical_space(Mesh,scale)
     candidatesFull = Mesh # don't need to transform since the scale is normal when this function is used.
     indices = [np.nan]
-    candidates, distances, indik = UM.findNearestKPoints(scale.mu, candidatesFull,numPointsForLejaCandidates, getIndices = True)
+    candidates, distances, indik = fun.findNearestKPoints(scale.mu, candidatesFull,numPointsForLejaCandidates, getIndices = True)
     # Px = candidates[0,0]
     # Py = candidates[0,1]
     point = candidates[0]

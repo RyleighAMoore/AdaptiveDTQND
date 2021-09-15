@@ -1,6 +1,5 @@
 import numpy as np
 import Functions as fun
-import UnorderedMesh as UM
 from scipy.spatial import Delaunay
 from itertools import chain
 from tqdm import tqdm, trange
@@ -14,7 +13,6 @@ import Circumsphere as CS
 from itertools import combinations
 from collections import defaultdict
 import time
-import ICMeshGenerator as M
 
 random.seed(10)
 
