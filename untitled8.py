@@ -7,20 +7,20 @@ import matplotlib.pyplot as plt
 
 
 dimension = 1
-beta = 2
-radius = 2
+beta = 4
+radius = 4
 kstepMin= 0.06
 kstepMax = 0.07
-h = 0.01
+h = 0.1
 endTime =1
 
-dimension = 3
-beta = 3
-radius =0.4
-kstepMin= 0.1
-kstepMax = 0.11
-h = 0.01
-endTime = 0.1
+# dimension = 2
+# beta = 3
+# radius =0.8
+# kstepMin= 0.09
+# kstepMax = 0.1
+# h = 0.01
+# endTime = 1
 
 # def driftFunction(mesh):
 #       if mesh.ndim ==1:
@@ -38,21 +38,21 @@ def driftFunction(mesh):
     if mesh.ndim ==1:
         mesh = np.expand_dims(mesh, axis=0)
     dr = np.zeros(np.shape(mesh))
-    dr[:,0] = 0.5
+    dr[:,0] = 0
     return dr
 
 def diffusionFunction(mesh):
     if mesh.ndim ==1:
         mesh = np.expand_dims(mesh, axis=0)
     if dimension ==1:
-        return 0.5*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+        return 1*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     else:
-        return 0.5*np.diag(np.ones(dimension))
+        return 1*np.diag(np.ones(dimension))
 
 
 spatialDiff = False
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
-parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, timeDiscretizationType = "EM")
+parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, timeDiscretizationType = "AM")
 simulation = Simulation(sde, parameters, endTime)
 # plt.scatter(simulation.pdf.meshCoordinates,simulation.pdf.pdfVals)
 # plt.scatter(simulation.meshTrajectory[-1],simulation.pdfTrajectory[-1])
@@ -133,7 +133,7 @@ from exactSolutions import Solution
 
 trueSoln = []
 for i in range(len(simulation.meshTrajectory)): #diff, drift, mesh, t, dim
-    truepdf = Solution(0.5, 0.5, simulation.meshTrajectory[i], (i+1)*h, dimension)
+    truepdf = Solution(1, 0, simulation.meshTrajectory[i], (i+1)*h, dimension)
     # truepdf = solution(xvec,-1,T)
     trueSoln.append(np.squeeze(np.copy(truepdf)))
 

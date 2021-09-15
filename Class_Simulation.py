@@ -27,7 +27,7 @@ class Simulation():
         if parameters.timeDiscretizationType == "EM":
             self.timeDiscretizationMethod = EulerMaruyamaTimeDiscretizationMethod(pdf)
         if parameters.timeDiscretizationType == "AM":
-            self.timeDiscretizationMethod = AndersonMattinglyTimeDiscretizationMethod()
+            self.timeDiscretizationMethod = AndersonMattinglyTimeDiscretizationMethod(pdf)
 
 
     def computeTimestep(self, sde, pdf, parameters):
@@ -174,6 +174,7 @@ class Integrator:
 
 
     def computeUpdateWithAlternativeMethod(self, sde, parameters, pdf, index):
+        self.AltMethodUseCount = self.AltMethodUseCount  + 1
         scaling = GaussScale(sde.dimension)
         scaling.setMu(np.asarray(pdf.meshCoordinates[index,:]+parameters.h*sde.driftFunction(pdf.meshCoordinates[index,:])).T)
         scaling.setCov((parameters.h*sde.diffusionFunction(scaling.mu*sde.diffusionFunction(scaling.mu).T).T))
@@ -208,6 +209,7 @@ class Integrator:
 
     def computeTimeStep(self, sde, parameters, pdf):
         LPReuseCount = 0
+        self.AltMethodUseCount = 0
         newPdf = []
         for index, point in enumerate(pdf.meshCoordinates):
             useLejaIntegrationProcedure = self.findQuadraticFit(sde, pdf, parameters, index)
@@ -235,6 +237,7 @@ class Integrator:
                             value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
             newPdf.append(np.copy(value))
         print(LPReuseCount/pdf.meshLength*100, "% Leja Reuse")
+        print(self.AltMethodUseCount/pdf.meshLength*100, "% Alt method Use")
         return np.asarray(newPdf)
 
 

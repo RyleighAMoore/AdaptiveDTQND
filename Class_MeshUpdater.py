@@ -27,7 +27,7 @@ class MeshUpdater:
             self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)
 
 
-    def addPointsToBoundary(self, pdf, sde, parameters, dimension):
+    def addPointsToBoundary(self, pdf, sde, parameters, dimension, integrator):
             count = 0
             MeshOrig = np.copy(pdf.meshCoordinates)
             PdfOrig = np.copy(pdf.pdfVals)
@@ -101,7 +101,7 @@ class MeshUpdater:
         '''If the mesh is changed, these become 1 so we know to recompute the triangulation'''
         self.changedBoolean = 0
         meshSizeBeforeUpdates = pdf.meshLength
-        self.addPointsToBoundary(pdf, sde, parameters, sde.dimension)
+        self.addPointsToBoundary(pdf, sde, parameters, sde.dimension, simulation.integrator)
         if self.changedBoolean==1:
             newMeshSize = len(pdf.meshCoordinates)
             if parameters.timeDiscretizationType == "EM":
@@ -109,7 +109,7 @@ class MeshUpdater:
                         simulation.timeDiscretizationMethod.AddPointToG(pdf.meshCoordinates[:i,:], i-1, parameters, sde, pdf, simulation.integrator)
             elif parameters.timeDiscretizationType == "AM":
                 indices = list(range(meshSizeBeforeUpdates, newMeshSize))
-                simulation.integrator.TransitionMatrix = fun.AddPointsToGAndersonMat(Mesh, indices, h, GMat, diff, drift, SpatialDiff, dimension, minDistanceBetweenPoints)
+                simulation.timeDiscretizationMethod.AddPointToG(pdf, indices, parameters, simulation.integrator, sde)
 
 
     def getBoundaryPoints(self, pdf, dimension, parameters, sde):

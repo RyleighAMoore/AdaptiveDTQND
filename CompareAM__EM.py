@@ -121,18 +121,22 @@ def mydiff(mesh):
     # return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
 
+# mydrift = sde.Drift
+# mydiff = sde.Diff
+
 ApproxSoln = False
-timeStep = [0.01]
-EndTime =1
+timeStep = [0.1]
+EndTime = 1
 kstepMin = 0.06 # lambda
-kstepMax = kstepMin # Lambda
-beta = 3
-radius = 2 # R
+kstepMax = 0.07 # Lambda
+beta = 2
+radius = 3 # R
 SpatialDiff = False
 conditionNumForAltMethod = 10
 NumLejas = 5
 numPointsForLejaCandidates = 50
 numQuadFit = 30
+
 
 ErrorsEM = []
 timesEM = []
@@ -149,7 +153,7 @@ for i in timeStep:
     par.numPointsForLejaCandidates = numPointsForLejaCandidates
     par.numQuadFit = numQuadFit
     par.NumLejas = NumLejas
-    TSType = "EM"
+    TSType = "AM"
 
     Meshes, PdfTraj, LPReuseArr, AltMethod, GMat= DTQ(NumSteps, kstepMin, kstepMax, h, beta, radius, mydrift, mydiff, dimension, SpatialDiff, par, PrintStuff=True, TimeStepType= TSType, RetG = True)
     end = time.time()

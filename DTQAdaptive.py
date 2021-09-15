@@ -43,7 +43,7 @@ def DTQ(NumSteps, minDistanceBetweenPoints, maxDistanceBetweenPoints, h, degree,
 
 
     '''pdf after one time step with Dirac initial condition centered at the origin'''
-    mesh = M.NDGridMesh(dimension, minDistanceBetweenPoints, meshRadius, UseNoise = False)
+    mesh = M.NDGridMesh(dimension, meshRadius,minDistanceBetweenPoints, useNoiseBool = False)
 
 
     scale = GaussScale(dimension)

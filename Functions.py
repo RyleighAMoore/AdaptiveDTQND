@@ -301,7 +301,7 @@ def GenerateAndersonMatMatrix(h, Drift, Diff, DTQMesh, dimension,  maxDegFreedom
     theta = 0.5
     a1 = F.alpha1(theta)
     a2 = F.alpha2(theta)
-    meshAM = M.NDGridMesh(dimension, meshSpacingAM, int(max(int(np.ceil(np.max(DTQMesh)-np.min(DTQMesh))),2)+meshAMPadding)/2, UseNoise = False)
+    meshAM = M.NDGridMesh(dimension, int(max(int(np.ceil(np.max(DTQMesh)-np.min(DTQMesh))),2)+meshAMPadding)/2,meshSpacingAM,  useNoiseBool = False)
     mean = (np.max(DTQMesh)+np.min(DTQMesh))/2
     delta = np.ones(np.shape(meshAM))*mean
     meshAM = np.asarray(meshAM).T + delta.T

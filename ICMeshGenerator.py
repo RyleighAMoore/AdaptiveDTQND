@@ -3,28 +3,27 @@ import Functions as fun
 import UnorderedMesh as UM
 np.random.seed(10)
 
-def NDGridMesh(dimension, stepsize, radius, UseNoise = True):
-    subdivision = radius/stepsize
+def NDGridMesh(dimension, radius, stepSize, useNoiseBool = False):
+    subdivision = radius/stepSize
     step = radius/subdivision
-    grid= np.mgrid[tuple(slice(0, radius, stepsize) for _ in range(dimension))]
+    grid= np.mgrid[tuple(slice(step - radius, radius, stepSize) for _ in range(dimension))]
     mesh = []
     for i in range(grid.shape[0]):
         new = grid[i].ravel()
-        if UseNoise:
-            noise = np.random.normal(0,1, size = (len(grid),2))
-            meshSpacing = stepsize
-            noise = np.random.uniform(-meshSpacing, meshSpacing,size = (len(new)))
-
-            shake = 0.1*stepsize
-            noise = -meshSpacing*shake +(meshSpacing*shake - - meshSpacing*shake)/(np.max(noise)-np.min(noise))*(noise-np.min(noise))
+        if useNoiseBool:
+            shake = 0.1*stepSize
+            noise = np.random.uniform(-stepSize, stepSize ,size = (len(new)))
+            noise = -stepSize*shake +(stepSize*shake - - stepSize*shake)/(np.max(noise)-np.min(noise))*(noise-np.min(noise))
             new = new+noise
         mesh.append(new)
     grid = np.asarray(mesh).T
-    diff = -(stepsize/2)*np.ones(np.shape(grid))
-    grid = grid + diff
-
+    distance = 0
+    for i in range(dimension):
+        distance += grid[:,i]**2
+    distance = distance**(1/2)
+    distance = distance < radius
+    grid  =  grid[distance,:]
     return grid
-
 
 
 def getICMesh(radius, stepSize, h):
