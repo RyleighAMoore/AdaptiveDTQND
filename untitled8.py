@@ -30,6 +30,7 @@ endTime =1
 #       return np.zeros(np.shape(mesh))
 
 # def diffusionFunction(mesh):
+
 #     return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
 #     # return np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
 #     # return np.expand_dims(np.asarray(0.5*np.asarray(np.ones((np.size(mesh))))),1)
