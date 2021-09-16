@@ -12,7 +12,7 @@ radius = 2
 kstepMin= 0.06
 kstepMax = 0.07
 h = 0.1
-endTime = 2
+endTime = 1
 
 
 def driftFunction(mesh):
