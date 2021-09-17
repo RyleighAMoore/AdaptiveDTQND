@@ -1,7 +1,7 @@
 import numpy as np
 from pyopoly1.Class_Gaussian import GaussScale
 import matplotlib.pyplot as plt
-
+from Functions import nDGridMeshCenteredAtOrigin
 class PDF:
     def __init__(self, sde, parameters, UseNoise=False):
         self.pdfVals = None
@@ -42,7 +42,7 @@ class PDF:
         scale = GaussScale(sde.dimension)
         scale.setMu(parameters.h*sde.driftFunction(np.zeros(sde.dimension)).T)
         scale.setCov((parameters.h*sde.diffusionFunction(np.zeros(sde.dimension))*sde.diffusionFunction(np.zeros(sde.dimension)).T).T)
-        pdf = scale.ComputeGaussian(self, sde)
+        pdf = scale.ComputeGaussian(self.meshCoordinates, sde)
         self.pdfVals = pdf
 
     def plot(self):
@@ -51,25 +51,25 @@ class PDF:
         plt.show()
 
 
-def nDGridMeshCenteredAtOrigin(dimension, radius, stepSize, useNoiseBool = False):
-        subdivision = radius/stepSize
-        step = radius/subdivision
-        grid= np.mgrid[tuple(slice(step - radius, radius, step) for _ in range(dimension))]
-        mesh = []
-        for i in range(grid.shape[0]):
-            new = grid[i].ravel()
-            if useNoiseBool:
-                shake = 0.1*stepSize
-                noise = np.random.uniform(-stepSize, stepSize ,size = (len(new)))
-                noise = -stepSize*shake +(stepSize*shake - - stepSize*shake)/(np.max(noise)-np.min(noise))*(noise-np.min(noise))
-                new = new+noise
-            mesh.append(new)
-        grid = np.asarray(mesh).T
-        distance = 0
-        for i in range(dimension):
-            distance += grid[:,i]**2
-        distance = distance**(1/2)
-        distance = distance < radius
-        grid  =  grid[distance,:]
-        return grid
+# def nDGridMeshCenteredAtOrigin(dimension, radius, stepSize, useNoiseBool = False):
+#         subdivision = radius/stepSize
+#         step = radius/subdivision
+#         grid= np.mgrid[tuple(slice(step - radius, radius, step) for _ in range(dimension))]
+#         mesh = []
+#         for i in range(grid.shape[0]):
+#             new = grid[i].ravel()
+#             if useNoiseBool:
+#                 shake = 0.1*stepSize
+#                 noise = np.random.uniform(-stepSize, stepSize ,size = (len(new)))
+#                 noise = -stepSize*shake +(stepSize*shake - - stepSize*shake)/(np.max(noise)-np.min(noise))*(noise-np.min(noise))
+#                 new = new+noise
+#             mesh.append(new)
+#         grid = np.asarray(mesh).T
+#         distance = 0
+#         for i in range(dimension):
+#             distance += grid[:,i]**2
+#         distance = distance**(1/2)
+#         distance = distance < radius
+#         grid  =  grid[distance,:]
+#         return grid
 

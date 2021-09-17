@@ -1,5 +1,27 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
+def nDGridMeshCenteredAtOrigin(dimension, radius, stepSize, useNoiseBool = False):
+        subdivision = radius/stepSize
+        # step = radius/subdivision
+        grid= np.mgrid[tuple(slice(- radius*2, radius*2, stepSize) for _ in range(dimension))]
+        mesh = []
+        for i in range(grid.shape[0]):
+            new = grid[i].ravel()
+            if useNoiseBool:
+                shake = 0.1*stepSize
+                noise = np.random.uniform(-stepSize, stepSize ,size = (len(new)))
+                noise = -stepSize*shake +(stepSize*shake - - stepSize*shake)/(np.max(noise)-np.min(noise))*(noise-np.min(noise))
+                new = new+noise
+            mesh.append(new)
+        grid = np.asarray(mesh).T
+        distance = 0
+        for i in range(dimension):
+            distance += (-grid[:,i])**2
+        distance = distance**(1/2)
+        distance = distance < radius-0.0001
+        grid  =  grid[distance,:]
+        return grid
 
 
 def findNearestKPoints(Coord, AllPoints, numNeighbors, getIndices = False):
@@ -20,25 +42,32 @@ def findNearestKPoints(Coord, AllPoints, numNeighbors, getIndices = False):
     else:
         return AllPoints[idx[:numNeighbors]], normList[idx[:numNeighbors]]
 
-from scipy.stats import multivariate_normal
-def Gaussian(scaling, mesh):
-    # rv = multivariate_normal(scaling.mu.T[0], scaling.cov)
-    # soln_vals = np.asarray([rv.pdf(mesh)]).T
-    # soln = np.squeeze(soln_vals)
-    # print(scaling.invCov)
-    D = mesh.shape[1]
-    if D == 1:
-        mu = np.repeat(scaling.mu, len(mesh),axis = 0)
-        invCov= scaling.invCov
-        norm = np.zeros(len(mesh))
-        for dim in range(D):
-            norm += (mesh[:,dim] - mu[:,dim])**2
-        const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(scaling.cov))))
-        soln = const*np.exp(-1/2*invCov*norm).T
-    else:
-        print("need to imlement Gaussian ND")
 
-    return np.squeeze(soln)
+def findNearestPoint(Coord, AllPoints):
+    points, normList, indices = findNearestKPoints(Coord, AllPoints, 2, getIndices = True)
+    # if normList[0]==0:
+    #     return points[1], np.sqrt(normList[1]), indices[1]
+    # else:
+    return points[0], np.sqrt(normList[0]), indices[0]
+# from scipy.stats import multivariate_normal
+# def Gaussian(scaling, mesh):
+#     # rv = multivariate_normal(scaling.mu.T[0], scaling.cov)
+#     # soln_vals = np.asarray([rv.pdf(mesh)]).T
+#     # soln = np.squeeze(soln_vals)
+#     # print(scaling.invCov)
+#     D = mesh.shape[1]
+#     if D == 1:
+#         mu = np.repeat(scaling.mu, len(mesh),axis = 0)
+#         invCov= scaling.invCov
+#         norm = np.zeros(len(mesh))
+#         for dim in range(D):
+#             norm += (mesh[:,dim] - mu[:,dim])**2
+#         const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(scaling.cov))))
+#         soln = const*np.exp(-1/2*invCov*norm).T
+#     else:
+#         print("need to imlement Gaussian ND")
+
+#     return np.squeeze(soln)
 
 
 def weightExp(scaling,mesh):

@@ -25,14 +25,21 @@ class GaussScale:
         for i in range(len(sigmas)):
             self.cov[i,i] = sigmas[i]**2
 
-    def ComputeGaussian(self, pdf, sde):
-        vals = []
-        const = 1/(np.sqrt((2*np.pi)**sde.dimension*abs(np.linalg.det(self.cov))))
-        for x in pdf.meshCoordinates:
-            x = np.expand_dims(x,1)
-            temp = (x-self.mu)
-            val = temp.T@self.invCov@temp
-            vals.append(np.squeeze(val))
-        soln = const*np.exp(-1/2*np.asarray(vals)).T
+    def ComputeGaussian(self, mesh, sde):
+        if sde.dimension == 1:
+            mu = np.repeat(self.mu, len(mesh),axis = 0)
+            norm = (mesh - mu)**2
+            const = 1/(np.sqrt((2*np.pi)**sde.dimension*abs(np.linalg.det(self.cov))))
+            soln = np.squeeze(const*np.exp(-1/2*self.invCov*norm).T)
+        else:
+            vals = []
+            const = 1/(np.sqrt((2*np.pi)**sde.dimension*abs(np.linalg.det(self.cov))))
+            diff = (mesh-self.mu.T)
+            for i, x in enumerate(mesh):
+                x = np.expand_dims(x,1)
+                temp = diff[i,:]
+                val = temp.T@self.invCov@temp
+                vals.append(val)
+            soln = const*np.exp(-1/2*np.asarray(vals)).T
         return soln
 

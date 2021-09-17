@@ -66,7 +66,7 @@ class MeshUpdater:
                     iivals = np.expand_dims(np.arange(len(pdf.meshCoordinates)),1)
                     index = iivals[boundaryPointsToAddAround]
                     if len(index)>0:
-                        candPoints = fun.nDGridMeshCenteredAtOrigin(sde.dimension, parameters.maxDistanceBetweenPoints*1.2, parameters.maxDistanceBetweenPoints*2, useNoiseBool = False)
+                        candPoints = fun.nDGridMeshCenteredAtOrigin(sde.dimension, parameters.maxDistanceBetweenPoints*2, parameters.maxDistanceBetweenPoints, useNoiseBool = False)
                         # candPoints = fun.NDGridMesh(sde.dimension,parameters.maxDistanceBetweenPoints*2, parameters.maxDistanceBetweenPoints*2.5, UseNoise = False)
                     for indx in index:
                         # newPoints = addPointsRadially(Mesh[indx,:], Mesh, 8, minDistanceBetweenPoints, maxDistanceBetweenPoints)

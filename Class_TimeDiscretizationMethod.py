@@ -53,9 +53,8 @@ class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
         integrator.TransitionMatrix[:len(newCol),newPointindex] = newCol*const
 
 
-from Class_PDF import nDGridMeshCenteredAtOrigin
+# from Class_PDF import nDGridMeshCenteredAtOrigin
 from Class_Gaussian import GaussScale
-from Functions import Gaussian
 class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
     ## TODO: RECHECK THAT RHO ISNT NEEDED, Combine the N2 computations
     def __init__(self, pdf):
@@ -98,7 +97,8 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
                 if sde.spatialDiff == True:
                     sig2 = np.sqrt(self.a1*sde.difffun(i)**2 - self.a2*sde.difffun(yim1)**2)*np.sqrt((1-self.theta)*h)
                     scale2.setCov(np.asarray(sig2**2))
-                N2 = Gaussian(scale2, pdf.meshCoordinates)
+                # N2 = Gaussian(scale2, pdf.meshCoordinates)
+                N2 = scale2.ComputeGaussian(pdf.meshCoordinates, sde)
                 N2All.append(np.copy(N2))
             N2Complete.append(np.copy(N2All))
         self.N2s = np.asarray(N2Complete)
@@ -109,7 +109,8 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         scale = GaussScale(sde.dimension)
         scale.setMu(np.asarray(mu1.T))
         scale.setCov(np.asarray(sig1**2))
-        N1 = Gaussian(scale, self.meshAM)
+        # N1 = Gaussian(scale, self.meshAM)
+        N1 = scale.ComputeGaussian(self.meshAM, sde)
 
         val = N1*np.asarray(N2)
         transitionProb = np.sum(self.meshSpacingAM**sde.dimension*val)
@@ -148,7 +149,8 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
                 if sde.spatialDiff == True:
                     sig2 = np.sqrt(self.a1*sde.diffusionFunction(i)**2 - self.a2*sde.diffusionFunction(yim1)**2)*np.sqrt((1-self.theta)*parameters.h)
                     scale2.setCov(np.asarray(sig2**2))
-                N2 = Gaussian(scale2, pdf.meshCoordinates)
+                # N2 = Gaussian(scale2, pdf.meshCoordinates)
+                N2 = scale2.ComputeGaussian(pdf.meshCoordinates, sde)
                 N2All.append(np.copy(N2))
             N2Complete.append(np.copy(N2All))
 
@@ -182,7 +184,8 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
                 if sde.spatialDiff == True:
                     sig2 = np.sqrt(self.a1*sde.diffusionFunction(i)**2 - self.a2*self.diffusionFunction(yim1)**2)*np.sqrt((1-self.theta)*parameters.h)
                     scale2.setCov(np.asarray(sig2**2))
-                N2 = Gaussian(scale2, meshNew)
+                # N2 = Gaussian(scale2, meshNew)
+                N2 = scale2.ComputeGaussian(meshNew, sde)
                 N2All.append(np.copy(N2))
             N2Complete.append(np.copy(N2All))
 
