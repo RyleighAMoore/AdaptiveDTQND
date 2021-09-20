@@ -9,20 +9,20 @@ import matplotlib.pyplot as plt
 dimension = 2
 
 if dimension ==1:
-    beta = 3
-    radius = 2
+    beta = 4
+    radius = 3
     kstepMin= 0.06
     kstepMax = 0.07
     h = 0.01
-    endTime = 0.3
+    endTime =2
 
 if dimension ==2:
     beta = 3
-    radius = 0.8
+    radius =1
     kstepMin= 0.08
     kstepMax = 0.085
-    h = 0.01
-    endTime = 0.4
+    h = 0.1
+    endTime = 0.7
 
 def driftFunction(mesh):
     if mesh.ndim ==1:
@@ -35,14 +35,14 @@ def diffusionFunction(mesh):
     if mesh.ndim ==1:
         mesh = np.expand_dims(mesh, axis=0)
     if dimension ==1:
-        return 1*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
+        return 0.6*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
     else:
-        return 1*np.diag(np.ones(dimension))
+        return 0.6*np.diag(np.ones(dimension))
 
 
 spatialDiff = False
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
-parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, timeDiscretizationType = "EM")
+parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, timeDiscretizationType = "AM")
 simulation = Simulation(sde, parameters, endTime)
 
 
@@ -151,7 +151,7 @@ from exactSolutions import Solution
 
 trueSoln = []
 for i in range(len(simulation.meshTrajectory)): #diff, drift, mesh, t, dim
-    truepdf = Solution(1, 0, simulation.meshTrajectory[i], (i+1)*h, dimension)
+    truepdf = Solution(0.6, 0, simulation.meshTrajectory[i], (i+1)*h, dimension)
     # truepdf = solution(xvec,-1,T)
     trueSoln.append(np.squeeze(np.copy(truepdf)))
 

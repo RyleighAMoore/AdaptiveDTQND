@@ -1,6 +1,9 @@
 import Class_PDF
 import numpy as np
 from Functions import G, alpha1, alpha2
+from tqdm import trange
+import matplotlib.pyplot as plt
+
 class TimeDiscretizationMethod():
     def __init__(self):
         self
@@ -13,6 +16,7 @@ class TimeDiscretizationMethod():
     def RemovePoints(self):
         pass
 
+from tqdm import trange
 class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
     def __init__(self, pdf):
         self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*5
@@ -53,14 +57,14 @@ class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
         integrator.TransitionMatrix[:len(newCol),newPointindex] = newCol*const
 
 
-# from Class_PDF import nDGridMeshCenteredAtOrigin
+from Class_PDF import nDGridMeshCenteredAtOrigin
 from Class_Gaussian import GaussScale
 class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
     ## TODO: RECHECK THAT RHO ISNT NEEDED, Combine the N2 computations
     def __init__(self, pdf):
         self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*5
         self.meshSpacingAM = 0.05
-        self.meshAMPadding = 3.5
+        self.meshAMPadding = 0.5
         self.theta = 0.5
         self.a1 = alpha1(self.theta)
         self.a2 = alpha2(self.theta)
@@ -93,7 +97,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
             mu2s = self.meshAM + (self.a1*sde.driftFunction(self.meshAM) - self.a2*sde.driftFunction(yim1))*(1-self.theta)*h
             for count, i in enumerate(self.meshAM):
                 mu2 = np.expand_dims(mu2s[count],1)
-                scale2.setMu(np.asarray(mu2.T))
+                scale2.setMu(np.asarray(mu2))
                 if sde.spatialDiff == True:
                     sig2 = np.sqrt(self.a1*sde.difffun(i)**2 - self.a2*sde.difffun(yim1)**2)*np.sqrt((1-self.theta)*h)
                     scale2.setCov(np.asarray(sig2**2))
@@ -121,8 +125,8 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         matrix = np.empty([sizeMatrix, sizeMatrix])*np.NaN
         self.setAndersonMattinglyMeshForComputingTransitionProbability(pdf, sde)
         self.computeN2s(pdf, sde, h)
-        for i in range(len(pdf.meshCoordinates)):
-            for j in range(len(pdf.meshCoordinates)):
+        for i in trange(pdf.meshLength):
+            for j in range(pdf.meshLength):
                 N2 = self.N2s[j][:,i]
                 transitionProb = self.computeTransitionProbability(sde, pdf.meshCoordinates[i], pdf.meshCoordinates[j], h, N2= N2)
                 matrix[i,j] = transitionProb
@@ -145,7 +149,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
             mu2s = self.meshAM + (self.a1*sde.driftFunction(self.meshAM) - self.a2*sde.driftFunction(yim1))*(1-self.theta)*parameters.h
             for count, i in enumerate(self.meshAM):
                 mu2 = np.expand_dims(mu2s[count],1)
-                scale2.setMu(np.asarray(mu2.T))
+                scale2.setMu(np.asarray(mu2))
                 if sde.spatialDiff == True:
                     sig2 = np.sqrt(self.a1*sde.diffusionFunction(i)**2 - self.a2*sde.diffusionFunction(yim1)**2)*np.sqrt((1-self.theta)*parameters.h)
                     scale2.setCov(np.asarray(sig2**2))
@@ -180,7 +184,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
             mu2s = self.meshAM + (self.a1*sde.driftFunction(self.meshAM) - self.a2*sde.driftFunction(yim1))*(1-self.theta)*parameters.h
             for count, i in enumerate(self.meshAM):
                 mu2 = np.expand_dims(mu2s[count],1)
-                scale2.setMu(np.asarray(mu2.T))
+                scale2.setMu(np.asarray(mu2))
                 if sde.spatialDiff == True:
                     sig2 = np.sqrt(self.a1*sde.diffusionFunction(i)**2 - self.a2*self.diffusionFunction(yim1)**2)*np.sqrt((1-self.theta)*parameters.h)
                     scale2.setCov(np.asarray(sig2**2))
