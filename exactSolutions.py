@@ -17,9 +17,9 @@ def ThreeDdiffusionEquation(mesh, D, t, A):
     D = D**2*0.5
     r = (mesh[:,0]-A*t)**2 + (mesh[:,1])**2 + (mesh[:,2])**2
     den = 4*D*t
-    
+
     vals = np.exp(-r/(den))*(1/(4*np.pi*D*t)**(N/2))
-    
+
     return vals
 
 def OneDdiffusionEquation(mesh, D, t, A):
@@ -27,9 +27,17 @@ def OneDdiffusionEquation(mesh, D, t, A):
     D = D**2*0.5
     r = (mesh[:,0]-A*t)**2
     den = 4*D*t
-    
+
     vals = np.exp(-r/(den))*(1/(4*np.pi*D*t)**(N/2))
-    
+
+    return vals
+
+def Solution(diff, drift, mesh, t, dim):
+    D = diff**2*0.5
+    r = (mesh[:,0]-drift*t)**2
+    for ii in range(1,dim):
+        r += (mesh[:,ii])**2
+    vals = np.exp(-r/(4*D*t))*(1/(4*np.pi*D*t))**(dim/2)
     return vals
 
 

@@ -714,5 +714,5 @@ class Triangulation:
     def convex_invariant(self, vertex):
         """Hull is convex."""
         raise NotImplementedError
-        
-        
+
+
