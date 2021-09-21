@@ -4,9 +4,9 @@ from Class_SDE import SDE
 from Class_Simulation import Simulation
 import numpy as np
 import matplotlib.pyplot as plt
+import DriftDiffusionFunctionBank as functionBank
 
-
-dimension = 2
+dimension = 3
 
 if dimension ==1:
     beta = 4
@@ -21,28 +21,27 @@ if dimension ==2:
     radius =1
     kstepMin= 0.08
     kstepMax = 0.085
-    h = 0.1
-    endTime = 0.7
+    h = 0.01
+    endTime = 0.5
 
-def driftFunction(mesh):
-    if mesh.ndim ==1:
-        mesh = np.expand_dims(mesh, axis=0)
-    dr = np.zeros(np.shape(mesh))
-    dr[:,0] = 0
-    return dr
 
-def diffusionFunction(mesh):
-    if mesh.ndim ==1:
-        mesh = np.expand_dims(mesh, axis=0)
-    if dimension ==1:
-        return 0.6*np.expand_dims(np.asarray(np.ones((np.size(mesh)))),1)
-    else:
-        return 0.6*np.diag(np.ones(dimension))
+if dimension ==3:
+    beta = 3
+    radius = 0.5
+    kstepMin= 0.08
+    kstepMax = 0.085
+    h = 0.01
+    endTime = 0.1
+
+driftFunction = functionBank.zeroDrift
+driftFunction = functionBank.erfDrift
+
+diffusionFunction = functionBank.oneDiffusion
 
 
 spatialDiff = False
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
-parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, timeDiscretizationType = "AM")
+parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, timeDiscretizationType = "EM")
 simulation = Simulation(sde, parameters, endTime)
 
 
@@ -109,7 +108,7 @@ if dimension ==2:
     title = ax.set_title('3D Test')
 
     graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
-    ax.set_zlim(0, 4.5)
+    ax.set_zlim(0, 1.5)
     ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
     plt.show()
 
@@ -151,7 +150,7 @@ from exactSolutions import Solution
 
 trueSoln = []
 for i in range(len(simulation.meshTrajectory)): #diff, drift, mesh, t, dim
-    truepdf = Solution(0.6, 0, simulation.meshTrajectory[i], (i+1)*h, dimension)
+    truepdf = Solution(1, 0, simulation.meshTrajectory[i], (i+1)*h, dimension)
     # truepdf = solution(xvec,-1,T)
     trueSoln.append(np.squeeze(np.copy(truepdf)))
 
