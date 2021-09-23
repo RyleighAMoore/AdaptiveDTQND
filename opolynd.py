@@ -1,5 +1,5 @@
 import numpy as np
-from pyopoly1 import opoly1d
+import opoly1d
 
 
 def opolynd_eval(x, lambdas, ab, poly1d):
@@ -31,11 +31,11 @@ if __name__ == "__main__":
     from mpl_toolkits.mplot3d import Axes3D
     import opoly1d, indexing
     from families import HermitePolynomials
-    
+
     #plot 1D
     d = 1
     k = 6
-    
+
     H = HermitePolynomials()
 
     ab = H.recurrence(k+1)
@@ -50,12 +50,12 @@ if __name__ == "__main__":
     for i in range(len(p.T)):
         plt.plot(x,p[:,i])
     plt.show()
-    
-    
+
+
     #plot 2D
     d = 2
     k = 6
-    
+
     H = HermitePolynomials()
     H.probability_measure = True
 
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     x = np.linspace(-6, 6, N)
     X,Y = np.meshgrid(x,x)
     XX = np.concatenate((X.reshape(X.size,1), Y.reshape(Y.size,1)), axis=1)
-    
+
     lambdas = indexing.total_degree_indices(d, k)
 
     p = opolynd_eval(XX, lambdas, ab, H)

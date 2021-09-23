@@ -53,16 +53,16 @@ class Simulation():
 
 
 
-from pyopoly1.Class_Gaussian import GaussScale
+from Class_Gaussian import GaussScale
 import numpy as np
 from Class_LaplaceApproximation import LaplaceApproximation
 import math
-from pyopoly1.variableTransformations import map_to_canonical_space, map_from_canonical_space
-from pyopoly1.families import HermitePolynomials
-from pyopoly1 import indexing
-from pyopoly1 import LejaPoints as LP
-from pyopoly1 import opolynd
-from pyopoly1.LejaPoints import getLejaPoints
+from variableTransformations import map_to_canonical_space, map_from_canonical_space
+from families import HermitePolynomials
+import indexing
+import LejaPoints as LP
+import opolynd
+from LejaPoints import getLejaPoints
 from scipy.interpolate import griddata
 from Functions import weightExp, G
 

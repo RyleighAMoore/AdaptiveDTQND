@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import special as sp
-from pyopoly1.opoly1d import OrthogonalPolynomialBasis1D
+from opoly1d import OrthogonalPolynomialBasis1D
 
 class JacobiPolynomials(OrthogonalPolynomialBasis1D):
     def __init__(self, alpha=0., beta=0.):

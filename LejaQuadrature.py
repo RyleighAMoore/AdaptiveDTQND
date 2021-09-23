@@ -7,13 +7,13 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from Functions import GVals, Gaussian, G, weightExp, GAndersonMat
 from scipy.interpolate import griddata, interp2d
-from pyopoly1.LejaPoints import getLejaSetFromPoints, getLejaPoints
-from pyopoly1.QuadratureRules import QuadratureByInterpolationND, QuadratureByInterpolation_Simple, QuadratureByInterpolationND_DivideOutGaussian
-from pyopoly1.families import HermitePolynomials
-from pyopoly1.Class_Gaussian import GaussScale
-from pyopoly1 import indexing
+from LejaPoints import getLejaSetFromPoints, getLejaPoints
+from QuadratureRules import QuadratureByInterpolationND, QuadratureByInterpolation_Simple, QuadratureByInterpolationND_DivideOutGaussian
+from families import HermitePolynomials
+from Class_Gaussian import GaussScale
+import indexing
 import math
-from pyopoly1 import variableTransformations as VT
+import variableTransformations as VT
 
 
 def getMeshValsThatAreClose(Mesh, pdf, sigmaX, sigmaY, muX, muY, numStd = 4):

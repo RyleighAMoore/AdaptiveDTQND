@@ -1,5 +1,5 @@
 import numpy as np
-from pyopoly1.Class_Gaussian import GaussScale
+from Class_Gaussian import GaussScale
 import matplotlib.pyplot as plt
 from Functions import nDGridMeshCenteredAtOrigin
 class PDF:

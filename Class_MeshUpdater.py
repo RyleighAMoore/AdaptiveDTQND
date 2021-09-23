@@ -5,8 +5,8 @@ from itertools import chain
 from tqdm import tqdm, trange
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from pyopoly1 import LejaPoints as LP
-from pyopoly1 import LejaPoints as LP
+import LejaPoints as LP
+import LejaPoints as LP
 from scipy.interpolate import griddata
 import random
 import Circumsphere as CS

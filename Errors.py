@@ -3,9 +3,9 @@ from scipy.interpolate import griddata, interp2d
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.stats import multivariate_normal
-from pyopoly1 import opolynd as op
-from pyopoly1 import families as f
-from pyopoly1.indexing import total_degree_indices
+import opolynd as op
+import families as f
+from indexing import total_degree_indices
 
 
 def ErrorValsOneTime(Meshes, PdfTraj, mesh2, surfaces, PrintStuff=True):

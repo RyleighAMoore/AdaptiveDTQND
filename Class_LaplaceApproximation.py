@@ -1,7 +1,7 @@
 
 import numpy as np
 import math
-from pyopoly1.Class_Gaussian import GaussScale
+from Class_Gaussian import GaussScale
 from itertools import combinations
 import operator as op
 from functools import reduce

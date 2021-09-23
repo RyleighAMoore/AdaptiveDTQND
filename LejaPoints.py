@@ -6,12 +6,12 @@ Created on Tue Jan 21 11:21:05 2020
 """
 import matplotlib.pyplot as plt
 import numpy as np
-from pyopoly1 import opolynd
-from pyopoly1.LejaUtilities import get_lu_leja_samples, sqrtNormal_weights
-from pyopoly1.opolynd import opolynd_eval
+import opolynd
+from LejaUtilities import get_lu_leja_samples, sqrtNormal_weights
+from opolynd import opolynd_eval
 from mpl_toolkits.mplot3d import Axes3D
 import math
-from pyopoly1 import variableTransformations as VT
+import variableTransformations as VT
 np.random.seed(10)
 
 
