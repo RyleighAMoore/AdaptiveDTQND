@@ -23,7 +23,7 @@ if dimension ==2:
     kstepMin= 0.08
     kstepMax = 0.09
     h = 0.05
-    endTime = 0.05
+    endTime = 0.5
 
 
 if dimension ==3:
@@ -45,6 +45,9 @@ ErrorsAM = []
 ErrorsEM = []
 timesAM =[]
 timesEM = []
+timesNoStartupEM = []
+timesNoStartupAM = []
+
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
 meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,2, 0.05)
@@ -55,16 +58,22 @@ for h in hvals:
     parametersEM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =True, timeDiscretizationType = "EM")
     startEM = time.time()
     simulationEM = Simulation(sde, parametersEM, endTime)
+
+    startEMNoStartup = time.time()
     simulationEM.computeAllTimes(sde, simulationEM.pdf, parametersEM)
     endEM = time.time()
     timesEM.append(np.copy(endEM-startEM))
+    timesNoStartupEM(np.copy(endEM-startEMNoStartup))
 
     parametersAM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =True, timeDiscretizationType = "AM")
     startAM = time.time()
     simulationAM = Simulation(sde, parametersAM, endTime)
+    startAMNoStartup = time.time()
     simulationAM.computeAllTimes(sde, simulationAM.pdf, parametersAM)
     endAM =time.time()
     timesAM.append(np.copy(endAM-startAM))
+    timesNoStartupAM(np.copy(endEM-startAMNoStartup))
+
 
     LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationEM.meshTrajectory[-1], simulationEM.pdfTrajectory[-1], meshApprox, pdfApprox, h)
     ErrorsEM.append(np.copy(L2wErrors))
@@ -83,6 +92,8 @@ ax.scatter(meshApprox[:,0],meshApprox[:,1], pdfApprox)
 plt.figure()
 plt.semilogy(np.asarray(timesEM), np.asarray(ErrorsEM),label= "EM")
 plt.semilogy(np.asarray(timesAM), np.asarray(ErrorsAM), label="AM")
+plt.semilogy(np.asarray(timesNoStartupEM), np.asarray(ErrorsEM), label= "EM: No Startup")
+plt.semilogy(np.asarray(timesNoStartupAM), np.asarray(ErrorsAM), label="AM: No Startup")
 plt.legend()
 plt.show()
 plt.savefig('result.png')
