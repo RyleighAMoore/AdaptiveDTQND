@@ -5,24 +5,25 @@ from Class_Simulation import Simulation
 import numpy as np
 import matplotlib.pyplot as plt
 import DriftDiffusionFunctionBank as functionBank
+import time
 
-dimension = 3
+dimension = 1
 
 if dimension ==1:
     beta = 4
-    radius = 3
+    radius = 5
     kstepMin= 0.06
     kstepMax = 0.07
-    h = 0.01
-    endTime =2
+    h = 0.1
+    endTime =5
 
 if dimension ==2:
     beta = 3
     radius =1
     kstepMin= 0.08
-    kstepMax = 0.085
-    h = 0.01
-    endTime = 0.5
+    kstepMax = 0.09
+    h = 0.05
+    endTime = 0.25
 
 
 if dimension ==3:
@@ -33,7 +34,7 @@ if dimension ==3:
     h = 0.01
     endTime = 0.1
 
-driftFunction = functionBank.zeroDrift
+# driftFunction = functionBank.zeroDrift
 driftFunction = functionBank.erfDrift
 
 diffusionFunction = functionBank.oneDiffusion
@@ -41,8 +42,13 @@ diffusionFunction = functionBank.oneDiffusion
 
 spatialDiff = False
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
-parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, timeDiscretizationType = "EM")
+parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =True, timeDiscretizationType = "AM")
 simulation = Simulation(sde, parameters, endTime)
+start = time.time()
+simulation.computeAllTimes(sde, simulation.pdf, parameters)
+end = time.time()
+print(end-start)
+
 
 
 from exactSolutions import Solution

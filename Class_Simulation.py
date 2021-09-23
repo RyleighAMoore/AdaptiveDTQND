@@ -17,10 +17,10 @@ class Simulation():
         self.endTime = endTime
         self.pdfTrajectory = []
         self.meshTrajectory = []
+        self.times = []
         self.setTimeDiscretizationDriver(parameters, self.pdf)
         self.meshUpdater = MeshUpdater(parameters, self.pdf, sde.dimension)
         self.integrator = Integrator(self, sde, parameters, self.pdf)
-        self.computeAllTimes(sde, self.pdf, parameters)
 
 
     def setTimeDiscretizationDriver(self, parameters, pdf):
@@ -38,15 +38,16 @@ class Simulation():
     def computeAllTimes(self, sde, pdf, parameters):
         self.pdfTrajectory.append(np.copy(pdf.pdfVals))
         self.meshTrajectory.append(np.copy(pdf.meshCoordinates))
+        self.times.append(parameters.h)
         numSteps = int(self.endTime/parameters.h)
         for i in range(1, numSteps):
-            if i>2:
+            if i>2 and parameters.useAdaptiveMesh ==True:
                 self.integrator.checkIncreaseSizeStorageMatrices(pdf,parameters)
                 self.meshUpdater.addPointsToMeshProcedure(pdf, parameters, self, sde)
                 if i>=9 and i%25==1:
                     self.meshUpdater.removePointsFromMeshProcedure(pdf, self, parameters, sde)
-
             self.computeTimestep(sde, pdf, parameters)
+            self.times.append((i+1)*parameters.h)
 
 
 

@@ -64,7 +64,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
     def __init__(self, pdf):
         self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*5
         self.meshSpacingAM = 0.05
-        self.meshAMPadding = 0.5
+        self.meshAMPadding = 1
         self.theta = 0.5
         self.a1 = alpha1(self.theta)
         self.a2 = alpha2(self.theta)

@@ -7,6 +7,27 @@ from pyopoly1 import opolynd as op
 from pyopoly1 import families as f
 from pyopoly1.indexing import total_degree_indices
 
+
+def ErrorValsOneTime(Meshes, PdfTraj, mesh2, surfaces, PrintStuff=True):
+
+    # Interpolate the fine grid soln to the leja points
+    gridSolnOnLejas = griddata(mesh2, surfaces, Meshes, method='cubic', fill_value=np.min(surfaces))
+    gridSolnOnLejas = np.squeeze(gridSolnOnLejas)
+    # fig = plt.figure()
+    # plt.scatter(Meshes, np.abs((PdfTraj-gridSolnOnLejas)), c='k', marker='.')
+    # plt.show()
+    #compute errors
+    l2w = np.sqrt(np.sum(np.abs((gridSolnOnLejas - PdfTraj))**2*gridSolnOnLejas)/np.sum(gridSolnOnLejas))
+
+    l2 = np.sqrt(np.sum(np.abs((gridSolnOnLejas - PdfTraj)*1)**2)/len(PdfTraj))
+
+    l1 = np.sum(np.abs(gridSolnOnLejas - PdfTraj)*gridSolnOnLejas)/len(PdfTraj)
+
+    linf = np.max(np.abs(gridSolnOnLejas - PdfTraj))
+    return linf, l2, l1, l2w
+
+
+
 def ErrorVals(Meshes, PdfTraj, mesh2, surfaces, PrintStuff=True):
     L2Errors = []
     LinfErrors = []
