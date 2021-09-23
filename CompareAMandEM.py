@@ -84,6 +84,8 @@ plt.figure()
 plt.semilogy(np.asarray(timesEM), np.asarray(ErrorsEM),label= "EM")
 plt.semilogy(np.asarray(timesAM), np.asarray(ErrorsAM), label="AM")
 plt.legend()
+plt.show()
+plt.savefig('result.png')
 
 
 # import matplotlib.pyplot as plt
