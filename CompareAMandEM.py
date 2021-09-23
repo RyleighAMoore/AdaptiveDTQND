@@ -63,7 +63,7 @@ for h in hvals:
     simulationEM.computeAllTimes(sde, simulationEM.pdf, parametersEM)
     endEM = time.time()
     timesEM.append(np.copy(endEM-startEM))
-    timesNoStartupEM(np.copy(endEM-startEMNoStartup))
+    timesNoStartupEM.append(np.copy(endEM-startEMNoStartup))
 
     parametersAM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =True, timeDiscretizationType = "AM")
     startAM = time.time()
@@ -72,7 +72,7 @@ for h in hvals:
     simulationAM.computeAllTimes(sde, simulationAM.pdf, parametersAM)
     endAM =time.time()
     timesAM.append(np.copy(endAM-startAM))
-    timesNoStartupAM(np.copy(endEM-startAMNoStartup))
+    timesNoStartupAM.append(np.copy(endEM-startAMNoStartup))
 
 
     LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationEM.meshTrajectory[-1], simulationEM.pdfTrajectory[-1], meshApprox, pdfApprox, h)
