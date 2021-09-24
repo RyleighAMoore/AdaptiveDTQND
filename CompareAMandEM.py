@@ -14,15 +14,15 @@ if dimension ==1:
     radius = 5
     kstepMin= 0.06
     kstepMax = 0.07
-    h = 0.01
-    endTime =10
+    # h = 0.01
+    endTime =3
 
 if dimension ==2:
     beta = 3
     radius =1
     kstepMin= 0.08
     kstepMax = 0.09
-    h = 0.05
+    # h = 0.05
     endTime = 0.5
 
 
@@ -31,7 +31,7 @@ if dimension ==3:
     radius = 0.5
     kstepMin= 0.08
     kstepMax = 0.085
-    h = 0.01
+    # h = 0.01
     endTime = 0.1
 
 # driftFunction = functionBank.zeroDrift
@@ -51,10 +51,9 @@ timesNoStartupAM = []
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
 meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,20, 0.05)
-hvals = [0.01, 0.05, 0.1]
+hvals = [0.05, 0.1]
 # hvals =[0.05]
 for h in hvals:
-
     parametersEM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =True, timeDiscretizationType = "EM")
     startEM = time.time()
     simulationEM = Simulation(sde, parametersEM, endTime)
@@ -84,8 +83,10 @@ from mpl_toolkits.mplot3d import Axes3D
 
 # fig =plt.figure()
 # ax = Axes3D(fig)
-# ax.scatter(meshApprox[:,0],meshApprox[:,1], pdfApprox)
-# plt.scatter(simulationAM.meshTrajectory[-1], simulationAM.pdfTrajectory[-1])
+# plt.scatter(meshApprox, pdfApprox)
+# plt.scatter(simulationEM.meshTrajectory[0], simulationEM.pdfTrajectory[0])
+# plt.scatter(simulationEM.meshTrajectory[-1], simulationEM.pdfTrajectory[-1])
+
 
 # plt.scatter(simulationEM.meshTrajectory[-1],simulationEM.pdfTrajectory[-1])
 
