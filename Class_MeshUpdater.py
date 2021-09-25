@@ -40,7 +40,7 @@ class MeshUpdater:
                     MM = np.max(pdf.meshCoordinates)
                     newPointsBool = True
 
-                    for i in range(1,5):
+                    for i in range(1,10):
                         pdf.addPointsToMesh(np.asarray([[mm-i*radius]]))
                         newPoints.append(np.asarray(mm-i*radius))
                 if pdf.pdfVals[right] > self.addPointsToBoundaryIfBiggerThanTolerance:
@@ -49,11 +49,11 @@ class MeshUpdater:
                     MM = np.max(pdf.meshCoordinates)
                     newPointsBool = True
 
-                    for i in range(1,5):
+                    for i in range(1,10):
                         pdf.addPointsToMesh(np.asarray([[MM+i*radius]]))
                         newPoints.append(np.asarray(MM+i*radius))
                 if newPointsBool:
-                    interp1 = [griddata(MeshOrig,PdfOrig, np.asarray(newPoints), method='linear', fill_value=np.min(pdf.pdfVals))][0]
+                    interp1 = [griddata(MeshOrig,PdfOrig, np.asarray(newPoints), method='linear', fill_value=np.min(pdf.pdfVals)/2)][0]
                     interp1[interp1<0] = np.min(PdfOrig)
                     pdf.addPointsToPdf(interp1)
                     self.changedBoolean =1
@@ -91,7 +91,7 @@ class MeshUpdater:
                             numPointsAdded = numPointsAdded + len(newPoints)
                     if numPointsAdded > 0:
                         newPoints = pdf.meshCoordinates[-numPointsAdded:,:]
-                        interp = [griddata(MeshOrig, PdfOrig, newPoints, method='linear', fill_value=np.min(pdf.pdfVals))][0]
+                        interp = [griddata(MeshOrig, PdfOrig, newPoints, method='linear', fill_value=np.min(pdf.pdfVals)/2)][0]
                         interp[interp<0] = np.min(pdf.pdfVals)
                         pdf.addPointsToPdf(interp)
                         self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)

@@ -8,6 +8,13 @@ def zeroDrift(mesh):
     dr[:,0] = 0
     return dr
 
+def oneDrift(mesh):
+    if mesh.ndim ==1:
+        mesh = np.expand_dims(mesh, axis=0)
+    dr = np.zeros(np.shape(mesh))
+    dr[:,0] = 1
+    return dr
+
 def oneDiffusion(mesh):
     if mesh.ndim == 1:
         mesh = np.expand_dims(mesh, axis=0)

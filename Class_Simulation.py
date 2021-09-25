@@ -44,6 +44,7 @@ class Simulation():
             if i>2 and parameters.useAdaptiveMesh ==True:
                 self.integrator.checkIncreaseSizeStorageMatrices(pdf,parameters)
                 self.meshUpdater.addPointsToMeshProcedure(pdf, parameters, self, sde)
+                # print(len(self.pdfTrajectory[-1]), "****************")
                 if i>=9 and i%25==1:
                     self.meshUpdater.removePointsFromMeshProcedure(pdf, self, parameters, sde)
             self.computeTimestep(sde, pdf, parameters)

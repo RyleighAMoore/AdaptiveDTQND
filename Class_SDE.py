@@ -16,7 +16,7 @@ class SDE:
         beta = 3 # Not really used
         kstepMin = xStep
         kstepMax = xStep # Not really used
-        h = 0.05 # Do not make less
+        h = 0.005 # Do not make less
 
         parameters = Parameters(self, beta, radius, kstepMin, kstepMax, h, False, timeDiscretizationType = "EM")
         pdf = PDF(self, parameters)

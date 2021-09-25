@@ -11,11 +11,11 @@ dimension = 1
 
 if dimension ==1:
     beta = 4
-    radius = 5
+    radius = 3
     kstepMin= 0.06
     kstepMax = 0.07
-    h = 0.1
-    endTime =5
+    h = 0.01
+    endTime =3
 
 if dimension ==2:
     beta = 3
@@ -34,7 +34,7 @@ if dimension ==3:
     h = 0.01
     endTime = 0.1
 
-# driftFunction = functionBank.zeroDrift
+driftFunction = functionBank.zeroDrift
 driftFunction = functionBank.erfDrift
 
 diffusionFunction = functionBank.oneDiffusion
