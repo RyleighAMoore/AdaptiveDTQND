@@ -25,9 +25,9 @@ class Simulation():
 
     def setTimeDiscretizationDriver(self, parameters, pdf):
         if parameters.timeDiscretizationType == "EM":
-            self.timeDiscretizationMethod = EulerMaruyamaTimeDiscretizationMethod(pdf)
+            self.timeDiscretizationMethod = EulerMaruyamaTimeDiscretizationMethod(pdf, adaptive = parameters.useAdaptiveMesh)
         if parameters.timeDiscretizationType == "AM":
-            self.timeDiscretizationMethod = AndersonMattinglyTimeDiscretizationMethod(pdf)
+            self.timeDiscretizationMethod = AndersonMattinglyTimeDiscretizationMethod(pdf, adaptive = parameters.useAdaptiveMesh)
 
 
     def computeTimestep(self, sde, pdf, parameters):

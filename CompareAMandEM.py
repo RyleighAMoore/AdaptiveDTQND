@@ -8,7 +8,7 @@ import DriftDiffusionFunctionBank as functionBank
 from Errors import ErrorValsOneTime
 import time
 
-dimension = 1
+dimension = 2
 if dimension ==1:
     beta = 3
     radius = 4
@@ -34,8 +34,8 @@ if dimension ==3:
     # h = 0.01
     endTime = 0.1
 
-# driftFunction = functionBank.zeroDrift
-driftFunction = functionBank.erfDrift
+driftFunction = functionBank.zeroDrift
+# driftFunction = functionBank.erfDrift
 # driftFunction = functionBank.oneDrift
 
 spatialDiff = False
@@ -51,9 +51,14 @@ timesNoStartupEM = []
 timesNoStartupAM = []
 adaptive = True
 
+ApproxSolution =False
+
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
-meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,15, 0.005)
+if ApproxSolution:
+    meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,1.2, 0.01)
+
+
 hvals = [0.1, 0.2]
 # hvals =[0.05]
 for h in hvals:
@@ -67,6 +72,12 @@ for h in hvals:
     timesEM.append(np.copy(endEM-startEM))
     timesNoStartupEM.append(np.copy(endEM-startEMNoStartup))
 
+    if not ApproxSolution:
+        meshApprox = simulationEM.pdfTrajectory[-1]
+        pdfApprox = sde.exactSolution(simulationEM.meshTrajectory[-1], endTime)
+    LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationEM.meshTrajectory[-1], simulationEM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
+    ErrorsEM.append(np.copy(L2wErrors))
+
     parametersAM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "AM")
     startAM = time.time()
     simulationAM = Simulation(sde, parametersAM, endTime)
@@ -75,11 +86,11 @@ for h in hvals:
     endAM =time.time()
     timesAM.append(np.copy(endAM-startAM))
     timesNoStartupAM.append(np.copy(endAM-startAMNoStartup))
+    if not ApproxSolution:
+        meshApprox = simulationAM.pdfTrajectory[-1]
+        pdfApprox = sde.exactSolution(simulationAM.meshTrajectory[-1], endTime)
 
-
-    LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationEM.meshTrajectory[-1], simulationEM.pdfTrajectory[-1], meshApprox, pdfApprox, h)
-    ErrorsEM.append(np.copy(L2wErrors))
-    LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationAM.meshTrajectory[-1], simulationAM.pdfTrajectory[-1], meshApprox, pdfApprox, h)
+    LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationAM.meshTrajectory[-1], simulationAM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
     ErrorsAM.append(np.copy(L2wErrors))
 
 from mpl_toolkits.mplot3d import Axes3D

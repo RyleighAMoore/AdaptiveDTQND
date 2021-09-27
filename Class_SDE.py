@@ -29,6 +29,18 @@ class SDE:
             # plt.scatter(pdf.meshCoordinates, pdf.pdfVals)
         return pdf.meshCoordinates, pdf.pdfVals
 
+    def exactSolution(self, mesh, endTime):
+        drift = self.driftFunction(np.asarray([mesh[0]]))
+        drift = drift[0][0]
+        diff = self.diffusionFunction(mesh[0])[0,0]
+        D = diff**2*0.5
+        r = (mesh[:,0]-drift*endTime)**2
+        for ii in range(1,self.dimension):
+            r += (mesh[:,ii])**2
+        vals = np.exp(-r/(4*D*endTime))*(1/(4*np.pi*D*endTime))**(self.dimension/2)
+        return vals
+
+
 
         # surfaces2 = []
         # for i in solnIndices:

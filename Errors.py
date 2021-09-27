@@ -8,11 +8,15 @@ import families as f
 from indexing import total_degree_indices
 
 
-def ErrorValsOneTime(Meshes, PdfTraj, mesh2, surfaces, PrintStuff=True):
+def ErrorValsOneTime(Meshes, PdfTraj, mesh2, surfaces, interpolate= True):
 
     # Interpolate the fine grid soln to the leja points
-    gridSolnOnLejas = griddata(mesh2, surfaces, Meshes, method='cubic', fill_value=np.min(surfaces))
-    gridSolnOnLejas = np.squeeze(gridSolnOnLejas)
+    if interpolate:
+        gridSolnOnLejas = griddata(mesh2, surfaces, Meshes, method='cubic', fill_value=np.min(surfaces))
+        gridSolnOnLejas = np.squeeze(gridSolnOnLejas)
+    else:
+        gridSolnOnLejas = surfaces
+
     # fig = plt.figure()
     # plt.scatter(Meshes, np.abs((PdfTraj-gridSolnOnLejas)), c='k', marker='.')
     # plt.show()
