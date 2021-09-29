@@ -20,7 +20,7 @@ from tqdm import trange
 class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
     def __init__(self, pdf, adaptive):
         if adaptive:
-            self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*5
+            self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*3
         else:
             self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength
 
@@ -68,7 +68,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
     ## TODO: RECHECK THAT RHO ISNT NEEDED, Combine the N2 computations
     def __init__(self, pdf, adaptive):
         if adaptive:
-            self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*5
+            self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*3
         else:
             self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength
         self.meshSpacingAM = 0.05
@@ -126,7 +126,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
             N2Complete.append(np.copy(N2All))
         self.N2s = np.asarray(N2Complete)
 
-    def computeTransitionProbability(self, sde, yi, yim1, h, N2):
+    def computeTransitionProbability(self, sde, yim1, h, N2):
         mu1 = yim1 + sde.driftFunction(np.asarray([yim1]))*self.theta*h
         sig1 = abs(sde.diffusionFunction(np.asarray([yim1])))*np.sqrt(self.theta*h)
         scale = GaussScale(sde.dimension)
@@ -147,7 +147,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         for i in trange(pdf.meshLength):
             for j in range(pdf.meshLength):
                 N2 = self.N2s[j][:,i]
-                transitionProb = self.computeTransitionProbability(sde, pdf.meshCoordinates[i], pdf.meshCoordinates[j], h, N2= N2)
+                transitionProb = self.computeTransitionProbability(sde, pdf.meshCoordinates[j], h, N2= N2)
                 matrix[i,j] = transitionProb
         return matrix
 

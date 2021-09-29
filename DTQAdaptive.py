@@ -19,11 +19,11 @@ if dimension ==1:
 
 if dimension ==2:
     beta = 3
-    radius =0.9
+    radius =0.21
     kstepMin= 0.08
     kstepMax = 0.09
     h = 0.05
-    endTime = 0.25
+    endTime = 0.1
 
 
 if dimension ==3:
@@ -42,7 +42,7 @@ diffusionFunction = functionBank.oneDiffusion
 
 spatialDiff = False
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
-parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =True, timeDiscretizationType = "AM")
+parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =False, timeDiscretizationType = "AM")
 simulation = Simulation(sde, parameters, endTime)
 start = time.time()
 simulation.computeAllTimes(sde, simulation.pdf, parameters)

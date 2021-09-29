@@ -49,7 +49,7 @@ timesAM =[]
 timesEM = []
 timesNoStartupEM = []
 timesNoStartupAM = []
-adaptive = True
+adaptive = False
 
 ApproxSolution =False
 
@@ -59,7 +59,7 @@ if ApproxSolution:
     meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,1.2, 0.01)
 
 
-hvals = [0.1, 0.2]
+hvals = [0.15]
 # hvals =[0.05]
 for h in hvals:
     parametersEM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM")
@@ -77,6 +77,7 @@ for h in hvals:
         pdfApprox = sde.exactSolution(simulationEM.meshTrajectory[-1], endTime)
     LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationEM.meshTrajectory[-1], simulationEM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
     ErrorsEM.append(np.copy(L2wErrors))
+    del simulationEM
 
     parametersAM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "AM")
     startAM = time.time()
@@ -89,9 +90,10 @@ for h in hvals:
     if not ApproxSolution:
         meshApprox = simulationAM.pdfTrajectory[-1]
         pdfApprox = sde.exactSolution(simulationAM.meshTrajectory[-1], endTime)
-
     LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationAM.meshTrajectory[-1], simulationAM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
     ErrorsAM.append(np.copy(L2wErrors))
+    del simulationAM
+
 
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -105,8 +107,8 @@ plt.scatter(meshApprox, pdfApprox)
 # plt.scatter(simulationEM.meshTrajectory[-1],simulationEM.pdfTrajectory[-1])
 
 plt.figure()
-plt.semilogy(np.asarray(timesEM), np.asarray(ErrorsEM),label= "EM")
-plt.semilogy(np.asarray(timesAM), np.asarray(ErrorsAM), label="AM")
+plt.semilogy(np.asarray(timesEM), np.asarray(ErrorsEM),'.',label= "EM")
+plt.semilogy(np.asarray(timesAM), np.asarray(ErrorsAM), ',', label="AM")
 plt.semilogy(np.asarray(timesNoStartupEM), np.asarray(ErrorsEM),'.', label= "EM: No Startup")
 plt.semilogy(np.asarray(timesNoStartupAM), np.asarray(ErrorsAM),'.', label="AM: No Startup")
 plt.legend()
