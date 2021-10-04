@@ -93,6 +93,8 @@ plt.ylabel("Time (seconds)")
 plt.title("1D Transition Matrix Formation Cost")
 
 plt.legend()
+plt.show()
+plt.savefig('result.png')
 
 
 
