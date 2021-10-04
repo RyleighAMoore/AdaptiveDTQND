@@ -11,11 +11,11 @@ import time
 dimension = 1
 if dimension ==1:
     beta = 3
-    radius = 10
+    radius =10
     kstepMin= 0.06
     kstepMax = 0.065
     # h = 0.01
-    endTime =0
+    endTime =1
 
 if dimension ==2:
     beta = 4
