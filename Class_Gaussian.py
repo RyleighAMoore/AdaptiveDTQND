@@ -22,7 +22,10 @@ class GaussScale:
     def setCov(self, covMat):
         # assert np.shape(covMat) == np.shape(self.cov)
         self.cov = covMat
-        self.invCov = np.linalg.inv(covMat)
+        try:
+            self.invCov = np.linalg.inv(covMat)
+        except np.linalg.LinAlgError:
+            self.invCov = np.linalg.inv(np.asarray(covMat))
         self.invCovR = 1/np.sqrt(2)*np.linalg.cholesky(self.invCov).T
 
     def setSigma(self, sigmas):
@@ -93,9 +96,25 @@ class GaussScale:
             # val = np.diagonal(val)
             # soln = const*np.exp(-1/2*val).T
             diff = (mesh.T - self.mu)
-            soln = self.const * np.exp(-1*np.linalg.norm(self.invCovR @ diff, axis=0)**2)
+            step1 = self.invCovR @ diff
+            # s = (step1.conj() * step1).real
+            # step2 = np.squeeze(np.sqrt(np.add.reduce(s, axis=0, keepdims=True)))
+            # step2 = np.linalg.norm(step1, axis=0)
+            # step3 = -1 * step2 ** 2
+            step2and3 = -1 * self.normSpecialSquared(step1, axis=0)
+            step4 = np.exp(step2and3)
+            step5 = self.const * step4
+            soln = step5
+            #soln = self.const * np.exp(-1*np.squeeze(np.sqrt(np.add.reduce(((self.invCovR @ diff).conj() * (self.invCovR @ diff)).real, axis=0, keepdims=True)))**2)
+            # soln = self.const * np.exp(-1*np.linalg.norm(self.invCovR @ diff, axis=0)**2)
+
 
         return soln
 
+    def normSpecialSquared(self, x, axis):
+        nd = x.ndim
+        axis = (axis,)
+        s = (x.conj() * x).real
+        return np.add.reduce(s, axis=axis)
 
 

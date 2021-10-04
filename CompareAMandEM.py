@@ -8,23 +8,22 @@ import DriftDiffusionFunctionBank as functionBank
 from Errors import ErrorValsOneTime
 import time
 
-dimension = 2
+dimension = 1
 if dimension ==1:
     beta = 3
-    radius = 4
+    radius = 10
     kstepMin= 0.06
-    kstepMax = 0.07
+    kstepMax = 0.065
     # h = 0.01
-    endTime =3
+    endTime =0
 
 if dimension ==2:
-    beta = 3
-    radius =1
+    beta = 4
+    radius =1.5
     kstepMin= 0.08
     kstepMax = 0.09
     # h = 0.05
-    endTime = 0.5
-
+    endTime = 1
 
 if dimension ==3:
     beta = 3
@@ -34,8 +33,8 @@ if dimension ==3:
     # h = 0.01
     endTime = 0.1
 
-driftFunction = functionBank.zeroDrift
-# driftFunction = functionBank.erfDrift
+# driftFunction = functionBank.zeroDrift
+driftFunction = functionBank.erfDrift
 # driftFunction = functionBank.oneDrift
 
 spatialDiff = False
@@ -51,16 +50,15 @@ timesNoStartupEM = []
 timesNoStartupAM = []
 adaptive = False
 
-ApproxSolution =False
+ApproxSolution =True
 
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
 if ApproxSolution:
-    meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,1.2, 0.01)
+    meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,14, 0.005)
 
 
-hvals = [0.15]
-# hvals =[0.05]
+hvals = [0.05, 0.1, 0.15]
 for h in hvals:
     parametersEM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM")
     startEM = time.time()
@@ -75,9 +73,10 @@ for h in hvals:
     if not ApproxSolution:
         meshApprox = simulationEM.pdfTrajectory[-1]
         pdfApprox = sde.exactSolution(simulationEM.meshTrajectory[-1], endTime)
+
     LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationEM.meshTrajectory[-1], simulationEM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
     ErrorsEM.append(np.copy(L2wErrors))
-    del simulationEM
+    # del simulationEM
 
     parametersAM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "AM")
     startAM = time.time()
@@ -92,14 +91,14 @@ for h in hvals:
         pdfApprox = sde.exactSolution(simulationAM.meshTrajectory[-1], endTime)
     LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationAM.meshTrajectory[-1], simulationAM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
     ErrorsAM.append(np.copy(L2wErrors))
-    del simulationAM
+    # del simulationAM
 
 
 from mpl_toolkits.mplot3d import Axes3D
 
-fig =plt.figure()
+# fig =plt.figure()
 # ax = Axes3D(fig)
-plt.scatter(meshApprox, pdfApprox)
+# plt.scatter(meshApprox, pdfApprox)
 # plt.scatter(simulationEM.meshTrajectory[0], simulationEM.pdfTrajectory[0])
 # plt.scatter(simulationEM.meshTrajectory[-1], simulationEM.pdfTrajectory[-1])
 
@@ -107,10 +106,10 @@ plt.scatter(meshApprox, pdfApprox)
 # plt.scatter(simulationEM.meshTrajectory[-1],simulationEM.pdfTrajectory[-1])
 
 plt.figure()
-plt.semilogy(np.asarray(timesEM), np.asarray(ErrorsEM),'.',label= "EM")
-plt.semilogy(np.asarray(timesAM), np.asarray(ErrorsAM), ',', label="AM")
-plt.semilogy(np.asarray(timesNoStartupEM), np.asarray(ErrorsEM),'.', label= "EM: No Startup")
-plt.semilogy(np.asarray(timesNoStartupAM), np.asarray(ErrorsAM),'.', label="AM: No Startup")
+plt.semilogy(np.asarray(timesEM), np.asarray(ErrorsEM),'o-',label= "EM")
+plt.semilogy(np.asarray(timesAM), np.asarray(ErrorsAM), 'o-', label="AM")
+plt.semilogy(np.asarray(timesNoStartupEM), np.asarray(ErrorsEM),'.-', label= "EM: No Startup")
+plt.semilogy(np.asarray(timesNoStartupAM), np.asarray(ErrorsAM),'.-', label="AM: No Startup")
 plt.legend()
 plt.show()
 plt.savefig('result.png')
@@ -134,12 +133,12 @@ if dimension ==1:
     ani = animation.FuncAnimation(fig, update_graph, frames=len(simulation.pdfTrajectory), interval=50, blit=False)
     plt.show()
 
-plt.figure()
+# plt.figure()
 
-lengths = []
-for  i in range(len(simulation.pdfTrajectory)):
-    l = len(np.asarray((simulation.pdfTrajectory[i])))
-    lengths.append(l)
+# lengths = []
+# for  i in range(len(simulation.pdfTrajectory)):
+#     l = len(np.asarray((simulation.pdfTrajectory[i])))
+#     lengths.append(l)
 
 
 plt.figure()

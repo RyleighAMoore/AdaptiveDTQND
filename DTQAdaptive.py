@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import DriftDiffusionFunctionBank as functionBank
 import time
 
-dimension =2
+dimension =1
 
 if dimension ==1:
     beta = 4
@@ -15,15 +15,15 @@ if dimension ==1:
     kstepMin= 0.06
     kstepMax = 0.07
     h = 0.01
-    endTime =3
+    endTime =2
 
 if dimension ==2:
     beta = 3
-    radius =0.21
+    radius = 0.6
     kstepMin= 0.08
     kstepMax = 0.09
     h = 0.05
-    endTime = 0.1
+    endTime = 0.5
 
 
 if dimension ==3:
@@ -34,15 +34,15 @@ if dimension ==3:
     h = 0.01
     endTime = 0.1
 
-driftFunction = functionBank.zeroDrift
-# driftFunction = functionBank.erfDrift
+# driftFunction = functionBank.zeroDrift
+driftFunction = functionBank.erfDrift
 
 diffusionFunction = functionBank.oneDiffusion
 
 
 spatialDiff = False
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
-parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =False, timeDiscretizationType = "AM")
+parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =True, timeDiscretizationType = "AM")
 simulation = Simulation(sde, parameters, endTime)
 start = time.time()
 simulation.computeAllTimes(sde, simulation.pdf, parameters)
@@ -51,26 +51,26 @@ print(end-start)
 
 
 
-from exactSolutions import Solution
+# from exactSolutions import Solution
 
-trueSoln = []
-for i in range(len(simulation.meshTrajectory)): #diff, drift, mesh, t, dim
-    truepdf = Solution(1, 0, simulation.meshTrajectory[i], (i+1)*h, dimension)
-    # truepdf = solution(xvec,-1,T)
-    trueSoln.append(np.squeeze(np.copy(truepdf)))
+# trueSoln = []
+# for i in range(len(simulation.meshTrajectory)): #diff, drift, mesh, t, dim
+#     truepdf = Solution(1, 0, simulation.meshTrajectory[i], (i+1)*h, dimension)
+#     # truepdf = solution(xvec,-1,T)
+#     trueSoln.append(np.squeeze(np.copy(truepdf)))
 
-from Errors import ErrorValsExact
-LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(simulation.meshTrajectory, simulation.pdfTrajectory, trueSoln, h, plot=False)
+# from Errors import ErrorValsExact
+# LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(simulation.meshTrajectory, simulation.pdfTrajectory, trueSoln, h, plot=False)
 
 
 
-endTime = 2
+# endTime = 2
 
 # spatialDiff = False
 # sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
 # parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, timeDiscretizationType = "EM")
 # simulation = Simulation(sde, parameters, endTime)
-# from exactSolutions import Solution
+from exactSolutions import Solution
 
 trueSoln = []
 for i in range(len(simulation.meshTrajectory)): #diff, drift, mesh, t, dim
@@ -103,64 +103,64 @@ if dimension ==1:
 if dimension ==2:
     Meshes = simulation.meshTrajectory
     PdfTraj = simulation.pdfTrajectory
-    def update_graph(num):
-        graph.set_data (Meshes[num][:,0], Meshes[num][:,1])
-        graph.set_3d_properties(PdfTraj[num])
-        title.set_text('3D Test, time={}'.format(num))
-        return title, graph
+    # def update_graph(num):
+    #     graph.set_data (Meshes[num][:,0], Meshes[num][:,1])
+    #     graph.set_3d_properties(PdfTraj[num])
+    #     title.set_text('3D Test, time={}'.format(num))
+    #     return title, graph
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    title = ax.set_title('3D Test')
+    # # fig = plt.figure()
+    # # ax = fig.add_subplot(111, projection='3d')
+    # # title = ax.set_title('3D Test')
 
-    graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
-    ax.set_zlim(0, 1.5)
-    ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
-    plt.show()
+    # # graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
+    # # ax.set_zlim(0, 1.5)
+    # # ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
+    # # plt.show()
 
-if dimension ==3:
-    Meshes = simulation.meshTrajectory
-    PdfTraj = simulation.pdfTrajectory
-    from mpl_toolkits.mplot3d.art3d import juggle_axes
-    def update_graph(num):
-        # print(num)
-        # graph._offsets3d=(Meshes[num][:,0], Meshes[num][:,1],  Meshes[num][:,2])
-        # graph.set_array(PdfTraj[num])
-        indx = 0
-        indy = 1
-        indz = 2
-        ax.clear()
-        ax.set_zlim(np.min(Meshes[-1][:,indz]),np.max(Meshes[-1][:,indz]))
-        ax.set_xlim(np.min(Meshes[-1][:,indx]),np.max(Meshes[-1][:,indx]))
-        ax.set_ylim(np.min(Meshes[-1][:,indy]),np.max(Meshes[-1][:,indy]))
-        graph = ax.scatter3D(Meshes[num][:,0], Meshes[num][:,1],  Meshes[num][:,2], c=np.log(PdfTraj[num]), cmap='bone_r', vmax=max(np.log(PdfTraj[0])), vmin=0, marker=".")
+# if dimension ==3:
+#     Meshes = simulation.meshTrajectory
+#     PdfTraj = simulation.pdfTrajectory
+#     from mpl_toolkits.mplot3d.art3d import juggle_axes
+#     def update_graph(num):
+#         # print(num)
+#         # graph._offsets3d=(Meshes[num][:,0], Meshes[num][:,1],  Meshes[num][:,2])
+#         # graph.set_array(PdfTraj[num])
+#         indx = 0
+#         indy = 1
+#         indz = 2
+#         ax.clear()
+#         ax.set_zlim(np.min(Meshes[-1][:,indz]),np.max(Meshes[-1][:,indz]))
+#         ax.set_xlim(np.min(Meshes[-1][:,indx]),np.max(Meshes[-1][:,indx]))
+#         ax.set_ylim(np.min(Meshes[-1][:,indy]),np.max(Meshes[-1][:,indy]))
+#         graph = ax.scatter3D(Meshes[num][:,0], Meshes[num][:,1],  Meshes[num][:,2], c=np.log(PdfTraj[num]), cmap='bone_r', vmax=max(np.log(PdfTraj[0])), vmin=0, marker=".")
 
-        # graph.set_data(Meshes[num][:,0], Meshes[num][:,1])
-        # graph.set_3d_properties(Meshes[num][:,2], color=PdfTraj[num], cmap='binary')
-        # title.set_text('3D Test, time={}'.format(num))
-        return graph
+#         # graph.set_data(Meshes[num][:,0], Meshes[num][:,1])
+#         # graph.set_3d_properties(Meshes[num][:,2], color=PdfTraj[num], cmap='binary')
+#         # title.set_text('3D Test, time={}'.format(num))
+#         return graph
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    title = ax.set_title('3D Test')
-    ax.set_zlim(np.min(Meshes[-1][:,2]),np.max(Meshes[-1][:,2]))
-    ax.set_xlim(np.min(Meshes[-1][:,0]),np.max(Meshes[-1][:,0]))
-    ax.set_ylim(np.min(Meshes[-1][:,1]),np.max(Meshes[-1][:,1]))
-
-
-    ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=1000, blit=False)
-    plt.show()
+#     fig = plt.figure()
+#     ax = fig.add_subplot(111, projection='3d')
+#     title = ax.set_title('3D Test')
+#     ax.set_zlim(np.min(Meshes[-1][:,2]),np.max(Meshes[-1][:,2]))
+#     ax.set_xlim(np.min(Meshes[-1][:,0]),np.max(Meshes[-1][:,0]))
+#     ax.set_ylim(np.min(Meshes[-1][:,1]),np.max(Meshes[-1][:,1]))
 
 
-from exactSolutions import Solution
+#     ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=1000, blit=False)
+#     plt.show()
 
-trueSoln = []
-for i in range(len(simulation.meshTrajectory)): #diff, drift, mesh, t, dim
-    truepdf = Solution(1, 0, simulation.meshTrajectory[i], (i+1)*h, dimension)
-    # truepdf = solution(xvec,-1,T)
-    trueSoln.append(np.squeeze(np.copy(truepdf)))
 
-from Errors import ErrorValsExact
-LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(simulation.meshTrajectory, simulation.pdfTrajectory, trueSoln, h, plot=False)
+# from exactSolutions import Solution
+
+# trueSoln = []
+# for i in range(len(simulation.meshTrajectory)): #diff, drift, mesh, t, dim
+#     truepdf = Solution(1, 0, simulation.meshTrajectory[i], (i+1)*h, dimension)
+#     # truepdf = solution(xvec,-1,T)
+#     trueSoln.append(np.squeeze(np.copy(truepdf)))
+
+# from Errors import ErrorValsExact
+# LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(simulation.meshTrajectory, simulation.pdfTrajectory, trueSoln, h, plot=False)
 
 

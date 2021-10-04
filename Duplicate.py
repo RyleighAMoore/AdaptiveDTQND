@@ -17,6 +17,7 @@ class TimeDiscretizationMethod():
     def RemovePoints(self):
         pass
 
+from tqdm import trange
 class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
     def __init__(self, pdf, adaptive):
         if adaptive:
@@ -113,6 +114,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
                 scale2.setCov(sig2**2)
 
             mu2s = self.meshAM + (self.a1*sde.driftFunction(self.meshAM) - self.a2*sde.driftFunction(yim1))*(1-self.theta)*h
+
             for count, i in enumerate(self.meshAM):
                 mu2 = mu2s[[count],:]
                 scale2.setMu(mu2.T)
@@ -174,7 +176,6 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
     def computeTransitionMatrix(self, pdf, sde, h):
         sizeMatrix = pdf.meshLength
         matrix = np.empty([sizeMatrix, sizeMatrix])*np.NaN
-
         self.setAndersonMattinglyMeshForComputingTransitionProbability(pdf, sde)
         self.computeN2s(pdf, sde, h)
         for j in trange(pdf.meshLength):
@@ -182,12 +183,11 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
             N2s = self.N2s[j]
             val = self.meshSpacingAM**sde.dimension*N2s.T@np.expand_dims(N1,1)
             matrix[:,j] = np.squeeze(val)
-        # matrix2 = np.empty([sizeMatrix, sizeMatrix])*np.NaN
         # for i in trange(pdf.meshLength):
         #     for j in range(pdf.meshLength):
         #         N2 = self.N2s[j][:,i]
         #         transitionProb = self.computeTransitionProbability(sde, pdf.meshCoordinates[j], h, N2= N2)
-        #         matrix2[i,j] = transitionProb
+        #         matrix[i,j] = transitionProb
         return matrix
 
     # def AddPointToG(self, pdf, newPointindices, parameters, integrator, sde):
@@ -240,23 +240,22 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         #CAdding New columns
         numNew = range(pdf.meshLength-len(newPointindices), pdf.meshLength)
 
-        # for i in range(pdf.meshLength): # over col
-        #     countj = 0
-        #     for j in numNew: # over the row
-        #         N2 = N2Complete[countj][:,i]
-        #         val = self.computeTransitionProbability(sde, pdf.meshCoordinates[j], parameters.h, N2)
-        #         # val = self.ComputeAndersonMattingly(N2, i, j, h, driftfun, difffun, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints, meshAM, SpatialDiff)
-        #         integrator.TransitionMatrix[i,j] = val
-        #         countj = countj+1
+        for i in range(pdf.meshLength): # over col
+            countj = 0
+            for j in numNew: # over the row
+                N2 = N2Complete[countj][:,i]
+                val = self.computeTransitionProbability(sde, pdf.meshCoordinates[j], parameters.h, N2)
+                # val = self.ComputeAndersonMattingly(N2, i, j, h, driftfun, difffun, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints, meshAM, SpatialDiff)
+                integrator.TransitionMatrix[i,j] = val
+                countj = countj+1
 
         # cc = np.copy(integrator.TransitionMatrix)
-        countj = 0
-        for j in numNew:
-            N1 = self.computeN1(sde, pdf.meshCoordinates[j], parameters.h)
-            N2s = N2Complete[countj]
-            val = self.meshSpacingAM**sde.dimension*N2s.T@np.expand_dims(N1,1)
-            integrator.TransitionMatrix[:len(val),j] = np.squeeze(val)
-            countj = countj+1
+        # for i in trange(pdf.meshLength):
+        #     N1 = self.computeN1(sde, pdf.meshCoordinates[i], parameters.h)
+        #     N2s = N2Complete[i]
+        #     val = self.meshSpacingAM**sde.dimension*N2s.T@np.expand_dims(N1,1)
+        #     cc[:len(val),i] = np.squeeze(val)
+        #     t=0
 
 
 
@@ -284,27 +283,16 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
                 N2All.append(np.copy(N2))
             N2Complete.append(np.copy(N2All))
 
-        # counti = 0
-        # for i in numNew: # over row
-        #     for j in range(pdf.meshLength): # over the row
-        #         N2 = N2Complete[j][:,counti]
-        #         val = self.computeTransitionProbability(sde, pdf.meshCoordinates[j], parameters.h, N2)
-        #         # val = ComputeAndersonMattingly(N2, i, j, h, driftfun, difffun, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints, meshAM, SpatialDiff)
-        #         integrator.TransitionMatrix[i,j] = val
-        #     counti = counti+1
+        counti = 0
+        for i in numNew: # over row
+            for j in range(pdf.meshLength): # over the row
+                N2 = N2Complete[j][:,counti]
+                val = self.computeTransitionProbability(sde, pdf.meshCoordinates[j], parameters.h, N2)
+                # val = ComputeAndersonMattingly(N2, i, j, h, driftfun, difffun, mesh, dimension, theta, a1, a2, minDistanceBetweenPoints, meshAM, SpatialDiff)
+                integrator.TransitionMatrix[i,j] = val
+            counti = counti+1
 
-        # cc = np.copy(integrator.TransitionMatrix)
-        countj = 0
-        for j in range(pdf.meshLength):
-            N1 = self.computeN1(sde, pdf.meshCoordinates[j], parameters.h)
-            N2s = N2Complete[countj]
-            val = self.meshSpacingAM**sde.dimension*N2s.T@np.expand_dims(N1,1)
-            integrator.TransitionMatrix[numNew,countj] = np.squeeze(val)
-            countj = countj+1
-        # t=0
 
-        # ttt = self.computeTransitionMatrix(pdf, sde, parameters.h)
-        # t=0
 
 
 
