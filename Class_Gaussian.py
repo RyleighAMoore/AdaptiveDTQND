@@ -58,49 +58,17 @@ class GaussScale:
         if sde.dimension == 1:
             # mu = np.repeat(self.mu, len(mesh),axis = 0)
             norm = (mesh - self.mu)**2
-            const = 1/(np.sqrt((2*np.pi)**sde.dimension*abs(np.linalg.det(self.cov))))
+            if self.const == None:
+                const = 1/(np.sqrt((2*np.pi)**sde.dimension*abs(np.linalg.det(self.cov))))
             soln = np.squeeze(const*np.exp(-1/2*self.invCov*norm).T)
 
         if sde.dimension >1:
-            # norm = np.subtract(mesh,self.mu.T)
-            # norm1 = norm[:,0]
-            # norm2 = norm[:,1]
-            # norm12 = norm1*norm2
-            # norm1 = np.subtract(mesh[:,0],self.mu[0])
-            # norm2 = np.subtract(mesh[:,1],self.mu[1])
-            # norm1 = mesh[:,0]-self.mu[0]
-            # norm2 = mesh[:,1]-self.mu[1]
-            # norm12 = norm1*norm2
             if self.const == None:
                 const = 1/(np.sqrt((2*np.pi)**sde.dimension*abs(np.linalg.det(self.cov))))
                 self.const = const
-            # soln = self.const*np.exp(-1/2*self.invCov[0,0]*norm1**2-1/2*self.invCov[0,1]*norm12-1/2*self.invCov[0,1]*norm12-1/2*self.invCov[1,0]*norm12-1/2*self.invCov[1,1]*norm2**2).T
 
-            # # write Sigma^{-1} as R.T @ R
-            # # So outside this function:
-            # self.invCovR = 1/np.sqrt(2)*np.linalg.cholesky(self.invCov, 'lower').T
-
-            # # then x.T @ Sigma^{-1} @ x = norm(y)**2, y = R @ x
-            # soln = self.const * np.exp(-np.linalg.norm((R @ (mesh.T - self.mu).T, axis=1)**2)
-            # diff = (mesh.T - self.mu)
-            # soln = self.const * np.exp(-1*np.linalg.norm(self.invCovR @ diff, axis=0)**2)
-
-            # rv = multivariate_normal(self.mu.T[0], self.cov)
-            # soln_vals = np.asarray([rv.pdf(mesh)]).T
-            # soln= np.squeeze(soln_vals)
-
-        # else:
-            # const = 1/(np.sqrt((2*np.pi)**sde.dimension*abs(np.linalg.det(self.cov))))
-            # diff = np.subtract(mesh,self.mu.T)
-            # val = diff@self.invCov@diff.T
-            # val = np.diagonal(val)
-            # soln = const*np.exp(-1/2*val).T
             diff = (mesh.T - self.mu)
             step1 = self.invCovR @ diff
-            # s = (step1.conj() * step1).real
-            # step2 = np.squeeze(np.sqrt(np.add.reduce(s, axis=0, keepdims=True)))
-            # step2 = np.linalg.norm(step1, axis=0)
-            # step3 = -1 * step2 ** 2
             step2and3 = -1 * self.normSpecialSquared(step1, axis=0)
             step4 = np.exp(step2and3)
             step5 = self.const * step4

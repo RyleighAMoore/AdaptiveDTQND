@@ -7,15 +7,15 @@ import matplotlib.pyplot as plt
 import DriftDiffusionFunctionBank as functionBank
 import time
 
-dimension =2
+dimension =1
 
 if dimension ==1:
     beta = 4
-    radius = 3
+    radius = 20
     kstepMin= 0.06
     kstepMax = 0.07
     h = 0.01
-    endTime =1
+    endTime =0
 
 if dimension ==2:
     beta = 3
@@ -42,7 +42,7 @@ diffusionFunction = functionBank.oneDiffusion
 
 spatialDiff = False
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
-parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh =True, timeDiscretizationType = "EM", integratorType = "TR")
+parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh =True, timeDiscretizationType = "AM", integratorType = "TR")
 simulation = Simulation(sde, parameters, endTime)
 start = time.time()
 simulation.computeAllTimes(sde, simulation.pdf, parameters)

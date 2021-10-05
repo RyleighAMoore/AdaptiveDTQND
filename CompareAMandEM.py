@@ -11,7 +11,7 @@ import time
 dimension = 2
 if dimension ==1:
     beta = 3
-    radius =15
+    radius =4
     kstepMin= 0.06
     kstepMax = 0.065
     # h = 0.01
@@ -19,7 +19,7 @@ if dimension ==1:
 
 if dimension ==2:
     beta = 3
-    radius =3
+    radius =2
     kstepMin= 0.08
     kstepMax = 0.09
     h = 0.05
@@ -49,18 +49,18 @@ timesEM = []
 timesNoStartupEM = []
 timesNoStartupAM = []
 
-adaptive = False
-integrationType = "TR"
+adaptive = True
+integrationType = "LQ"
 
 ApproxSolution =False
 
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
 if ApproxSolution:
-    meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,4, 0.005)
+    meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,2.5, 0.005)
 
 
-hvals = [0.01, 0.1, 0.2, 0.3]
+hvals = [0.01, 0.1, 0.2]
 for h in hvals:
     parametersEM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType=integrationType)
     startEM = time.time()
