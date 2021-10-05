@@ -102,11 +102,12 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
 
     # @profile
     def computeN2s(self, pdf, sde, h):
-        N2Complete = []
-        count = 0
+        s = np.size(self.meshAM,0)
+        N2Complete2 = np.zeros((pdf.meshLength, s, pdf.meshLength))
+        # N2Complete = []
+        count1 = 0
         for yim1 in tqdm(pdf.meshCoordinates):
-            count = count+1
-            N2All = []
+            # N2All = []
             scale2 = GaussScale(sde.dimension)
             if sde.spatialDiff == False:
                 sig2 = np.sqrt(self.a1*sde.diffusionFunction(self.meshAM[0])**2 - self.a2*sde.diffusionFunction(self.meshAM[0])**2)*np.sqrt((1-self.theta)*h)
@@ -121,9 +122,11 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
                     scale2.setCov(sig2**2)
                 # N2 = Gaussian(scale2, pdf.meshCoordinates)
                 N2 = scale2.ComputeGaussian(pdf.meshCoordinates, sde)
-                N2All.append(np.copy(N2))
-            N2Complete.append(np.copy(N2All))
-        self.N2s = N2Complete
+                # N2All.append(np.copy(N2))
+                N2Complete2[count1,count,:] = N2
+            # N2Complete.append(np.copy(N2All))
+            count1 = count1+1
+        self.N2s = N2Complete2
 
     # def computeN2s(self, pdf, sde, h):
     #     N2Complete = []
@@ -212,11 +215,13 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
 
     def AddPointToG(self, pdf, newPointindices, parameters, integrator, sde):
         changedBool = self.setAndersonMattinglyMeshForComputingTransitionProbability(pdf, sde)
-        N2Complete = []
-        count = 0
+        # N2Complete = []
+        s = np.size(self.meshAM,0)
+        N2Complete = np.zeros((pdf.meshLength, s, pdf.meshLength))
+
+        count1 = 0
         meshNew = pdf.meshCoordinates[newPointindices]
         for yim1 in meshNew:
-            count = count+1
             N2All = []
             scale2 = GaussScale(sde.dimension)
             if sde.spatialDiff == False:
@@ -234,8 +239,10 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
                     scale2.setCov(np.asarray(sig2**2))
                 # N2 = Gaussian(scale2, pdf.meshCoordinates)
                 N2 = scale2.ComputeGaussian(pdf.meshCoordinates, sde)
-                N2All.append(np.copy(N2))
-            N2Complete.append(np.copy(N2All))
+                # N2All.append(np.copy(N2))
+                N2Complete[count1,count,:] = N2
+            count1 = count1 +1
+            # N2Complete.append(np.copy(N2All))
 
         #CAdding New columns
         numNew = range(pdf.meshLength-len(newPointindices), pdf.meshLength)
@@ -260,12 +267,13 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
 
 
 
-        N2Complete = []
-        count = 0
+        # N2Complete = []
+        s = np.size(self.meshAM,0)
+        N2Complete = np.zeros((pdf.meshLength, s, np.size(meshNew,0)))
+        count1 = 0
         meshNew = pdf.meshCoordinates[newPointindices]
         for yim1 in pdf.meshCoordinates:
-            count = count+1
-            N2All = []
+            # N2All = []
             scale2 = GaussScale(sde.dimension)
             if sde.spatialDiff == False:
                 sig2 = np.sqrt(self.a1*sde.diffusionFunction(self.meshAM[0])**2 - self.a2*sde.diffusionFunction(self.meshAM[0])**2)*np.sqrt((1-self.theta)*parameters.h)
@@ -281,8 +289,10 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
                     scale2.setCov(np.asarray(sig2**2))
                 # N2 = Gaussian(scale2, meshNew)
                 N2 = scale2.ComputeGaussian(meshNew, sde)
-                N2All.append(np.copy(N2))
-            N2Complete.append(np.copy(N2All))
+                N2Complete[count1,count,:] = N2
+                # N2All.append(np.copy(N2))
+            # N2Complete.append(np.copy(N2All))
+            count1 = count1 +1
 
         # counti = 0
         # for i in numNew: # over row

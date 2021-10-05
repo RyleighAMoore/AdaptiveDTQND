@@ -30,7 +30,7 @@ class IntegratorTrapezoidal(Integrator):
         self.TransitionMatrix = simulation.timeDiscretizationMethod.computeTransitionMatrix(pdf, sde, parameters.h)
 
     def computeTimeStep(self, sde, parameters, simulation):
-        vals= np.asarray(self.stepSize**sde.dimension*self.TransitionMatrix@simulation.pdfTrajectory[-1])
+        vals= np.asarray(self.stepSize**sde.dimension*self.TransitionMatrix[:simulation.pdf.meshLength, :simulation.pdf.meshLength]@simulation.pdfTrajectory[-1])
         return np.squeeze(vals)
 
     def checkIncreaseSizeStorageMatrices(self, pdf, parameters):
@@ -183,7 +183,7 @@ class IntegratorLejaQuadrature(Integrator):
     def computeTimeStep(self, sde, parameters, simulation):
         LPReuseCount = 0
         self.AltMethodUseCount = 0
-        newPdf = []
+        newPdf = np.zeros(simulation.pdf.meshLength)
         pdf = simulation.pdf
         for index, point in enumerate(pdf.meshCoordinates):
             useLejaIntegrationProcedure = self.findQuadraticFit(sde, pdf, parameters, index)
@@ -209,10 +209,10 @@ class IntegratorLejaQuadrature(Integrator):
                             self.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
                         if condNumber > parameters.conditionNumForAltMethod or value < 0: # Nothing worked, use alt method
                             value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
-            newPdf.append(np.copy(value))
+            newPdf[index] =value
         print(LPReuseCount/pdf.meshLength*100, "% Leja Reuse")
         print(self.AltMethodUseCount/pdf.meshLength*100, "% Alt method Use")
-        return np.asarray(newPdf)
+        return newPdf
 
 
 

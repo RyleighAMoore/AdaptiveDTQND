@@ -18,12 +18,12 @@ if dimension ==1:
     endTime =4
 
 if dimension ==2:
-    beta = 4
-    radius =1.5
+    beta = 3
+    radius =3
     kstepMin= 0.08
     kstepMax = 0.09
-    # h = 0.05
-    endTime = 1
+    h = 0.05
+    endTime = 0.4
 
 if dimension ==3:
     beta = 3
@@ -33,8 +33,8 @@ if dimension ==3:
     # h = 0.01
     endTime = 0.1
 
-# driftFunction = functionBank.zeroDrift
-driftFunction = functionBank.erfDrift
+driftFunction = functionBank.zeroDrift
+# driftFunction = functionBank.erfDrift
 # driftFunction = functionBank.oneDrift
 
 spatialDiff = False
@@ -48,15 +48,16 @@ timesAM =[]
 timesEM = []
 timesNoStartupEM = []
 timesNoStartupAM = []
+
 adaptive = False
 integrationType = "TR"
 
-ApproxSolution =True
+ApproxSolution =False
 
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
 if ApproxSolution:
-    meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,30, 0.005)
+    meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,4, 0.005)
 
 
 hvals = [0.01, 0.1, 0.2, 0.3]
