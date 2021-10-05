@@ -61,7 +61,7 @@ class GaussScale:
             const = 1/(np.sqrt((2*np.pi)**sde.dimension*abs(np.linalg.det(self.cov))))
             soln = np.squeeze(const*np.exp(-1/2*self.invCov*norm).T)
 
-        if sde.dimension == 2:
+        if sde.dimension >1:
             # norm = np.subtract(mesh,self.mu.T)
             # norm1 = norm[:,0]
             # norm2 = norm[:,1]
@@ -107,8 +107,6 @@ class GaussScale:
             soln = step5
             #soln = self.const * np.exp(-1*np.squeeze(np.sqrt(np.add.reduce(((self.invCovR @ diff).conj() * (self.invCovR @ diff)).real, axis=0, keepdims=True)))**2)
             # soln = self.const * np.exp(-1*np.linalg.norm(self.invCovR @ diff, axis=0)**2)
-
-
         return soln
 
     def normSpecialSquared(self, x, axis):

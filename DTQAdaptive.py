@@ -15,11 +15,11 @@ if dimension ==1:
     kstepMin= 0.06
     kstepMax = 0.07
     h = 0.01
-    endTime =2
+    endTime =5
 
 if dimension ==2:
     beta = 3
-    radius = 0.6
+    radius =2
     kstepMin= 0.08
     kstepMax = 0.09
     h = 0.05
@@ -42,7 +42,7 @@ diffusionFunction = functionBank.oneDiffusion
 
 spatialDiff = False
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
-parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =True, timeDiscretizationType = "AM")
+parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh =True, timeDiscretizationType = "AM", integratorType = "LQ")
 simulation = Simulation(sde, parameters, endTime)
 start = time.time()
 simulation.computeAllTimes(sde, simulation.pdf, parameters)
@@ -103,20 +103,20 @@ if dimension ==1:
 if dimension ==2:
     Meshes = simulation.meshTrajectory
     PdfTraj = simulation.pdfTrajectory
-    # def update_graph(num):
-    #     graph.set_data (Meshes[num][:,0], Meshes[num][:,1])
-    #     graph.set_3d_properties(PdfTraj[num])
-    #     title.set_text('3D Test, time={}'.format(num))
-    #     return title, graph
+    def update_graph(num):
+        graph.set_data (Meshes[num][:,0], Meshes[num][:,1])
+        graph.set_3d_properties(PdfTraj[num])
+        title.set_text('3D Test, time={}'.format(num))
+        return title, graph
 
-    # # fig = plt.figure()
-    # # ax = fig.add_subplot(111, projection='3d')
-    # # title = ax.set_title('3D Test')
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    title = ax.set_title('3D Test')
 
-    # # graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
-    # # ax.set_zlim(0, 1.5)
-    # # ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
-    # # plt.show()
+    graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
+    ax.set_zlim(0, 1.5)
+    ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
+    plt.show()
 
 # if dimension ==3:
 #     Meshes = simulation.meshTrajectory

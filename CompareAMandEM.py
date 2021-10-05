@@ -8,14 +8,14 @@ import DriftDiffusionFunctionBank as functionBank
 from Errors import ErrorValsOneTime
 import time
 
-dimension = 1
+dimension = 2
 if dimension ==1:
     beta = 3
-    radius =10
+    radius =15
     kstepMin= 0.06
     kstepMax = 0.065
     # h = 0.01
-    endTime =1
+    endTime =4
 
 if dimension ==2:
     beta = 4
@@ -49,18 +49,19 @@ timesEM = []
 timesNoStartupEM = []
 timesNoStartupAM = []
 adaptive = False
+integrationType = "TR"
 
 ApproxSolution =True
 
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
 if ApproxSolution:
-    meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,14, 0.005)
+    meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,30, 0.005)
 
 
-hvals = [0.05, 0.1, 0.15]
+hvals = [0.01, 0.1, 0.2, 0.3]
 for h in hvals:
-    parametersEM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM")
+    parametersEM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType=integrationType)
     startEM = time.time()
     simulationEM = Simulation(sde, parametersEM, endTime)
 
@@ -78,7 +79,7 @@ for h in hvals:
     ErrorsEM.append(np.copy(L2wErrors))
     # del simulationEM
 
-    parametersAM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "AM")
+    parametersAM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "AM", integratorType=integrationType)
     startAM = time.time()
     simulationAM = Simulation(sde, parametersAM, endTime)
     startAMNoStartup = time.time()
@@ -111,6 +112,9 @@ plt.semilogy(np.asarray(timesAM), np.asarray(ErrorsAM), 'o-', label="AM")
 plt.semilogy(np.asarray(timesNoStartupEM), np.asarray(ErrorsEM),'.-', label= "EM: No Startup")
 plt.semilogy(np.asarray(timesNoStartupAM), np.asarray(ErrorsAM),'.-', label="AM: No Startup")
 plt.legend()
+plt.xlabel("Time (Seconds)")
+plt.ylabel("Error")
+
 plt.show()
 plt.savefig('result.png')
 
