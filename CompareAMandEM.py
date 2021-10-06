@@ -8,18 +8,18 @@ import DriftDiffusionFunctionBank as functionBank
 from Errors import ErrorValsOneTime
 import time
 
-dimension = 2
+dimension = 1
 if dimension ==1:
     beta = 3
     radius =4
     kstepMin= 0.06
     kstepMax = 0.065
     # h = 0.01
-    endTime =4
+    endTime =6
 
 if dimension ==2:
     beta = 3
-    radius =2
+    radius =1
     kstepMin= 0.08
     kstepMax = 0.09
     h = 0.05
@@ -33,9 +33,9 @@ if dimension ==3:
     # h = 0.01
     endTime = 0.1
 
-driftFunction = functionBank.zeroDrift
+# driftFunction = functionBank.zeroDrift
 # driftFunction = functionBank.erfDrift
-# driftFunction = functionBank.oneDrift
+driftFunction = functionBank.oneDrift
 
 spatialDiff = False
 
@@ -52,15 +52,15 @@ timesNoStartupAM = []
 adaptive = True
 integrationType = "LQ"
 
-ApproxSolution =False
+ApproxSolution =True
 
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
 if ApproxSolution:
-    meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,2.5, 0.005)
+    meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,25, 0.005)
 
 
-hvals = [0.01, 0.1, 0.2]
+hvals = [0.1, 0.2]
 for h in hvals:
     parametersEM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType=integrationType)
     startEM = time.time()

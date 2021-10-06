@@ -11,19 +11,19 @@ dimension =1
 
 if dimension ==1:
     beta = 4
-    radius = 20
+    radius = 4
     kstepMin= 0.06
     kstepMax = 0.07
-    h = 0.01
-    endTime =0
+    h = 0.1
+    endTime =4
 
 if dimension ==2:
     beta = 3
-    radius =3
+    radius =0.5
     kstepMin= 0.08
     kstepMax = 0.09
     h = 0.05
-    endTime = 0.4
+    endTime = 0
 
 
 if dimension ==3:
@@ -36,13 +36,15 @@ if dimension ==3:
 
 # driftFunction = functionBank.zeroDrift
 driftFunction = functionBank.erfDrift
+# driftFunction = functionBank.oneDrift
+
 
 diffusionFunction = functionBank.oneDiffusion
 
 
 spatialDiff = False
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
-parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh =True, timeDiscretizationType = "AM", integratorType = "TR")
+parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh =True, timeDiscretizationType = "AM", integratorType = "LQ")
 simulation = Simulation(sde, parameters, endTime)
 start = time.time()
 simulation.computeAllTimes(sde, simulation.pdf, parameters)
@@ -74,7 +76,7 @@ from exactSolutions import Solution
 
 trueSoln = []
 for i in range(len(simulation.meshTrajectory)): #diff, drift, mesh, t, dim
-    truepdf = Solution(1, 0, simulation.meshTrajectory[i], (i+1)*h, dimension)
+    truepdf = Solution(1, 1, simulation.meshTrajectory[i], (i+1)*h, dimension)
     # truepdf = solution(xvec,-1,T)
     trueSoln.append(np.squeeze(np.copy(truepdf)))
 

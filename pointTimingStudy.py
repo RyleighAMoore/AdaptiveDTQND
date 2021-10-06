@@ -53,7 +53,7 @@ adaptive = False
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
 
-rvals = [0.1, 1, 5, 10,20]
+rvals = [0.1, 1, 5, 10,20, 40]
 # rvals = [0.2, 0.5, 1, 1.2]
 
 meshLengths = []
@@ -90,7 +90,7 @@ plt.loglog(np.asarray(meshLengths), np.asarray(timesEM),label= "EM")
 plt.loglog(np.asarray(meshLengths), np.asarray(timesAM), label="AM")
 plt.xlabel("# points")
 plt.ylabel("Time (seconds)")
-plt.title("1D Transition Matrix Formation Cost")
+plt.title("2D Transition Matrix Formation Cost")
 
 plt.legend()
 plt.show()
