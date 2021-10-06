@@ -8,7 +8,8 @@ import DriftDiffusionFunctionBank as functionBank
 from Errors import ErrorValsOneTime
 import time
 
-dimension =1
+dimension =2
+
 if dimension ==1:
     beta = 3
     radius = 10
@@ -54,7 +55,7 @@ adaptive = False
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
 
 rvals = [0.1, 1, 5, 10,20, 40]
-# rvals = [0.2, 0.5, 1, 1.2]
+rvals = [0.2, 0.5, 1, 1.2]
 
 meshLengths = []
 for radius in rvals:

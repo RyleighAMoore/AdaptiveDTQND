@@ -3,6 +3,8 @@ import numpy as np
 from Functions import G, alpha1, alpha2
 from tqdm import trange
 import matplotlib.pyplot as plt
+from matplotlib import pyplot
+from mpl_toolkits.mplot3d import Axes3D
 
 
 class TimeDiscretizationMethod():
@@ -100,8 +102,8 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         else:
             return False
 
-    def setAndersonMattinglyMeshAroundPoint(self, point, sde):
-            radius =1.5
+    def setAndersonMattinglyMeshAroundPoint(self, point, sde, radius):
+            radius =radius
             meshAM = nDGridMeshCenteredAtOrigin(sde.dimension, radius,self.meshSpacingAM, useNoiseBool = False)
             mean = point
             delta = np.ones(np.shape(meshAM))*mean
@@ -109,33 +111,6 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
             meshAM = meshAM.T
             self.meshAM = meshAM
 
-    # @profile
-    # def computeN2s(self, pdf, sde, h):
-    #     s = np.size(self.meshAM,0)
-    #     N2Complete2 = np.zeros((pdf.meshLength, s, pdf.meshLength))
-    #     # N2Complete = []
-    #     count1 = 0
-    #     for yim1 in tqdm(pdf.meshCoordinates):
-    #         # N2All = []
-    #         scale2 = GaussScale(sde.dimension)
-    #         if sde.spatialDiff == False:
-    #             sig2 = np.sqrt(self.a1*sde.diffusionFunction(self.meshAM[0])**2 - self.a2*sde.diffusionFunction(self.meshAM[0])**2)*np.sqrt((1-self.theta)*h)
-    #             scale2.setCov(sig2**2)
-
-    #         mu2s = self.meshAM + (self.a1*sde.driftFunction(self.meshAM) - self.a2*sde.driftFunction(yim1))*(1-self.theta)*h
-    #         for count, i in enumerate(self.meshAM):
-    #             mu2 = mu2s[[count],:]
-    #             scale2.setMu(mu2.T)
-    #             if sde.spatialDiff == True:
-    #                 sig2 = np.sqrt(self.a1*sde.difffun(i)**2 - self.a2*sde.difffun(yim1)**2)*np.sqrt((1-self.theta)*h)
-    #                 scale2.setCov(sig2**2)
-    #             # N2 = Gaussian(scale2, pdf.meshCoordinates)
-    #             N2 = scale2.ComputeGaussian(pdf.meshCoordinates, sde)
-    #             # N2All.append(np.copy(N2))
-    #             N2Complete2[count1,count,:] = N2
-    #         # N2Complete.append(np.copy(N2All))
-    #         count1 = count1+1
-    #     self.N2s = N2Complete2
 
     # @profile
     def computeN2(self, pdf, sde, h, yim1):
@@ -153,7 +128,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
             mu2 = mu2s[[count],:]
             scale2.setMu(mu2.T)
             if sde.spatialDiff == True:
-                sig2 = np.sqrt(self.a1*sde.difffun(i)**2 - self.a2*sde.difffun(yim1)**2)*np.sqrt((1-self.theta)*h)
+                sig2 = np.sqrt(self.a1*sde.diffusionFunction(i)**2 - self.a2*sde.diffusionFunction(yim1)**2)*np.sqrt((1-self.theta)*h)
                 scale2.setCov(sig2**2)
             # N2 = Gaussian(scale2, pdf.meshCoordinates)
             N2 = scale2.ComputeGaussian(pdf.meshCoordinates, sde)
@@ -161,7 +136,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         return N2Complete2
 
 
-    def computeN1(self, sde, yim1, h):
+    def computeN1(self, sde, yim1, h, scale):
         mu1 = yim1 + sde.driftFunction(np.asarray([yim1]))*self.theta*h
         sig1 = abs(sde.diffusionFunction(np.asarray([yim1])))*np.sqrt(self.theta*h)
         scale = GaussScale(sde.dimension)
@@ -183,26 +158,33 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         sizeMatrix = pdf.meshLength
         matrix = np.empty([sizeMatrix, sizeMatrix])*np.NAN
 
-        # self.setAndersonMattinglyMeshForComputingTransitionProbability(pdf, sde)
-        # self.computeN2s(pdf, sde, h)
         for j in trange(pdf.meshLength):
-            self.setAndersonMattinglyMeshAroundPoint(pdf.meshCoordinates[j], sde)
+            mu1= pdf.meshCoordinates[j]+sde.driftFunction(np.asarray([pdf.meshCoordinates[j]]))*self.theta*h
+            sig1 = abs(sde.diffusionFunction(np.asarray([pdf.meshCoordinates[j]]))*np.sqrt(self.theta*h))
+            scale1 = GaussScale(sde.dimension)
+            scale1.setMu(np.asarray(mu1.T))
+            scale1.setCov(np.asarray(sig1**2))
+
+            self.setAndersonMattinglyMeshAroundPoint(mu1, sde, 4*np.max(sig1))
             N2 = self.computeN2(pdf, sde, h, pdf.meshCoordinates[j])
-            N1 = self.computeN1(sde, pdf.meshCoordinates[j], h)
+            N1 = scale1.ComputeGaussian(self.meshAM, sde)
+
             # plt.figure()
             # plt.plot(pdf.meshCoordinates, N2.T@np.expand_dims(N1,1), label="Product")
             # plt.plot(self.meshAM, N1, label="N1")
             # # plt.plot(pdf.meshCoordinates, N2.T, label="N2")
             # plt.plot(pdf.meshCoordinates[j], 0, '*')
             # plt.show()
+            # fig = pyplot.figure()
+            # ax = Axes3D(fig)
+            # ax.scatter(pdf.meshCoordinates[:,0],pdf.meshCoordinates[:,1], N2.T@np.expand_dims(N1,1), label="Product")
+            # ax.scatter(self.meshAM[:,0], self.meshAM[:,1], N1, label="N1")
+            # # plt.plot(pdf.meshCoordinates, N2.T, label="N2")
+            # ax.plot(pdf.meshCoordinates[j,0], pdf.meshCoordinates[j,1], 0, '*')
+            # plt.legend()
+            # plt.show()
             val = self.meshSpacingAM**sde.dimension*N2.T@np.expand_dims(N1,1)
             matrix[:,j] = np.squeeze(val)
-        # matrix2 = np.empty([sizeMatrix, sizeMatrix])*np.NaN
-        # for i in trange(pdf.meshLength):
-        #     for j in range(pdf.meshLength):
-        #         N2 = self.N2s[j][:,i]
-        #         transitionProb = self.computeTransitionProbability(sde, pdf.meshCoordinates[j], h, N2= N2)
-        #         matrix2[i,j] = transitionProb
         return matrix
 
     # def AddPointToG(self, pdf, newPointindices, parameters, integrator, sde):

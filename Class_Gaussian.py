@@ -83,4 +83,14 @@ class GaussScale:
         s = (x.conj() * x).real
         return np.add.reduce(s, axis=axis)
 
+    def combineTwoGaussians(self, scale2):
+        if self.dimension ==1:
+            muCombined = scale2.cov*1/(self.cov + scale2.cov)*self.mu + self.cov*1/(self.cov + scale2.cov)*scale2.mu
+            covCombined = self.cov*1/(self.cov + scale2.cov)*scale2.cov
+        else:
+            muCombined = scale2.cov@np.linalg.inv(self.cov + scale2.cov)@self.mu + self.cov@np.linalg.inv(self.cov + scale2.cov)@scale2.mu
+            covCombined = self.cov@np.linalg.inv(self.cov + scale2.cov)@scale2.cov
+        return muCombined, covCombined
+
+
 
