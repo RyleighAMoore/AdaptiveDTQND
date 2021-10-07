@@ -19,11 +19,11 @@ if dimension ==1:
 
 if dimension ==2:
     beta = 3
-    radius =1
+    radius =1.5
     kstepMin= 0.08
     kstepMax = 0.09
     h = 0.05
-    endTime = 0.4
+    endTime = 0.5
 
 if dimension ==3:
     beta = 3
@@ -52,7 +52,7 @@ timesNoStartupAM = []
 adaptive = True
 integrationType = "LQ"
 
-ApproxSolution =True
+ApproxSolution =False
 
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
