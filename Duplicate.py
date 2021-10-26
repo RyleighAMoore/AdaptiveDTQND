@@ -209,7 +209,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
     #             integrator.TransitionMatrix[i,j] = transitionProb
     #     t=0
 
-
+    # @profile
     def AddPointToG(self, pdf, newPointindices, parameters, integrator, sde):
         changedBool = self.setAndersonMattinglyMeshForComputingTransitionProbability(pdf, sde)
         N2Complete = []

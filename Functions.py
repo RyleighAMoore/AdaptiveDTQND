@@ -91,7 +91,7 @@ def weightExp(scaling,mesh):
 
 
 
-def G(indexOfMesh,mesh, h, drift, diff, SpatialDiff):
+def G(indexOfMesh, mesh, h, drift, diff, SpatialDiff):
     '''Changing mu and cov over each row'''
     x = mesh[indexOfMesh,:]
     D = mesh.shape[1]

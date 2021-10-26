@@ -27,7 +27,7 @@ class IntegratorTrapezoidal(Integrator):
             print("Updates with the Trapezoidal rule are not currently supported.")
             parameters.useAdaptiveMesh = False
         self.stepSize = parameters.minDistanceBetweenPoints
-        self.TransitionMatrix = simulation.timeDiscretizationMethod.computeTransitionMatrix(pdf, sde, parameters.h)
+        self.TransitionMatrix = simulation.timeDiscretizationMethod.computeTransitionMatrix(pdf, sde, parameters)
 
     def computeTimeStep(self, sde, parameters, simulation):
         vals= np.asarray(self.stepSize**sde.dimension*self.TransitionMatrix[:simulation.pdf.meshLength, :simulation.pdf.meshLength]@simulation.pdfTrajectory[-1])
@@ -41,7 +41,7 @@ class IntegratorTrapezoidal(Integrator):
 class IntegratorLejaQuadrature(Integrator):
     def __init__(self, simulation, sde, parameters, pdf):
         self.lejaPoints = None
-        self.TransitionMatrix = simulation.timeDiscretizationMethod.computeTransitionMatrix(pdf, sde, parameters.h)
+        self.TransitionMatrix = simulation.timeDiscretizationMethod.computeTransitionMatrix(pdf, sde, parameters)
         self.LejaPointIndicesMatrix = np.zeros((simulation.timeDiscretizationMethod.sizeTransitionMatrixIncludingEmpty, parameters.numLejas))
         self.LejaPointIndicesBoolVector = np.zeros((simulation.timeDiscretizationMethod.sizeTransitionMatrixIncludingEmpty,1))
         self.conditionNumberForAcceptingLejaPointsAtNextTimeStep = 1.1

@@ -51,7 +51,6 @@ class GaussScale:
     #         soln = const*np.exp(-1/2*np.asarray(vals)).T
     #     return soln
 
-
     def ComputeGaussian(self, mesh, sde):
         # same mean and cov for all points.
         #dim = mesh.shape[1]
