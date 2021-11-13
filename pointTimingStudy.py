@@ -8,7 +8,7 @@ import DriftDiffusionFunctionBank as functionBank
 from Errors import ErrorValsOneTime
 import time
 
-dimension =2
+dimension =1
 
 if dimension ==1:
     beta = 3
@@ -54,29 +54,25 @@ adaptive = False
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
 
-rvals = [0.1, 1, 5, 10,20, 40]
-rvals = [0.2, 0.5, 1, 1.2]
+rvals = [80, 40, 20, 10, 5]
+# rvals = [2,1.5, 1, 0.5, 0.2]
 
 meshLengths = []
 for radius in rvals:
     h=0.1
     parametersEM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM")
-    startEM = time.time()
     simulationEM = Simulation(sde, parametersEM, endTime)
 
     startEMNoStartup = time.time()
-    simulationEM.computeAllTimes(sde, simulationEM.pdf, parametersEM)
+    simulationEM.timeDiscretizationMethod.computeTransitionMatrix(simulationEM.pdf, sde, parametersEM)
     endEM = time.time()
-    timesEM.append(np.copy(endEM-startEM))
     timesNoStartupEM.append(np.copy(endEM-startEMNoStartup))
 
     parametersAM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "AM")
-    startAM = time.time()
     simulationAM = Simulation(sde, parametersAM, endTime)
     startAMNoStartup = time.time()
-    simulationAM.computeAllTimes(sde, simulationAM.pdf, parametersAM)
-    endAM =time.time()
-    timesAM.append(np.copy(endAM-startAM))
+    simulationAM.timeDiscretizationMethod.computeTransitionMatrix(simulationAM.pdf, sde, parametersAM)
+    endAM = time.time()
     timesNoStartupAM.append(np.copy(endAM-startAMNoStartup))
 
     assert simulationAM.pdf.meshLength == simulationEM.pdf.meshLength
@@ -85,17 +81,16 @@ for radius in rvals:
     # del simulationAM
 
 
-
 plt.figure()
-plt.loglog(np.asarray(meshLengths), np.asarray(timesEM),label= "EM")
-plt.loglog(np.asarray(meshLengths), np.asarray(timesAM), label="AM")
-plt.xlabel("# points")
+plt.loglog(np.asarray(meshLengths), np.asarray(timesNoStartupEM), 'o', label= "EM")
+plt.loglog(np.asarray(meshLengths), np.asarray(timesNoStartupAM), 'o', label="AM")
+plt.xlabel("# points in mesh")
 plt.ylabel("Time (seconds)")
-plt.title("2D Transition Matrix Formation Cost")
+plt.title("1D Transition Matrix Formation Cost")
 
 plt.legend()
 plt.show()
-plt.savefig('result.png')
+# plt.savefig('result.png')
 
 
 

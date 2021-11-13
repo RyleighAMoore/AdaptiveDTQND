@@ -1,5 +1,5 @@
 class Parameters:
-    def __init__(self,sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh, timeDiscretizationType = "EM", integratorType = "LQ"):
+    def __init__(self,sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh, timeDiscretizationType = "EM", integratorType = "LQ", AMSpacing = 0.05):
         self.conditionNumForAltMethod = 8
         self.h = h
         self.kstepMin = kstepMin
@@ -14,13 +14,14 @@ class Parameters:
         self.setNumQuadFit(sde)
         self.useAdaptiveMesh = useAdaptiveMesh
         self.integratorType = integratorType
+        self.AMMeshSpacing = AMSpacing
 
     def tuneOnSdeUnlessDefined(self, sde):
         self.numberOfLejaPoints = self.getOptimalNumberOfLejaPoints(sde)
 
     def setNumLejas(self, sde):
         if sde.dimension == 1:
-            self.numLejas = 5
+            self.numLejas = 6
         elif sde.dimension == 2:
             self.numLejas = 10
         else:

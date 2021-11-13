@@ -10,21 +10,22 @@ import time
 
 dimension = 2
 if dimension ==1:
-    beta = 3
-    radius =4
-    kstepMin= 0.06
-    kstepMax = 0.065
-    # h = 0.01
-    endTime =4
-
-if dimension ==2:
-    beta = 3
-    radius =1.5
+    beta = 5
+    radius = 3
     kstepMin= 0.08
     kstepMax = 0.09
-    h = 0.05
-    endTime = 0.5
+    # kstepMin= 0.15
+    # kstepMax = 0.2
+    # h = 0.01
+    endTime = 20
 
+if dimension ==2:
+    beta = 5
+    radius =0.5
+    kstepMin= 0.08
+    kstepMax = 0.09
+    h = 0.01
+    endTime =1
 if dimension ==3:
     beta = 3
     radius = 0.5
@@ -34,8 +35,8 @@ if dimension ==3:
     endTime = 0.1
 
 # driftFunction = functionBank.zeroDrift
-driftFunction = functionBank.erfDrift
-# driftFunction = functionBank.oneDrift
+# driftFunction = functionBank.erfDrift
+driftFunction = functionBank.oneDrift
 
 spatialDiff = False
 
@@ -51,7 +52,16 @@ ApproxSolution =False
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
 if ApproxSolution:
-    meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,15, 0.003)
+    meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,1, 0.02)
+
+# with open('time4Erf.npy', 'wb') as f:
+#     np.save(f, meshApprox)
+#     np.save(f, pdfApprox)
+
+# with open('time10Erf.npy', 'rb') as f:
+#     meshApprox = np.load(f)
+#     pdfApprox = np.load(f)
+
 
 
 ErrorsAM = []
@@ -60,18 +70,24 @@ timesAM =[]
 timesEM = []
 timesNoStartupEM = []
 timesNoStartupAM = []
-hvals = [0.02, 0.05, 0.1, 0.2]
+timesStartupEM = []
+timesStartupAM = []
+hvals = [0.05, 0.1, 0.15, 0.2]
+hvalsAM = [0.2, 0.15, 0.1]
+# hvals = [0.1]
 
 for h in hvals:
     parametersEM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType=integrationType)
     startEM = time.time()
     simulationEM = Simulation(sde, parametersEM, endTime)
-
+    timeStartupEM = time.time() - startEM
     startEMNoStartup = time.time()
     simulationEM.computeAllTimes(sde, simulationEM.pdf, parametersEM)
     endEM = time.time()
     timesEM.append(np.copy(endEM-startEM))
     timesNoStartupEM.append(np.copy(endEM-startEMNoStartup))
+    timesStartupEM.append(np.copy(timeStartupEM))
+
 
     if not ApproxSolution:
         meshApprox = simulationEM.pdfTrajectory[-1]
@@ -79,16 +95,21 @@ for h in hvals:
 
     LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationEM.meshTrajectory[-1], simulationEM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
     ErrorsEM.append(np.copy(L2wErrors))
-    # del simulationEM
+    del simulationEM
 
+for h in hvalsAM:
     parametersAM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "AM", integratorType=integrationType)
     startAM = time.time()
     simulationAM = Simulation(sde, parametersAM, endTime)
+    timeStartupAM = time.time() - startAM
     startAMNoStartup = time.time()
     simulationAM.computeAllTimes(sde, simulationAM.pdf, parametersAM)
     endAM =time.time()
     timesAM.append(np.copy(endAM-startAM))
     timesNoStartupAM.append(np.copy(endAM-startAMNoStartup))
+    timesStartupAM.append(np.copy(timeStartupAM))
+
+
     if not ApproxSolution:
         meshApprox = simulationAM.pdfTrajectory[-1]
         pdfApprox = sde.exactSolution(simulationAM.meshTrajectory[-1], endTime)
@@ -108,21 +129,38 @@ from mpl_toolkits.mplot3d import Axes3D
 
 # plt.scatter(simulationEM.meshTrajectory[-1],simulationEM.pdfTrajectory[-1])
 
+# plt.figure()
+# plt.semilogy(np.asarray(timesEM), np.asarray(ErrorsEM),'o-',label= "EM")
+# plt.semilogy(np.asarray(timesAM), np.asarray(ErrorsAM), 'o-', label="AM")
+# plt.semilogy(np.asarray(timesNoStartupEM), np.asarray(ErrorsEM),'.-', label= "EM: No Startup")
+# plt.semilogy(np.asarray(timesNoStartupAM), np.asarray(ErrorsAM),'.-', label="AM: No Startup")
+# plt.semilogy(np.asarray(timesStartupAM), np.asarray(ErrorsAM),'.-', label="AM: Startup")
+# plt.semilogy(np.asarray(timesStartupEM), np.asarray(ErrorsEM),'.-', label="EM: Startup")
+
+# plt.legend()
+# plt.xlabel("Time (Seconds)")
+# plt.ylabel("Error")
+
+# plt.show()
+# plt.savefig('result.png')
+
 plt.figure()
-plt.semilogy(np.asarray(timesEM), np.asarray(ErrorsEM),'o-',label= "EM")
-plt.semilogy(np.asarray(timesAM), np.asarray(ErrorsAM), 'o-', label="AM")
-plt.semilogy(np.asarray(timesNoStartupEM), np.asarray(ErrorsEM),'.-', label= "EM: No Startup")
-plt.semilogy(np.asarray(timesNoStartupAM), np.asarray(ErrorsAM),'.-', label="AM: No Startup")
+plt.loglog(np.asarray(timesEM), np.asarray(ErrorsEM),'o-',label= "EM: Total Time")
+plt.loglog(np.asarray(timesAM), np.asarray(ErrorsAM), 'o-', label="AM: Total Time")
+# plt.loglog(np.asarray(timesNoStartupEM), np.asarray(ErrorsEM),'.-', label= "EM: No Startup")
+# plt.loglog(np.asarray(timesNoStartupAM), np.asarray(ErrorsAM),'.-', label="AM: No Startup")
+# plt.loglog(np.asarray(timesStartupAM), np.asarray(ErrorsAM),'.-', label="AM: Startup")
+# plt.loglog(np.asarray(timesStartupEM), np.asarray(ErrorsEM),'.-', label="EM: Startup")
+
 plt.legend()
 plt.xlabel("Time (Seconds)")
 plt.ylabel("Error")
 
 plt.show()
-plt.savefig('result.png')
-
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+
 simulation = simulationAM
 if dimension ==1:
     def update_graph(num):
@@ -134,7 +172,7 @@ if dimension ==1:
     title = ax.set_title('2D Test')
 
     graph, = ax.plot(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], linestyle="", marker=".")
-    ax.set_xlim(-20, 20)
+    ax.set_xlim(-40, 40)
     ax.set_ylim(0, np.max(simulation.pdfTrajectory[0]))
     ani = animation.FuncAnimation(fig, update_graph, frames=len(simulation.pdfTrajectory), interval=50, blit=False)
     plt.show()
@@ -148,15 +186,15 @@ if dimension ==1:
 
 
 plt.figure()
-plt.semilogy(np.asarray(hvals), np.asarray(ErrorsEM),label= "EM")
-plt.semilogy(np.asarray(hvals), np.asarray(ErrorsAM), label="AM")
+plt.semilogy(np.asarray(hvals), np.asarray(ErrorsEM),'o', label= "EM")
+plt.semilogy(np.asarray(hvalsAM), np.asarray(ErrorsAM),'o', label="AM")
 plt.ylabel("Errors")
 plt.xlabel("Temporal Step Size")
 plt.legend()
 
 plt.figure()
 plt.plot(np.asarray(hvals), np.asarray(timesEM),label= "EM")
-plt.plot(np.asarray(hvals), np.asarray(timesAM), label="AM")
+plt.plot(np.asarray(hvalsAM), np.asarray(timesAM), label="AM")
 plt.ylabel("Time")
 plt.xlabel("Temporal Step Size")
 plt.legend()

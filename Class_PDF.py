@@ -42,7 +42,7 @@ class PDF:
         scale = GaussScale(sde.dimension)
         scale.setMu(parameters.h*sde.driftFunction(np.zeros(sde.dimension)).T)
         scale.setCov((parameters.h*sde.diffusionFunction(np.zeros(sde.dimension))*sde.diffusionFunction(np.zeros(sde.dimension)).T).T)
-        pdf = scale.ComputeGaussian(self.meshCoordinates, sde)
+        pdf = scale.ComputeGaussian(self.meshCoordinates, sde.dimension)
         self.pdfVals = pdf
 
     def plot(self):

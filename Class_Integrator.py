@@ -58,7 +58,7 @@ class IntegratorLejaQuadrature(Integrator):
 
 
     def checkIncreaseSizeStorageMatrices(self, pdf, parameters):
-        sizer = 5*pdf.meshLength
+        sizer = 2*pdf.meshLength
         if pdf.meshLength*2 >= np.size(self.TransitionMatrix,1):
             GMat2 = np.empty([2*sizer, 2*sizer])*np.NaN
             GMat2[:pdf.meshLength, :pdf.meshLength]= self.TransitionMatrix[:pdf.meshLength, :pdf.meshLength]
@@ -203,12 +203,15 @@ class IntegratorLejaQuadrature(Integrator):
                     else: # Continue with integration, use new leja points
                         self.LejaPointIndicesBoolVector[index] = False
                         self.setLejaPoints(pdf, index, parameters,sde)
-                        value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index, sde)
-                        if condNumber < 1.1: # Leja points worked really well, likely okay for next time step
-                            self.LejaPointIndicesBoolVector[index] = True
-                            self.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
-                        if condNumber > parameters.conditionNumForAltMethod or value < 0: # Nothing worked, use alt method
+                        if self.lejaSuccess == False:
                             value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
+                        else:
+                            value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index, sde)
+                            if condNumber < 1.1: # Leja points worked really well, likely okay for next time step
+                                self.LejaPointIndicesBoolVector[index] = True
+                                self.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
+                            if condNumber > parameters.conditionNumForAltMethod or value < 0: # Nothing worked, use alt method
+                                value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
             newPdf[index] =value
         print(LPReuseCount/pdf.meshLength*100, "% Leja Reuse")
         print(self.AltMethodUseCount/pdf.meshLength*100, "% Alt method Use")

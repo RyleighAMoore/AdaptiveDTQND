@@ -51,19 +51,20 @@ class GaussScale:
     #         soln = const*np.exp(-1/2*np.asarray(vals)).T
     #     return soln
 
-    def ComputeGaussian(self, mesh, sde):
+    # @profile
+    def ComputeGaussian(self, mesh, dimension):
         # same mean and cov for all points.
         #dim = mesh.shape[1]
-        if sde.dimension == 1:
-            # mu = np.repeat(self.mu, len(mesh),axis = 0)
-            norm = (mesh - self.mu)**2
-            if self.const == None:
-                const = 1/(np.sqrt((2*np.pi)**sde.dimension*abs(np.linalg.det(self.cov))))
-            soln = np.squeeze(const*np.exp(-1/2*self.invCov*norm).T)
+        # if sde.dimension == 1:
+        #     # mu = np.repeat(self.mu, len(mesh),axis = 0)
+        #     norm = (mesh - self.mu)**2
+        #     if self.const == None:
+        #         const = 1/(np.sqrt((2*np.pi)**sde.dimension*abs(np.linalg.det(self.cov))))
+        #     soln = np.squeeze(const*np.exp(-1/2*self.invCov*norm).T)
 
-        if sde.dimension >1:
+        if dimension >0:
             if self.const == None:
-                const = 1/(np.sqrt((2*np.pi)**sde.dimension*abs(np.linalg.det(self.cov))))
+                const = 1/(np.sqrt((2*np.pi)**dimension*abs(np.linalg.det(self.cov))))
                 self.const = const
 
             diff = (mesh.T - self.mu)

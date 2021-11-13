@@ -11,7 +11,7 @@ import time
 dimension =2
 if dimension ==1:
     beta = 3
-    radius =67/2
+    radius =10
     kstepMin= 0.06
     kstepMax = 0.065
     h = 0.01
@@ -50,21 +50,7 @@ ApproxSolution =False
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
 
 
-parametersEM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType=integrationType)
-simulationEM = Simulation(sde, parametersEM, endTime)
-
-# parametersEMT = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType="TR")
-# simulationEMT = Simulation(sde, parametersEMT, endTime)
-
-parametersAM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "AM", integratorType=integrationType)
-simulationAM = Simulation(sde, parametersAM, endTime)
-
-AM = simulationAM.integrator.TransitionMatrix
-EM = simulationEM.integrator.TransitionMatrix
-
-print(np.nanmax(abs(AM-EM)))
-
-iters = 1
+iters = 10
 
 # '''Time Transition Matrix'''
 # startEM = time.time()
@@ -100,14 +86,22 @@ iters = 1
 
 
 '''Time Adding New points'''
-numPointsArr = [10000, 6000, 2000, 1000,10,1]
-numPointsArr = [900, 500, 300,100,10,1]
+rvals = [80, 40, 20, 10]
+
+rvals = [1.5, 1, 0.5, 0.2]
 
 timingEM = []
 timingAM = []
+lengths = []
 
 from tqdm import trange
-for numPoints in numPointsArr:
+for radius in rvals:
+    numPoints  =1
+    parametersEM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType=integrationType)
+    simulationEM = Simulation(sde, parametersEM, endTime)
+
+    parametersAM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "AM", integratorType=integrationType)
+    simulationAM = Simulation(sde, parametersAM, endTime)
     startEM = time.time()
     for i in trange(iters):
         for i in range(numPoints):
@@ -125,15 +119,18 @@ for numPoints in numPointsArr:
     endTime = endAM-startAM
     print(endTime/iters)
     timingAM.append(endTime/iters)
+    lengths.append(np.copy(simulationAM.pdf.meshLength))
+
+
 
 # # if timingEM[0] == 0:
 # #     timingEM[0] = 10**(-128)
 plt.figure()
-plt.loglog(np.asarray(numPointsArr), np.asarray(timingEM), 'o', label="EM")
-plt.loglog(np.asarray(numPointsArr), np.asarray(timingAM),'o', label = "AM")
+plt.loglog(np.asarray(lengths), np.asarray(timingEM), 'o', label="EM")
+plt.loglog(np.asarray(lengths), np.asarray(timingAM),'o', label = "AM")
 plt.ylabel("Time")
-plt.title("Timing to add points 1D")
-plt.xlabel("Number of added points")
+plt.title("Timing to add one point 2D")
+plt.xlabel("Number of points in mesh")
 plt.legend()
 
 # plt.figure()

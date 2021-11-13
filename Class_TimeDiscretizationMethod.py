@@ -20,8 +20,8 @@ class TimeDiscretizationMethod():
         pass
 
 class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
-    def __init__(self, pdf, adaptive):
-        if adaptive:
+    def __init__(self, pdf, parameters):
+        if parameters.useAdaptiveMesh:
             self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*3
         else:
             self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength
@@ -75,7 +75,7 @@ class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
         #     v = G(indexOfMesh,pdf.meshCoordinates, parameters.h, sde.driftFunction, sde.diffusionFunction, sde.spatialDiff)
         #     GMat2[indexOfMesh,:len(v)] = v
         GMat = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
-        for indexOfMesh in trange(pdf.meshLength):
+        for indexOfMesh in range(pdf.meshLength):
             m = pdf.meshCoordinates[indexOfMesh,:]
             D = sde.dimension
             scale1 = GaussScale(sde.dimension)
@@ -85,38 +85,61 @@ class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
                 var = parameters.h*sde.diffusionFunction(m)**2
                 scale1.setCov(np.asarray(var))
             else:
-                m = pdf.meshCoordinates[indexOfMesh,:]
                 cov = sde.diffusionFunction(m)@sde.diffusionFunction(m).T * parameters.h
                 scale1.setCov(cov)
 
-                soln_vals = np.zeros(pdf.meshLength)
-                vals = scale1.ComputeGaussian(pdf.meshCoordinates, sde)
+            soln_vals = np.zeros(pdf.meshLength)
+            vals = scale1.ComputeGaussian(pdf.meshCoordinates, sde.dimension)
 
             GMat[:len(vals), indexOfMesh] = vals
         return GMat
 
-    def AddPointToG(self, meshPartial, newPointindex, parameters, sde, pdf, integrator):
+    def AddPointToG(self, meshPartial, newPointindex, parameters,sde, pdf, integrator):
+        m = pdf.meshCoordinates[newPointindex,:]
+        D = sde.dimension
+        scale1 = GaussScale(sde.dimension)
+        mu = m+sde.driftFunction(m)*parameters.h
+        scale1.setMu(np.asarray(mu.T))
+        if D == 1:
+            var = parameters.h*sde.diffusionFunction(m)**2
+            scale1.setCov(np.asarray(var))
+        else:
+            cov = sde.diffusionFunction(m)@sde.diffusionFunction(m).T * parameters.h
+            scale1.setCov(cov)
+
+        soln_vals = np.zeros(pdf.meshLength)
+        vals = scale1.ComputeGaussian(pdf.meshCoordinates, sde.dimension)
+        integrator.TransitionMatrix[:len(vals), newPointindex] = vals
+
         newRow = G(newPointindex, meshPartial, parameters.h, sde.driftFunction, sde.diffusionFunction, sde.spatialDiff)
-        integrator.TransitionMatrix[newPointindex,:len(newRow)] = newRow
-        if sde.dimension == 1:
-            var = sde.diffusionFunction(meshPartial[newPointindex,:])**2*parameters.h
-            mean = meshPartial[newPointindex,:]+ sde.driftFunction(pdf.meshCoordinates[newPointindex,:])*parameters.h
-            newCol = 1/(np.sqrt(2*np.pi*var))*np.exp(-(meshPartial-mean)**2/(2*var))
-            integrator.TransitionMatrix[:len(newCol),newPointindex] = np.squeeze(newCol)
-            return
-            #Now, add new column
-        mu = meshPartial[newPointindex,:]+sde.driftFunction(np.expand_dims(meshPartial[newPointindex,:],axis=0))*parameters.h
-        mu = mu[0]
-        dfn = sde.diffusionFunction(meshPartial[newPointindex,:])
-        cov = dfn@dfn.T*parameters.h
-        newCol = np.empty(pdf.meshLength)
-        const = 1/(np.sqrt((2*np.pi)**sde.dimension*abs(np.linalg.det(cov))))
-        covInv = np.linalg.inv(cov)
-        for j in range(len(meshPartial)):
-            x = meshPartial[j,:]
-            Gs = np.exp(-1/2*((x-mu).T@covInv@(x.T-mu.T)))
-            newCol[j] = (Gs)
-        integrator.TransitionMatrix[:len(newCol),newPointindex] = newCol*const
+        integrator.TransitionMatrix[newPointindex, :len(newRow)] = newRow
+
+
+
+
+    # def AddPointToG(self, meshPartial, newPointindex, parameters, sde, pdf, integrator):
+    #     integrator.TransitionMatrix = self.computeTransitionMatrix(pdf, sde, parameters)
+    #     newRow = G(newPointindex, meshPartial, parameters.h, sde.driftFunction, sde.diffusionFunction, sde.spatialDiff)
+    #     integrator.TransitionMatrix[newPointindex,:len(newRow)] = newRow
+    #     if sde.dimension == 1:
+    #         var = sde.diffusionFunction(meshPartial[newPointindex,:])**2*parameters.h
+    #         mean = meshPartial[newPointindex,:]+ sde.driftFunction(pdf.meshCoordinates[newPointindex,:])*parameters.h
+    #         newCol = 1/(np.sqrt(2*np.pi*var))*np.exp(-(meshPartial-mean)**2/(2*var))
+    #         integrator.TransitionMatrix[:len(newCol),newPointindex] = np.squeeze(newCol)
+    #         return
+    #         #Now, add new column
+    #     mu = meshPartial[newPointindex,:]+sde.driftFunction(np.expand_dims(meshPartial[newPointindex,:],axis=0))*parameters.h
+    #     mu = mu[0]
+    #     dfn = sde.diffusionFunction(meshPartial[newPointindex,:])
+    #     cov = dfn@dfn.T*parameters.h
+    #     newCol = np.empty(pdf.meshLength)
+    #     const = 1/(np.sqrt((2*np.pi)**sde.dimension*abs(np.linalg.det(cov))))
+    #     covInv = np.linalg.inv(cov)
+    #     for j in range(len(meshPartial)):
+    #         x = meshPartial[j,:]
+    #         Gs = np.exp(-1/2*((x-mu).T@covInv@(x.T-mu.T)))
+    #         newCol[j] = (Gs)
+    #     integrator.TransitionMatrix[:len(newCol),newPointindex] = newCol*const
 
 
 from Class_PDF import nDGridMeshCenteredAtOrigin
@@ -125,48 +148,30 @@ from tqdm import tqdm
 
 class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
     ## TODO: RECHECK THAT RHO ISNT NEEDED, Combine the N2 computations
-    def __init__(self, pdf, adaptive):
-        if adaptive:
+    def __init__(self, pdf, parameters):
+        if parameters.useAdaptiveMesh:
             self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*3
         else:
             self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength
-        self.meshSpacingAM = 0.05
-        self.setMeshAMPadding(pdf.meshCoordinates.ndim)
+        self.meshSpacingAM = parameters.AMMeshSpacing
         self.theta = 0.5
         self.a1 = alpha1(self.theta)
         self.a2 = alpha2(self.theta)
         self.meshAM = None
         self.N2s = None
 
-
-    def setMeshAMPadding(self, dimension):
-        if dimension == 1:
-            self.meshAMPadding = 5
-        else:
-            self.meshAMPadding = 2
-
-
-    def setAndersonMattinglyMeshForComputingTransitionProbability(self, pdf, sde):
-        if np.any(self.meshAM) == None or 2*np.max(pdf.meshCoordinates)> np.max(self.meshAM) or 0.5*np.min(pdf.meshCoordinates)< np.min(self.meshAM):
-            radius = int(max(int(np.ceil(np.max(pdf.meshCoordinates)-np.min(pdf.meshCoordinates))),2)+self.meshAMPadding)/2
-            meshAM = nDGridMeshCenteredAtOrigin(sde.dimension, radius,self.meshSpacingAM, useNoiseBool = False)
-            mean = (np.max(pdf.meshCoordinates)+np.min(pdf.meshCoordinates))/2
-            delta = np.ones(np.shape(meshAM))*mean
-            meshAM = np.asarray(meshAM).T + delta.T
-            meshAM = meshAM.T
-            self.meshAM = meshAM
-            return True
-        else:
-            return False
-
     def setAndersonMattinglyMeshAroundPoint(self, point, sde, radius):
-            radius =8*radius
-            meshAM = nDGridMeshCenteredAtOrigin(sde.dimension, radius,self.meshSpacingAM, useNoiseBool = False)
-            mean = point
-            delta = np.ones(np.shape(meshAM))*mean
-            meshAM = np.asarray(meshAM).T + delta.T
-            meshAM = meshAM.T
-            self.meshAM = meshAM
+        if sde.dimension ==1:
+            radius =5*radius
+        else:
+            radius = 5*radius
+
+        meshAM = nDGridMeshCenteredAtOrigin(sde.dimension, radius,self.meshSpacingAM, useNoiseBool = False)
+        mean = point
+        delta = np.ones(np.shape(meshAM))*mean
+        meshAM = np.asarray(meshAM).T + delta.T
+        meshAM = meshAM.T
+        self.meshAM = meshAM
 
 
     # @profile
@@ -188,13 +193,13 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
                 sig2 = np.sqrt(self.a1*sde.diffusionFunction(i)**2 - self.a2*sde.diffusionFunction(yim1)**2)*np.sqrt((1-self.theta)*h)
                 scale2.setCov(sig2**2)
             # N2 = Gaussian(scale2, pdf.meshCoordinates)
-            N2 = scale2.ComputeGaussian(pdf.meshCoordinates, sde)
+            N2 = scale2.ComputeGaussian(pdf.meshCoordinates, sde.dimension)
             N2Complete2[:,count] = N2
         return N2Complete2
 
     # @profile
     def computeN2Paritial(self, pdf, sde, h, yim1, meshNew):
-        count1 = 0
+
         s = np.size(self.meshAM,0)
         N2Complete2 = np.zeros((len(meshNew),s))
 
@@ -210,7 +215,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
             if sde.spatialDiff == True:
                 sig2 = np.sqrt(self.a1*sde.diffusionFunction(i)**2 - self.a2*sde.diffusionFunction(yim1)**2)*np.sqrt((1-self.theta)*h)
                 scale2.setCov(sig2**2)
-            N2 = scale2.ComputeGaussian(meshNew, sde)
+            N2 = scale2.ComputeGaussian(meshNew, sde.dimension)
             N2Complete2[:,count] = N2
         return N2Complete2
 
@@ -233,9 +238,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
 
 
     def computeTransitionMatrix(self, pdf, sde, parameters):
-        sizeMatrix = pdf.meshLength
-        matrix = np.empty([sizeMatrix, sizeMatrix])*np.NAN
-
+        matrix = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
         for j in trange(pdf.meshLength):
             mu1= pdf.meshCoordinates[j]+sde.driftFunction(np.asarray([pdf.meshCoordinates[j]]))*self.theta*parameters.h
             sig1 = abs(sde.diffusionFunction(np.asarray([pdf.meshCoordinates[j]]))*np.sqrt(self.theta*parameters.h))
@@ -245,24 +248,17 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
 
             self.setAndersonMattinglyMeshAroundPoint(mu1, sde, np.max(sig1))
             N2 = self.computeN2(pdf, sde, parameters.h, pdf.meshCoordinates[j])
-            N1 = scale1.ComputeGaussian(self.meshAM, sde)
+            N1 = scale1.ComputeGaussian(self.meshAM, sde.dimension)
 
-            # plt.figure()
-            # plt.plot(pdf.meshCoordinates, N2@np.expand_dims(N1,1), label="Product")
-            # plt.plot(self.meshAM, N1, label="N1")
-            # # plt.plot(pdf.meshCoordinates, N2.T, label="N2")
-            # plt.plot(pdf.meshCoordinates[j], 0, '*')
-            # plt.show()
+            val = self.meshSpacingAM**sde.dimension*N2@np.expand_dims(N1,1)
+
             # fig = pyplot.figure()
             # ax = Axes3D(fig)
-            # ax.scatter(pdf.meshCoordinates[:,0],pdf.meshCoordinates[:,1], N2.T@np.expand_dims(N1,1), label="Product")
-            # ax.scatter(self.meshAM[:,0], self.meshAM[:,1], N1, label="N1")
-            # # plt.plot(pdf.meshCoordinates, N2.T, label="N2")
-            # ax.plot(pdf.meshCoordinates[j,0], pdf.meshCoordinates[j,1], 0, '*')
-            # plt.legend()
-            # plt.show()
-            val = self.meshSpacingAM**sde.dimension*N2@np.expand_dims(N1,1)
-            matrix[:,j] = np.squeeze(val)
+            # ax.scatter(self.meshAM[:,0], self.meshAM[:,1], N1)
+            # # ax.scatter(pdf.meshCoordinates[:,0], pdf.meshCoordinates[:,1], val)
+
+            # pyplot.show()
+            matrix[:len(val),j] = np.squeeze(val)
         return matrix
 
     # def AddPointToG(self, pdf, newPointindices, parameters, integrator, sde):
@@ -298,7 +294,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
 
             # Add column
             N2 = self.computeN2(pdf, sde, parameters.h, point)
-            N1 = scale1.ComputeGaussian(self.meshAM, sde)
+            N1 = scale1.ComputeGaussian(self.meshAM, sde.dimension)
             vals = self.meshSpacingAM**sde.dimension*N2@np.expand_dims(N1,1)
             integrator.TransitionMatrix[:len(pdf.meshCoordinates),newPointindices[index]] = np.squeeze(vals)
 
@@ -314,7 +310,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
 
             self.setAndersonMattinglyMeshAroundPoint(mu1, sde, np.max(sig1))
             N22 = self.computeN2Paritial(pdf, sde, parameters.h, pdf.meshCoordinates[count], pdf.meshCoordinates[newPointindices])
-            N1 = scale1.ComputeGaussian(self.meshAM, sde)
+            N1 = scale1.ComputeGaussian(self.meshAM, sde.dimension)
             vals = self.meshSpacingAM**sde.dimension*N22@np.expand_dims(N1,1)
 
             integrator.TransitionMatrix[pdf.meshLength-len(newPointindices):pdf.meshLength, count] = np.squeeze(vals)

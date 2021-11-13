@@ -28,9 +28,9 @@ class Simulation():
 
     def setTimeDiscretizationDriver(self, parameters, pdf):
         if parameters.timeDiscretizationType == "EM":
-            self.timeDiscretizationMethod = EulerMaruyamaTimeDiscretizationMethod(pdf, adaptive = parameters.useAdaptiveMesh)
+            self.timeDiscretizationMethod = EulerMaruyamaTimeDiscretizationMethod(pdf, parameters)
         if parameters.timeDiscretizationType == "AM":
-            self.timeDiscretizationMethod = AndersonMattinglyTimeDiscretizationMethod(pdf, adaptive = parameters.useAdaptiveMesh)
+            self.timeDiscretizationMethod = AndersonMattinglyTimeDiscretizationMethod(pdf, parameters)
 
     def setIntegrator(self, sde, parameters, pdf):
         if parameters.integratorType == "LQ":
