@@ -109,7 +109,7 @@ class MeshUpdater:
                         simulation.timeDiscretizationMethod.AddPointToG(pdf.meshCoordinates[:i,:], i-1, parameters, sde, pdf, simulation.integrator)
             elif parameters.timeDiscretizationType == "AM":
                 indices = list(range(meshSizeBeforeUpdates, newMeshSize))
-                simulation.timeDiscretizationMethod.AddPointToG(pdf, indices, parameters, simulation.integrator, sde)
+                simulation.timeDiscretizationMethod.AddPointToG(simulation, indices, parameters, simulation.integrator, sde)
 
 
     def getBoundaryPoints(self, pdf, dimension, parameters, sde):

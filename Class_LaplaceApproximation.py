@@ -7,12 +7,12 @@ import operator as op
 from functools import reduce
 
 class LaplaceApproximation:
-    def __init__(self, sde):
+    def __init__(self, dimension):
         self.scalingForGaussian = None
         self.leastSqauresFit= None
         self.constantOfGaussian= None
         self.combinationOfBasisFunctionsList = None
-        self.numLSBasis = self.computeShapeOfMatrix(sde.dimension+2, 2)
+        self.numLSBasis = self.computeShapeOfMatrix(dimension+2, 2)
 
     def computeShapeOfMatrix(self, n, r):
         r = min(r, n-r)

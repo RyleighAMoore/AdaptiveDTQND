@@ -39,51 +39,14 @@ class IntegratorTrapezoidal(Integrator):
 
 
 class IntegratorLejaQuadrature(Integrator):
-    def __init__(self, simulation, sde, parameters, pdf):
+    def __init__(self, dimension, parameters):
         self.lejaPoints = None
-        self.TransitionMatrix = simulation.timeDiscretizationMethod.computeTransitionMatrix(pdf, sde, parameters)
-        self.LejaPointIndicesMatrix = np.zeros((simulation.timeDiscretizationMethod.sizeTransitionMatrixIncludingEmpty, parameters.numLejas))
-        self.LejaPointIndicesBoolVector = np.zeros((simulation.timeDiscretizationMethod.sizeTransitionMatrixIncludingEmpty,1))
         self.conditionNumberForAcceptingLejaPointsAtNextTimeStep = 1.1
-        self.setIdentityScaling(sde.dimension)
-        self.setUpPolnomialFamily(sde.dimension)
-        self.altMethodLejaPoints, temp = getLejaPoints(parameters.numLejas, np.zeros((sde.dimension,1)), self.poly, num_candidate_samples=5000, candidateSampleMesh = [], returnIndices = False)
-        self.laplaceApproximation = LaplaceApproximation(sde)
+        self.setIdentityScaling(dimension)
+        self.setUpPolnomialFamily(dimension)
+        self.altMethodLejaPoints, temp = getLejaPoints(parameters.numLejas, np.zeros((dimension,1)), self.poly, num_candidate_samples=5000, candidateSampleMesh = [], returnIndices = False)
+        self.laplaceApproximation = LaplaceApproximation(dimension)
 
-    def removePoints(self, index):
-        self.TransitionMatrix = np.delete(self.TransitionMatrix, index,0)
-        self.TransitionMatrix = np.delete(self.TransitionMatrix, index,1)
-        # self.LejaPointIndicesMatrix = np.delete(self.LejaPointIndicesMatrix, index,0)
-        # self.LejaPointIndicesBoolVector = np.delete(self.LejaPointIndicesBoolVector, index)
-
-
-    def checkIncreaseSizeStorageMatrices(self, pdf, parameters):
-        sizer = 2*pdf.meshLength
-        if pdf.meshLength*2 >= np.size(self.TransitionMatrix,1):
-            GMat2 = np.empty([2*sizer, 2*sizer])*np.NaN
-            GMat2[:pdf.meshLength, :pdf.meshLength]= self.TransitionMatrix[:pdf.meshLength, :pdf.meshLength]
-            self.TransitionMatrix = GMat2
-
-            LPMat2 = np.empty([2*sizer, parameters.numLejas])*np.NaN
-            LPMat2[:pdf.meshLength, :pdf.meshLength]= self.LejaPointIndicesMatrix[:pdf.meshLength, :parameters.numLejas]
-            self.LejaPointIndicesMatrix = LPMat2
-
-            LPMatBool2 = np.zeros((2*sizer,1), dtype=bool)
-            LPMatBool2[:pdf.meshLength]= self.LejaPointIndicesBoolVector[:pdf.meshLength]
-            self.LejaPointIndicesBoolVector = LPMatBool2
-
-
-    def houseKeepingStorageMatrices(self, indices):
-        largerLPMat = np.zeros(np.shape(self.LejaPointIndicesMatrix))
-        for ii in indices:
-            LPUpdateList = np.where(self.LejaPointIndicesMatrix == ii)[0]
-            for i in LPUpdateList:
-                self.LejaPointIndicesBoolVector[i] = False
-            largerLP = self.LejaPointIndicesMatrix >= ii
-            largerLPMat = largerLPMat + largerLP
-        self.LejaPointIndicesMatrix = self.LejaPointIndicesMatrix - largerLPMat
-        self.LejaPointIndicesBoolVector = np.delete(self.LejaPointIndicesBoolVector, indices,0)
-        self.LejaPointIndicesMatrix = np.delete(self.LejaPointIndicesMatrix, indices, 0)
 
 
     def setUpPolnomialFamily(self, dimension):
@@ -98,17 +61,18 @@ class IntegratorLejaQuadrature(Integrator):
          self.identityScaling.setMu(np.zeros(dimension).T)
          self.identityScaling.setCov(np.eye(dimension))
 
-    def findQuadraticFit(self, sde, pdf, parameters, index):
+    def findQuadraticFit(self, sde, simulation, parameters, index):
+        pdf = simulation.pdf
         ## TODO: Update this so I don't recompute drift and diff everytime
-        pdf.setIntegrandBeforeDividingOut(self.TransitionMatrix[index,:pdf.meshLength]*pdf.pdfVals)
-        if not self.LejaPointIndicesBoolVector[index]: # Do not have good Leja points
+        pdf.setIntegrandBeforeDividingOut(simulation.TransitionMatrix[index,:pdf.meshLength]*pdf.pdfVals)
+        if not simulation.LejaPointIndicesBoolVector[index]: # Do not have good Leja points
             orderedPoints, distances, indicesOfOrderedPoints = findNearestKPoints(pdf.meshCoordinates[index], pdf.meshCoordinates, parameters.numQuadFit, getIndices=True)
             quadraticFitMeshPoints = orderedPoints[:parameters.numQuadFit]
             pdfValuesOfQuadraticFitPoints = pdf.integrandBeforeDividingOut[indicesOfOrderedPoints]
             self.laplaceApproximation.copmuteleastSquares(quadraticFitMeshPoints, pdfValuesOfQuadraticFitPoints, sde.dimension)
         else:
-            quadraticFitMeshPoints = pdf.meshCoordinates[self.LejaPointIndicesMatrix[index,:].astype(int)]
-            pdfValuesOfQuadraticFitPoints = pdf.integrandBeforeDividingOut[self.LejaPointIndicesMatrix[index,:].astype(int)]
+            quadraticFitMeshPoints = pdf.meshCoordinates[simulation.LejaPointIndicesMatrix[index,:].astype(int)]
+            pdfValuesOfQuadraticFitPoints = pdf.integrandBeforeDividingOut[simulation.LejaPointIndicesMatrix[index,:].astype(int)]
             self.laplaceApproximation.copmuteleastSquares(quadraticFitMeshPoints, pdfValuesOfQuadraticFitPoints,sde.dimension)
 
         if np.any(self.laplaceApproximation.constantOfGaussian)==None: # Fit failed
@@ -121,10 +85,11 @@ class IntegratorLejaQuadrature(Integrator):
         pdf.setIntegrandAfterDividingOut(pdf.integrandBeforeDividingOut/gaussianToDivideOut)
 
 
-    def setLejaPoints(self, pdf, index, parameters, sde):
+    def setLejaPoints(self, simulation, index, parameters, sde):
+        pdf = simulation.pdf
         self.divideOutGaussianAndSetIntegrand(pdf, sde, index)
-        if self.LejaPointIndicesBoolVector[index]: # Already have LejaPoints
-            LejaIndices = self.LejaPointIndicesMatrix[index,:].astype(int)
+        if simulation.LejaPointIndicesBoolVector[index]: # Already have LejaPoints
+            LejaIndices = simulation.LejaPointIndicesMatrix[index,:].astype(int)
             mesh2 = map_to_canonical_space(pdf.meshCoordinates, self.laplaceApproximation.scalingForGaussian)
             self.lejaPoints = mesh2[LejaIndices,:]
             self.lejaPointsPdfVals = pdf.integrandAfterDividingOut[LejaIndices]
@@ -186,11 +151,11 @@ class IntegratorLejaQuadrature(Integrator):
         newPdf = np.zeros(simulation.pdf.meshLength)
         pdf = simulation.pdf
         for index, point in enumerate(pdf.meshCoordinates):
-            useLejaIntegrationProcedure = self.findQuadraticFit(sde, pdf, parameters, index)
+            useLejaIntegrationProcedure = self.findQuadraticFit(sde, simulation, parameters, index)
             if not useLejaIntegrationProcedure: # Failed Quadratic Fit
                 value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
             else: # Get Leja points
-                self.setLejaPoints(pdf, index, parameters,sde)
+                self.setLejaPoints(simulation, index, parameters,sde)
                 if self.lejaSuccess == False: #Getting Leja points failed
                      value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
                      print("failed Leja")
@@ -198,18 +163,18 @@ class IntegratorLejaQuadrature(Integrator):
                     value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index, sde)
                     if condNumber < 1.1:
                         LPReuseCount = LPReuseCount +1
-                        self.LejaPointIndicesBoolVector[index] = True
-                        self.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
+                        simulation.LejaPointIndicesBoolVector[index] = True
+                        simulation.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
                     else: # Continue with integration, use new leja points
-                        self.LejaPointIndicesBoolVector[index] = False
-                        self.setLejaPoints(pdf, index, parameters,sde)
+                        simulation.LejaPointIndicesBoolVector[index] = False
+                        self.setLejaPoints(simulation, index, parameters,sde)
                         if self.lejaSuccess == False:
                             value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
                         else:
                             value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index, sde)
                             if condNumber < 1.1: # Leja points worked really well, likely okay for next time step
-                                self.LejaPointIndicesBoolVector[index] = True
-                                self.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
+                                simulation.LejaPointIndicesBoolVector[index] = True
+                                simulation.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
                             if condNumber > parameters.conditionNumForAltMethod or value < 0: # Nothing worked, use alt method
                                 value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
             newPdf[index] =value

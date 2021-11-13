@@ -19,12 +19,12 @@ if dimension ==1:
 
 if dimension ==2:
     beta = 3
-    radius =1.5
+    radius =1
     # radius = 0.5
     kstepMin= 0.08
     kstepMax = 0.09
     h = 0.01
-    endTime = 0.05
+    endTime = 0.15
 
 
 if dimension ==3:
