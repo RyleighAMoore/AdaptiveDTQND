@@ -77,7 +77,7 @@ from Class_Integrator import Integrator
 
 class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
     ## TODO: RECHECK THAT RHO ISNT NEEDED, Combine the N2 computations
-    def __init__(self, pdf, parameters, unScaledLejaPoints):
+    def __init__(self, pdf, parameters):
         if parameters.useAdaptiveMesh:
             self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*3
         else:

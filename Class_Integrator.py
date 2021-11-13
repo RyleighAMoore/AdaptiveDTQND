@@ -21,20 +21,19 @@ class Integrator:
 
 
 class IntegratorTrapezoidal(Integrator):
-    def __init__(self, simulation, sde, parameters, pdf):
+    def __init__(self, dimension, parameters):
         print("Warning: You must have an equispaced mesh!")
         if parameters.useAdaptiveMesh == True:
             print("Updates with the Trapezoidal rule are not currently supported.")
             parameters.useAdaptiveMesh = False
         self.stepSize = parameters.minDistanceBetweenPoints
-        self.TransitionMatrix = simulation.timeDiscretizationMethod.computeTransitionMatrix(pdf, sde, parameters)
+
 
     def computeTimeStep(self, sde, parameters, simulation):
-        vals= np.asarray(self.stepSize**sde.dimension*self.TransitionMatrix[:simulation.pdf.meshLength, :simulation.pdf.meshLength]@simulation.pdfTrajectory[-1])
+        # simulation.TransitionMatrix = simulation.timeDiscretizationMethod.computeTransitionMatrix(simulation.pdf, sde, parameters)
+        vals= np.asarray(self.stepSize**sde.dimension*simulation.TransitionMatrix[:simulation.pdf.meshLength, :simulation.pdf.meshLength]@simulation.pdfTrajectory[-1])
         return np.squeeze(vals)
 
-    def checkIncreaseSizeStorageMatrices(self, pdf, parameters):
-        pass
 
 
 
@@ -46,8 +45,6 @@ class IntegratorLejaQuadrature(Integrator):
         self.setUpPolnomialFamily(dimension)
         self.altMethodLejaPoints, temp = getLejaPoints(parameters.numLejas, np.zeros((dimension,1)), self.poly, num_candidate_samples=5000, candidateSampleMesh = [], returnIndices = False)
         self.laplaceApproximation = LaplaceApproximation(dimension)
-
-
 
     def setUpPolnomialFamily(self, dimension):
         self.poly = HermitePolynomials(rho=0)
