@@ -73,7 +73,7 @@ class Simulation():
         if parameters.timeDiscretizationType == "EM":
             self.timeDiscretizationMethod = EulerMaruyamaTimeDiscretizationMethod(pdf, parameters)
         if parameters.timeDiscretizationType == "AM":
-            self.timeDiscretizationMethod = AndersonMattinglyTimeDiscretizationMethod(pdf, parameters)
+            self.timeDiscretizationMethod = AndersonMattinglyTimeDiscretizationMethod(pdf, parameters, sde.dimension)
 
     def setIntegrator(self, sde, parameters, pdf):
         if parameters.integratorType == "LQ":

@@ -28,13 +28,9 @@ class IntegratorTrapezoidal(Integrator):
             parameters.useAdaptiveMesh = False
         self.stepSize = parameters.minDistanceBetweenPoints
 
-
     def computeTimeStep(self, sde, parameters, simulation):
-        # simulation.TransitionMatrix = simulation.timeDiscretizationMethod.computeTransitionMatrix(simulation.pdf, sde, parameters)
         vals= np.asarray(self.stepSize**sde.dimension*simulation.TransitionMatrix[:simulation.pdf.meshLength, :simulation.pdf.meshLength]@simulation.pdfTrajectory[-1])
         return np.squeeze(vals)
-
-
 
 
 class IntegratorLejaQuadrature(Integrator):

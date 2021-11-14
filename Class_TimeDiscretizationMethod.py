@@ -77,7 +77,7 @@ from Class_Integrator import Integrator
 
 class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
     ## TODO: RECHECK THAT RHO ISNT NEEDED, Combine the N2 computations
-    def __init__(self, pdf, parameters):
+    def __init__(self, pdf, parameters, dimension):
         if parameters.useAdaptiveMesh:
             self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*3
         else:
@@ -88,6 +88,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         self.a2 = alpha2(self.theta)
         self.meshAM = None
         self.N2s = None
+        # self.integrator = Integrator(dimension, parameters)
 
 
     def setAndersonMattinglyMeshAroundPoint(self, point, sde, radius):
@@ -129,7 +130,6 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
 
     # @profile
     def computeN2Paritial(self, pdf, sde, h, yim1, meshNew):
-
         s = np.size(self.meshAM,0)
         N2Complete2 = np.zeros((len(meshNew),s))
 
@@ -191,26 +191,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
             matrix[:len(val),j] = np.squeeze(val)
         return matrix
 
-    # def AddPointToG(self, pdf, newPointindices, parameters, integrator, sde):
-    #     # aaa= self.computeTransitionMatrix(pdf, sde, parameters.h)
-    #     # self.TransitionMatrix[:pdf.meshLength, :pdf.meshLength] = aaa
-    #     self.computeN2s(pdf, sde, parameters.h)
-    #     newPointsCount = len(newPointindices)
 
-    #     for i in range(pdf.meshLength-newPointsCount, pdf.meshLength):
-    #         for j in range(pdf.meshLength):
-    #             N2 = self.N2s[j][:,i]
-    #             transitionProb = self.computeTransitionProbability(sde, pdf.meshCoordinates[i], pdf.meshCoordinates[j], parameters.h, N2= N2)
-    #             integrator.TransitionMatrix[i,j] = transitionProb
-
-    #     for i in range(pdf.meshLength):
-    #         for j in range(pdf.meshLength-newPointsCount, pdf.meshLength):
-    #             N2 = self.N2s[j][:,i]
-    #             transitionProb = self.computeTransitionProbability(sde, pdf.meshCoordinates[i], pdf.meshCoordinates[j], parameters.h, N2= N2)
-    #             integrator.TransitionMatrix[i,j] = transitionProb
-    #     t=0
-
-    # @profile
     def AddPointToG(self, simulation, newPointindices, parameters, integrator, sde):
         pdf = simulation.pdf
         for index, point in enumerate(pdf.meshCoordinates[newPointindices]):
