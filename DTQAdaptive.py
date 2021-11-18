@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import DriftDiffusionFunctionBank as functionBank
 import time
 
-dimension =2
+dimension =1
 
 if dimension ==1:
     beta = 4
@@ -15,7 +15,7 @@ if dimension ==1:
     kstepMin= 0.06
     kstepMax = 0.07
     h = 0.1
-    endTime =10
+    endTime =4
 
 if dimension ==2:
     beta = 3

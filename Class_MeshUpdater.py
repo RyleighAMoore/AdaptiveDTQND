@@ -106,7 +106,7 @@ class MeshUpdater:
             newMeshSize = len(pdf.meshCoordinates)
             if parameters.timeDiscretizationType == "EM":
                 for i in range(meshSizeBeforeUpdates+1, newMeshSize+1):
-                        simulation.timeDiscretizationMethod.AddPointToG(pdf.meshCoordinates[:i,:], i-1, parameters, sde, pdf, simulation.integrator)
+                        simulation.timeDiscretizationMethod.AddPointToG(pdf.meshCoordinates[:i,:], i-1, parameters, sde, pdf, simulation.integrator, simulation)
             elif parameters.timeDiscretizationType == "AM":
                 indices = list(range(meshSizeBeforeUpdates, newMeshSize))
                 simulation.timeDiscretizationMethod.AddPointToG(simulation, indices, parameters, simulation.integrator, sde)
@@ -137,8 +137,8 @@ class MeshUpdater:
         if len(indices)>0:
             pdf.removePointsFromMesh(indices)
             pdf.removePointsFromPdf(indices)
-            simulation.integrator.removePoints(indices)
-            simulation.integrator.houseKeepingStorageMatrices(indices)
+            simulation.removePoints(indices)
+            simulation.houseKeepingStorageMatrices(indices)
 
             if not sde.dimension ==1:
                 self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)

@@ -40,7 +40,7 @@ class LaplaceApproximation:
         M[:,size] = np.ones(np.size(QuadMesh,0))
         return M, comboList
 
-    def copmuteleastSquares(self, QuadMesh, laplaceFitPdf, dimension):
+    def computeleastSquares(self, QuadMesh, laplaceFitPdf, dimension):
         M, comboList = self.buildVMatForLinFit(dimension, QuadMesh, laplaceFitPdf)
 
         MT = M.T
@@ -135,4 +135,11 @@ class LaplaceApproximation:
             vals = 1/(np.sqrt(np.pi)**dimension*JacFactor)*np.exp(-(vals2))/self.constantOfGaussian
         return np.squeeze(vals).T
 
+
+    def ComputeDividedOutAM(self, pdf, dimension, mesh):
+       temp = pdf.meshCoordinates
+       pdf.meshCoordinates = mesh
+       vals = self.ComputeDividedOut(pdf, dimension)
+       pdf.meshCoordinates = temp
+       return vals
 
