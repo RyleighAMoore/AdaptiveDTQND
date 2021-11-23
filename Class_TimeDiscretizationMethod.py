@@ -193,7 +193,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         return transitionProb
 
 
-    def computeTransitionMatrixLQ3(self, pdf, sde, parameters):
+    def computeTransitionMatrixL(self, pdf, sde, parameters):
         self.meshSpacingAM = 0.1
         matrix = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
         for j in trange(pdf.meshLength):
@@ -240,7 +240,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         # matrix2 = self.computeTransitionMatrix2(pdf, sde, parameters)
         return matrix
 
-    def computeTransitionMatrixLQ2(self, pdf, sde, parameters):
+    def computeTransitionMatrix(self, pdf, sde, parameters):
         self.meshSpacingAM = 0.2
 
         matrix = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
@@ -292,7 +292,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         return matrix
 
 
-    def computeTransitionMatrix(self, pdf, sde, parameters):
+    def computeTransitionMatrixO(self, pdf, sde, parameters):
         matrix = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
         for j in trange(pdf.meshLength):
             mu1= pdf.meshCoordinates[j]+sde.driftFunction(np.asarray([pdf.meshCoordinates[j]]))*self.theta*parameters.h

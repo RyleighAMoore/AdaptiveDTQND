@@ -8,7 +8,7 @@ import DriftDiffusionFunctionBank as functionBank
 from Errors import ErrorValsOneTime
 import time
 
-dimension =2
+dimension =1
 if dimension ==1:
     beta = 3
     radius =67/2
@@ -59,27 +59,27 @@ simulationEM = Simulation(sde, parametersEM, endTime)
 parametersAM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "AM", integratorType=integrationType)
 simulationAM = Simulation(sde, parametersAM, endTime)
 
-AM = simulationAM.integrator.TransitionMatrix
-EM = simulationEM.integrator.TransitionMatrix
+# AM = simulationAM.integrator.TransitionMatrix
+# EM = simulationEM.integrator.TransitionMatrix
 
-print(np.nanmax(abs(AM-EM)))
+# print(np.nanmax(abs(AM-EM)))
 
 iters = 1
 
-# '''Time Transition Matrix'''
-# startEM = time.time()
-# for i in range(iters):
-#     simulationEM.timeDiscretizationMethod.computeTransitionMatrix(simulationEM.pdf, sde, parametersEM)
-# endEM = time.time()
-# endTime = endEM-startEM
-# print(endTime/iters)
+'''Time Transition Matrix'''
+startEM = time.time()
+for i in range(iters):
+    simulationEM.timeDiscretizationMethod.computeTransitionMatrix(simulationEM.pdf, sde, parametersEM)
+endEM = time.time()
+endTime = endEM-startEM
+print(endTime/iters)
 
-# startAM = time.time()
-# for i in range(iters):
-#     simulationAM.timeDiscretizationMethod.computeTransitionMatrix(simulationEM.pdf, sde, parametersAM)
-# endAM = time.time()
-# endTime = endAM-startAM
-# print(endTime/iters)
+startAM = time.time()
+for i in range(iters):
+    simulationAM.timeDiscretizationMethod.computeTransitionMatrix(simulationEM.pdf, sde, parametersAM)
+endAM = time.time()
+endTime = endAM-startAM
+print(endTime/iters)
 
 
 # '''Time Adding New point'''
@@ -99,32 +99,32 @@ iters = 1
 
 
 
-'''Time Adding New points'''
-numPointsArr = [10000, 6000, 2000, 1000,10,1]
-numPointsArr = [900, 500, 300,100,10,1]
+# '''Time Adding New points'''
+# numPointsArr = [10000, 6000, 2000, 1000,10,1]
+# numPointsArr = [900, 500, 300,100,10,1]
 
-timingEM = []
-timingAM = []
+# timingEM = []
+# timingAM = []
 
-from tqdm import trange
-for numPoints in numPointsArr:
-    startEM = time.time()
-    for i in trange(iters):
-        for i in range(numPoints):
-            simulationEM.timeDiscretizationMethod.AddPointToG(simulationEM.pdf.meshCoordinates, i, parametersEM, sde, simulationEM.pdf, simulationEM.integrator)
-    endEM = time.time()
-    endTime = endEM-startEM
-    print(endTime/iters)
-    timingEM.append(endTime/iters)
+# from tqdm import trange
+# for numPoints in numPointsArr:
+#     startEM = time.time()
+#     for i in trange(iters):
+#         for i in range(numPoints):
+#             simulationEM.timeDiscretizationMethod.AddPointToG(simulationEM.pdf.meshCoordinates, i, parametersEM, sde, simulationEM.pdf, simulationEM.integrator)
+#     endEM = time.time()
+#     endTime = endEM-startEM
+#     print(endTime/iters)
+#     timingEM.append(endTime/iters)
 
-    l = [i for i in range(numPoints)]
-    startAM = time.time()
-    for i in trange(iters):
-        simulationAM.timeDiscretizationMethod.AddPointToG(simulationAM.pdf, l, parametersAM, simulationAM.integrator, sde)
-    endAM = time.time()
-    endTime = endAM-startAM
-    print(endTime/iters)
-    timingAM.append(endTime/iters)
+#     l = [i for i in range(numPoints)]
+#     startAM = time.time()
+#     for i in trange(iters):
+#         simulationAM.timeDiscretizationMethod.AddPointToG(simulationAM.pdf, l, parametersAM, simulationAM.integrator, sde)
+#     endAM = time.time()
+#     endTime = endAM-startAM
+#     print(endTime/iters)
+#     timingAM.append(endTime/iters)
 
 # # if timingEM[0] == 0:
 # #     timingEM[0] = 10**(-128)
