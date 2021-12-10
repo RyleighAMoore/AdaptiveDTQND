@@ -1,7 +1,7 @@
 import numpy as np
 from Class_Gaussian import GaussScale
 import matplotlib.pyplot as plt
-from Functions import nDGridMeshCenteredAtOrigin
+from Functions import nDGridMeshCenteredAtOrigin, nDGridMeshSquareCenteredAroundGivenPoint
 class PDF:
     def __init__(self, sde, parameters, UseNoise=False):
         self.pdfVals = None
@@ -34,7 +34,12 @@ class PDF:
         self.integrandAfterDividingOut = integrandAfterDividingOut
 
     def setInitialConditionMeshCoordinates(self, sde, parameters):
-        self.meshCoordinates = nDGridMeshCenteredAtOrigin(sde.dimension, parameters.radius, parameters.kstepMin)
+        if parameters.integratorType == "LQ":
+            self.meshCoordinates = nDGridMeshCenteredAtOrigin(sde.dimension, parameters.radius, parameters.kstepMin)
+        if parameters.integratorType == "TR":
+            # self.meshCoordinates = nDGridMeshSquareCenteredAroundGivenPoint(sde.dimension, parameters.radius, parameters.kstepMin, parameters.initialMeshCentering)
+            self.meshCoordinates = parameters.OverideMesh
+        # self.meshCoordinates = self.meshCoordinates + parameters.initialMeshCentering*np.ones(np.shape(self.meshCoordinates))
         self.meshLength = len(self.meshCoordinates)
 
 

@@ -25,7 +25,7 @@ if dimension ==2:
     kstepMin= 0.08
     kstepMax = 0.09
     h = 0.01
-    endTime =1
+    endTime =0.2
 if dimension ==3:
     beta = 3
     radius = 0.5

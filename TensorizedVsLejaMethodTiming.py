@@ -21,6 +21,8 @@ if dimension ==2:
     radius =1.5
     kstepMin= 0.08
     kstepMax = 0.09
+    kstepMin= 0.1
+    kstepMax = 0.12
     h = 0.01
     endTime = 1
 

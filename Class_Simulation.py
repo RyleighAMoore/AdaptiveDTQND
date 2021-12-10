@@ -12,7 +12,7 @@ from Class_TimeDiscretizationMethod import EulerMaruyamaTimeDiscretizationMethod
 from Class_PDF import PDF
 from Class_MeshUpdater import MeshUpdater
 from Class_Integrator import IntegratorLejaQuadrature, IntegratorTrapezoidal
-
+from tqdm import trange
 
 class Simulation():
     def __init__(self, sde, parameters, endTime):
@@ -92,7 +92,7 @@ class Simulation():
         self.meshTrajectory.append(np.copy(pdf.meshCoordinates))
         self.times.append(parameters.h)
         numSteps = int(self.endTime/parameters.h)
-        for i in range(1, numSteps):
+        for i in trange(1, numSteps):
             if i>2 and parameters.useAdaptiveMesh ==True:
                 self.checkIncreaseSizeStorageMatrices(parameters)
                 self.meshUpdater.addPointsToMeshProcedure(pdf, parameters, self, sde)

@@ -1,5 +1,5 @@
 class Parameters:
-    def __init__(self,sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh, timeDiscretizationType = "EM", integratorType = "LQ", AMSpacing = 0.05):
+    def __init__(self,sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh, timeDiscretizationType = "EM", integratorType = "LQ", AMSpacing = 0.05, initialMeshCentering=None, OverideMesh = None):
         self.conditionNumForAltMethod = 8
         self.h = h
         self.kstepMin = kstepMin
@@ -8,6 +8,7 @@ class Parameters:
         self.maxDistanceBetweenPoints = kstepMax
         self.beta = beta
         self.radius = radius
+        self.initialMeshCentering = initialMeshCentering
         self.timeDiscretizationType = timeDiscretizationType
         self.setNumLejas(sde)
         self.setNumPointsForLejaCandidates(sde)
@@ -15,6 +16,7 @@ class Parameters:
         self.useAdaptiveMesh = useAdaptiveMesh
         self.integratorType = integratorType
         self.AMMeshSpacing = AMSpacing
+        self.OverideMesh = OverideMesh
 
     def tuneOnSdeUnlessDefined(self, sde):
         self.numberOfLejaPoints = self.getOptimalNumberOfLejaPoints(sde)

@@ -59,6 +59,8 @@ def getLejaPoints(num_leja_samples, initial_samples, poly, num_candidate_samples
         return np.asarray(samples).T, np.asarray(samples[:,num_initial_samples:]).T
 
 import Functions as fun
+
+# @profile
 def getLejaSetFromPoints(scale, Mesh, numLejaPointsToReturn, poly, Pdf, diff, numPointsForLejaCandidates):
     # candidatesFull = VT.map_to_canonical_space(Mesh,scale)
     candidatesFull = Mesh # don't need to transform since the scale is normal when this function is used.

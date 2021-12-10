@@ -83,8 +83,8 @@ class IntegratorLejaQuadrature(Integrator):
         self.divideOutGaussianAndSetIntegrand(pdf, sde, index)
         if simulation.LejaPointIndicesBoolVector[index]: # Already have LejaPoints
             LejaIndices = simulation.LejaPointIndicesMatrix[index,:].astype(int)
-            mesh2 = map_to_canonical_space(pdf.meshCoordinates, self.laplaceApproximation.scalingForGaussian)
-            self.lejaPoints = mesh2[LejaIndices,:]
+            mesh2 = map_to_canonical_space(pdf.meshCoordinates[LejaIndices,:], self.laplaceApproximation.scalingForGaussian)
+            self.lejaPoints = mesh2
             self.lejaPointsPdfVals = pdf.integrandAfterDividingOut[LejaIndices]
             self.indicesOfLejaPoints = LejaIndices
             self.freshLejaPoints = False
@@ -201,7 +201,7 @@ class IntegratorLejaQuadrature(Integrator):
     #     print(self.AltMethodUseCount/pdf.meshLength*100, "% Alt method Use")
     #     return newPdf
 
-    def computeTimeStep(self, sde, parameters, simulation):
+    def computeTimeStep1(self, sde, parameters, simulation):
         LPReuseCount = 0
         self.freshLejaPoints = True
         self.AltMethodUseCount = 0
@@ -219,7 +219,7 @@ class IntegratorLejaQuadrature(Integrator):
                      print("failed Leja")
                 else: # Continue with integration, try to use Leja points from last step
                     value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index, sde)
-                    if condNumber < 1.1: # Finished, set Leja values for next time step
+                    if condNumber < self.conditionNumberForAcceptingLejaPointsAtNextTimeStep: # Finished, set Leja values for next time step
                         LPReuseCount = LPReuseCount +1
                         simulation.LejaPointIndicesBoolVector[index] = True
                         simulation.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
@@ -230,18 +230,64 @@ class IntegratorLejaQuadrature(Integrator):
                         if self.lejaSuccess == False:
                             value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
                         else:
+                            print("again")
                             value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index, sde)
-                            if condNumber < 1.1: # Leja points worked really well, likely okay for next time step
+                            if condNumber < self.conditionNumberForAcceptingLejaPointsAtNextTimeStep: # Leja points worked really well, likely okay for next time step
                                 simulation.LejaPointIndicesBoolVector[index] = True
                                 simulation.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
                             if condNumber > parameters.conditionNumForAltMethod or value < 0: # Nothing worked, use alt method
                                 value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
 
             newPdf[index] =value
-        print(LPReuseCount/pdf.meshLength*100, "% Leja Reuse")
-        print(self.AltMethodUseCount/pdf.meshLength*100, "% Alt method Use")
+        # print(LPReuseCount/pdf.meshLength*100, "% Leja Reuse")
+        # print(self.AltMethodUseCount/pdf.meshLength*100, "% Alt method Use")
         return newPdf
 
+    # @profile
+    def computeTimeStep(self, sde, parameters, simulation):
+        LPReuseCount = 0
+        self.freshLejaPoints = True
+        self.AltMethodUseCount = 0
+        newPdf = np.zeros(simulation.pdf.meshLength)
+        pdf = simulation.pdf
+        counting = 0
+        for index, point in enumerate(pdf.meshCoordinates):
+            useLejaIntegrationProcedure = self.findQuadraticFit(sde, simulation, parameters, index)
+            if not useLejaIntegrationProcedure: # Failed Quadratic Fit
+                value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
+            else: # Get Leja points, or compute them if they aren't set
+                self.setLejaPoints(simulation, index, parameters,sde)
+
+                if self.lejaSuccess == False: #Getting Leja points failed, use alt method
+                     value, condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
+                     print("failed Leja")
+                else: # Continue with integration, try to use Leja points from last step
+                    value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index, sde)
+                    if condNumber < self.conditionNumberForAcceptingLejaPointsAtNextTimeStep: # Finished, set Leja values for next time step
+                        LPReuseCount = LPReuseCount +1
+                        simulation.LejaPointIndicesBoolVector[index] = True
+                        simulation.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
+
+                    elif not self.freshLejaPoints: # Continue with integration, use new leja points
+                        simulation.LejaPointIndicesBoolVector[index] = False
+                        self.setLejaPoints(simulation, index, parameters,sde)
+                        if self.lejaSuccess == False:
+                            value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
+                        else:
+                            counting +=1
+                            value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index, sde)
+                            if condNumber < self.conditionNumberForAcceptingLejaPointsAtNextTimeStep: # Leja points worked really well, likely okay for next time step
+                                simulation.LejaPointIndicesBoolVector[index] = True
+                                simulation.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
+                            if condNumber > parameters.conditionNumForAltMethod or value < 0: # Nothing worked, use alt method
+                                value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
+            if value <= 0:
+                value = 10**(-parameters.beta)
+            newPdf[index] =value
+        # print(LPReuseCount/pdf.meshLength*100, "% Leja Reuse")
+        # print(self.AltMethodUseCount/pdf.meshLength*100, "% Alt method Use")
+        # print(counting, "-----------------------------------")
+        return newPdf
 
 
 def findNearestKPoints(Coord, AllPoints, numNeighbors, getIndices = False):
