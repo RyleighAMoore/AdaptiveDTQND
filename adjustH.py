@@ -27,8 +27,8 @@ if dimension ==2:
     kstepMax = 0.09
     kstepMin= 0.1
     kstepMax = 0.12
-    h = 0.05
-    endTime = 1
+    # h = 0.05
+    endTime = 2
 
 if dimension ==3:
     beta = 3
@@ -75,21 +75,16 @@ timesNoStartupEM = []
 timesNoStartupAM = []
 timesStartupEM = []
 timesStartupAM = []
-betaVals = [2,3, 4]
-# radiusVals = [1, 4]
-spacingVals = [0.08, 0.05]
-# times = [4,8,10]
-# times = [12]
-times= [1]
+betaVals = [2]
 
+hvals = [0.1, 0.15]
+# hvals = [0.02]
 
-for tt in times:
-    EndTime = tt
-    endTime = tt
+for h in hvals:
     for beta in betaVals:
         parametersEM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType="LQ")
         startEM = time.time()
-        simulationEM = Simulation(sde, parametersEM, EndTime)
+        simulationEM = Simulation(sde, parametersEM, endTime)
         timeStartupEM = time.time() - startEM
         startEMNoStartup = time.time()
         simulationEM.computeAllTimes(sde, simulationEM.pdf, parametersEM)
@@ -100,8 +95,8 @@ for tt in times:
 
 
         if not ApproxSolution:
-            meshApprox = simulationEM.meshTrajectory[-1]
-            pdfApprox = sde.exactSolution(simulationEM.meshTrajectory[-1], EndTime)
+            meshApprox = simulationEM.pdfTrajectory[-1]
+            pdfApprox = sde.exactSolution(simulationEM.meshTrajectory[-1], endTime)
 
         LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationEM.meshTrajectory[-1], simulationEM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
         ErrorsEM.append(np.copy(L2wErrors))
@@ -133,85 +128,49 @@ for tt in times:
     nx, ny = (int(np.ceil((xmax-xmin))/h), int(np.ceil((ymax-ymin))/h))
     x = np.linspace(xmin, xmax, nx)
     y = np.linspace(ymin, ymax, ny)
-    # xstart = np.floor(xmin)
-    # xs = []
-    # xs.append(xstart)
-    # while xstart< xmax:
-    #     xs.append(xstart+spacing)
-    #     xstart += spacing
+    spacing = kstepMin
+    buffer = 2
+    xstart = np.floor(xmin) -buffer
+    xs = []
+    xs.append(xstart)
+    while xstart< xmax+buffer:
+        xs.append(xstart+spacing)
+        xstart += spacing
 
-    # ystart = np.floor(ymin)
-    # ys = []
-    # ys.append(ystart)
+    ystart = np.floor(ymin)-buffer
+    ys = []
+    ys.append(ystart)
 
-    # while ystart< ymax:
-    #     ys.append(ystart+spacing)
-    #     ystart += spacing
+    while ystart< ymax+buffer:
+        ys.append(ystart+spacing)
+        ystart += spacing
 
 
-    # mesh = []
-    # for i in xs:
-    #     for j in ys:
-    #         mesh.append([i,j])
-    # mesh = np.asarray(mesh)
-
+    mesh = []
+    for i in xs:
+        for j in ys:
+            mesh.append([i,j])
+    mesh = np.asarray(mesh)
+    parametersAM = Parameters(sde, beta, radius, spacing, spacing, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", initialMeshCentering=initialCentering, OverideMesh = mesh)
+    startAM = time.time()
+    simulationAM = Simulation(sde, parametersAM, endTime)
     # plt.figure()
-    # plt.scatter(simulationEM.meshTrajectory[-1][:,0], simulationEM.meshTrajectory[-1][:,1])
-    for spacing in spacingVals:
-        xstart = np.floor(xmin)
-        xs = []
-        xs.append(xstart)
-        while xstart< xmax:
-            xs.append(xstart+spacing)
-            xstart += spacing
-
-        ystart = np.floor(ymin)
-        ys = []
-        ys.append(ystart)
-
-        while ystart< ymax:
-            ys.append(ystart+spacing)
-            ystart += spacing
+    # plt.scatter(simulationAM.pdf.meshCoordinates[:,0], simulationAM.pdf.meshCoordinates[:,1])
+    timeStartupAM = time.time() - startAM
+    startAMNoStartup = time.time()
+    simulationAM.computeAllTimes(sde, simulationAM.pdf, parametersAM)
+    endAM =time.time()
+    timesAM.append(np.copy(endAM-startAM))
+    timesNoStartupAM.append(np.copy(endAM-startAMNoStartup))
+    timesStartupAM.append(np.copy(timeStartupAM))
 
 
-        mesh = []
-        for i in xs:
-            for j in ys:
-                mesh.append([i,j])
-        mesh = np.asarray(mesh)
-        h=0.01
-        parametersAM = Parameters(sde, beta, radius, spacing, spacing, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", initialMeshCentering=initialCentering, OverideMesh = mesh)
-        startAM = time.time()
-        simulationAM = Simulation(sde, parametersAM, EndTime)
-        # plt.figure()
-        # plt.scatter(simulationAM.pdf.meshCoordinates[:,0], simulationAM.pdf.meshCoordinates[:,1])
-        timeStartupAM = time.time() - startAM
-        startAMNoStartup = time.time()
-        simulationAM.computeAllTimes(sde, simulationAM.pdf, parametersAM)
-        endAM =time.time()
-        timesAM.append(np.copy(endAM-startAM))
-        timesNoStartupAM.append(np.copy(endAM-startAMNoStartup))
-        timesStartupAM.append(np.copy(timeStartupAM))
-
-
-        if not ApproxSolution:
-            meshApprox = simulationAM.meshTrajectory[-1]
-            pdfApprox = sde.exactSolution(simulationAM.meshTrajectory[-1], endTime)
-        LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationAM.meshTrajectory[-1], simulationAM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
-        ErrorsAM.append(np.copy(L2wErrors))
-        # del simulationAM
-
-
-
-plt.figure()
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-title = ax.set_title('3D Test')
-Meshes = simulationAM.meshTrajectory
-PdfTraj = simulationAM.pdfTrajectory
-graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
-ax.plot(meshApprox[:,0], meshApprox[:,1], pdfApprox, color= "red",linestyle="", marker=".")
-
+    if not ApproxSolution:
+        meshApprox = simulationAM.pdfTrajectory[-1]
+        pdfApprox = sde.exactSolution(simulationAM.meshTrajectory[-1], endTime)
+    LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationAM.meshTrajectory[-1], simulationAM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
+    ErrorsAM.append(np.copy(L2wErrors))
+    # del simulationAM
 
 plt.figure()
 simulation = simulationAM
@@ -229,7 +188,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-simulation = simulationAM
+simulation = simulationEM
 if dimension ==1:
     def update_graph(num):
         graph.set_data(simulation.meshTrajectory[num], simulation.pdfTrajectory[num])
@@ -260,15 +219,16 @@ if dimension ==2:
 
     graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
     ax.set_zlim(0, 1.5)
-    ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=10, blit=False)
+    ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
     plt.show()
 
 
 
 
 plt.figure()
-plt.semilogx(np.asarray(timesEM), np.asarray(ErrorsEM),'o', label= "EM LQ")
-plt.semilogy(np.asarray(timesAM), np.asarray(ErrorsAM),'o', label="EM TR")
+for i in range(len(hvals)):
+    plt.semilogx(np.asarray(timesEM[i]), np.asarray(ErrorsEM[i]),'o', label= hvals[i])
+    plt.semilogy(np.asarray(timesAM[i]), np.asarray(ErrorsAM[i]),'*', label=hvals[i])
 plt.xlabel("Time")
 plt.ylabel("Errors")
 plt.legend()

@@ -15,6 +15,13 @@ def oneDrift(mesh):
     dr[:,0] = 1
     return dr
 
+def ptFiveDrift(mesh):
+    if mesh.ndim ==1:
+        mesh = np.expand_dims(mesh, axis=0)
+    dr = np.zeros(np.shape(mesh))
+    dr[:,0] = 0.5
+    return dr
+
 def twoDrift(mesh):
     if mesh.ndim ==1:
         mesh = np.expand_dims(mesh, axis=0)
