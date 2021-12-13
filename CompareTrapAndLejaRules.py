@@ -17,7 +17,6 @@ if dimension ==1:
     kstepMin= 0.15
     kstepMax = 0.2
     h = 0.01
-    endTime = 3
 
 if dimension ==2:
     beta = 3
@@ -25,10 +24,9 @@ if dimension ==2:
     # radius = 0.5
     kstepMin= 0.08
     kstepMax = 0.09
-    kstepMin= 0.1
-    kstepMax = 0.12
+    kstepMin= 0.13
+    kstepMax = 0.15
     h = 0.05
-    endTime = 1
 
 if dimension ==3:
     beta = 3
@@ -36,7 +34,6 @@ if dimension ==3:
     kstepMin= 0.08
     kstepMax = 0.085
     h = 0.01
-    endTime = 0.4
 
 # driftFunction = functionBank.zeroDrift
 # driftFunction = functionBank.erfDrift
@@ -52,77 +49,41 @@ adaptive = True
 
 ApproxSolution =False
 
-
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
-if ApproxSolution:
-    meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,1, 0.02)
-
-# with open('time4Erf.npy', 'wb') as f:
-#     np.save(f, meshApprox)
-#     np.save(f, pdfApprox)
-
-# with open('time10Erf.npy', 'rb') as f:
-#     meshApprox = np.load(f)
-#     pdfApprox = np.load(f)
-
-
 
 ErrorsAM = []
 ErrorsEM = []
 timesAM =[]
 timesEM = []
-timesNoStartupEM = []
-timesNoStartupAM = []
-timesStartupEM = []
-timesStartupAM = []
-betaVals = [2,3, 4]
+betaVals = [3]
+# betaVals = [2.5]
 # radiusVals = [1, 4]
-spacingVals = [0.08, 0.05]
+# spacingVals = [0.08, 0.05]
+spacingVals = [0.12]
+
 # times = [4,8,10]
 # times = [12]
-times= [1]
+times= [1,5,10]
+numPointsAM = []
+numPointsEM = []
 
-
-for tt in times:
-    EndTime = tt
-    endTime = tt
+for endTime in times:
     for beta in betaVals:
-        parametersEM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType="LQ")
-        startEM = time.time()
-        simulationEM = Simulation(sde, parametersEM, EndTime)
-        timeStartupEM = time.time() - startEM
-        startEMNoStartup = time.time()
-        simulationEM.computeAllTimes(sde, simulationEM.pdf, parametersEM)
-        endEM = time.time()
-        timesEM.append(np.copy(endEM-startEM))
-        timesNoStartupEM.append(np.copy(endEM-startEMNoStartup))
-        timesStartupEM.append(np.copy(timeStartupEM))
+        for spacing in spacingVals:
+            parametersEM = Parameters(sde, beta, radius, spacing, spacing+0.2, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType="LQ")
+            startEM = time.time()
+            simulationEM = Simulation(sde, parametersEM, endTime)
+            simulationEM.computeAllTimes(sde, simulationEM.pdf, parametersEM)
+            endEM = time.time()
+            timesEM.append(np.copy(endEM-startEM))
 
-
-        if not ApproxSolution:
             meshApprox = simulationEM.meshTrajectory[-1]
-            pdfApprox = sde.exactSolution(simulationEM.meshTrajectory[-1], EndTime)
+            pdfApprox = sde.exactSolution(simulationEM.meshTrajectory[-1], endTime)
 
-        LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationEM.meshTrajectory[-1], simulationEM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
-        ErrorsEM.append(np.copy(L2wErrors))
+            LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationEM.meshTrajectory[-1], simulationEM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
+            ErrorsEM.append(np.copy(L2wErrors))
+            numPointsEM.append(np.copy(simulationEM.pdf.meshLength))
 
-    spans = []
-    centering = []
-    minMin = 1000
-    maxMax = -1000
-    for i in range(sde.dimension):
-        vals = simulationEM.meshTrajectory[-1][:,i]
-        vals0 = simulationEM.meshTrajectory[0][:,i]
-        minVal = min(np.min(vals), np.min(vals0))
-        maxVal = max(np.max(vals), np.max(vals0))
-        minMin = min(minVal, minMin)
-        maxMax = max(maxVal, maxMax)
-        centering.append(maxVal/2+minVal/2)
-        spans.append(maxVal - minVal)
-
-
-    radius = max(spans)/4
-    initialCentering = np.asarray(centering)
 
     xmin = min(np.min(simulationEM.meshTrajectory[-1][:,0]),np.min(simulationEM.meshTrajectory[0][:,0]))
     xmax = max(np.max(simulationEM.meshTrajectory[-1][:,0]),np.max(simulationEM.meshTrajectory[0][:,0]))
@@ -130,59 +91,31 @@ for tt in times:
     ymax = max(np.max(simulationEM.meshTrajectory[-1][:,1]),np.max(simulationEM.meshTrajectory[0][:,1]))
 
 
-    nx, ny = (int(np.ceil((xmax-xmin))/h), int(np.ceil((ymax-ymin))/h))
-    x = np.linspace(xmin, xmax, nx)
-    y = np.linspace(ymin, ymax, ny)
-    # xstart = np.floor(xmin)
-    # xs = []
-    # xs.append(xstart)
-    # while xstart< xmax:
-    #     xs.append(xstart+spacing)
-    #     xstart += spacing
-
-    # ystart = np.floor(ymin)
-    # ys = []
-    # ys.append(ystart)
-
-    # while ystart< ymax:
-    #     ys.append(ystart+spacing)
-    #     ystart += spacing
-
-
-    # mesh = []
-    # for i in xs:
-    #     for j in ys:
-    #         mesh.append([i,j])
-    # mesh = np.asarray(mesh)
-
-    # plt.figure()
-    # plt.scatter(simulationEM.meshTrajectory[-1][:,0], simulationEM.meshTrajectory[-1][:,1])
     for spacing in spacingVals:
-        xstart = np.floor(xmin)
+        buffer = 1
+        xstart = np.floor(xmin) - buffer
         xs = []
         xs.append(xstart)
-        while xstart< xmax:
+        while xstart< xmax + buffer:
             xs.append(xstart+spacing)
             xstart += spacing
 
-        ystart = np.floor(ymin)
+        ystart = np.floor(ymin) - buffer
         ys = []
         ys.append(ystart)
 
-        while ystart< ymax:
+        while ystart< ymax+ buffer:
             ys.append(ystart+spacing)
             ystart += spacing
-
 
         mesh = []
         for i in xs:
             for j in ys:
                 mesh.append([i,j])
         mesh = np.asarray(mesh)
-        h=0.01
-        parametersAM = Parameters(sde, beta, radius, spacing, spacing, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", initialMeshCentering=initialCentering, OverideMesh = mesh)
+        parametersAM = Parameters(sde, beta, radius, spacing, spacing, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = mesh)
         startAM = time.time()
-        simulationAM = Simulation(sde, parametersAM, EndTime)
+        simulationAM = Simulation(sde, parametersAM, endTime)
         # plt.figure()
         # plt.scatter(simulationAM.pdf.meshCoordinates[:,0], simulationAM.pdf.meshCoordinates[:,1])
         timeStartupAM = time.time() - startAM
@@ -190,8 +123,6 @@ for tt in times:
         simulationAM.computeAllTimes(sde, simulationAM.pdf, parametersAM)
         endAM =time.time()
         timesAM.append(np.copy(endAM-startAM))
-        timesNoStartupAM.append(np.copy(endAM-startAMNoStartup))
-        timesStartupAM.append(np.copy(timeStartupAM))
 
 
         if not ApproxSolution:
@@ -199,7 +130,7 @@ for tt in times:
             pdfApprox = sde.exactSolution(simulationAM.meshTrajectory[-1], endTime)
         LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationAM.meshTrajectory[-1], simulationAM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
         ErrorsAM.append(np.copy(L2wErrors))
-        # del simulationAM
+        numPointsAM.append(np.copy(simulationAM.pdf.meshLength))
 
 
 
@@ -269,20 +200,23 @@ if dimension ==2:
 plt.figure()
 plt.semilogx(np.asarray(timesEM), np.asarray(ErrorsEM),'o', label= "EM LQ")
 plt.semilogy(np.asarray(timesAM), np.asarray(ErrorsAM),'o', label="EM TR")
+plt.semilogx(np.asarray(timesEM), np.asarray(numPointsEM),'.', label= "LQ Points")
+plt.semilogy(np.asarray(timesAM), np.asarray(numPointsAM),'.', label="TR Points")
 plt.xlabel("Time")
 plt.ylabel("Errors")
 plt.legend()
 plt.savefig('timingPlot.png')
 
 
-# plt.figure()
-# plt.semilogx(np.asarray(times), np.asarray(timesEM),'o', label= "EM LQ")
-# plt.semilogy(np.asarray(times), np.asarray(timesAM),'o', label="EM TR")
-# # plt.semilogx(np.asarray(times), np.asarray(timesNoStartupEM),'.', label= "EM LQ")
-# # plt.semilogy(np.asarray(times), np.asarray(timesNoStartupAM),'.', label="EM TR")
-# plt.xlabel("End Time")
-# plt.ylabel("timing")
-# plt.legend()
+plt.figure()
+plt.semilogx(np.asarray(times), np.asarray(timesEM),'o', label= "EM LQ")
+plt.semilogy(np.asarray(times), np.asarray(timesAM),'o', label="EM TR")
+plt.semilogx(np.asarray(times), np.asarray(numPointsEM),'.', label= "LQ Points")
+plt.semilogy(np.asarray(times), np.asarray(numPointsAM),'.', label="TR Points")
+plt.xlabel("End Time")
+plt.ylabel("timing")
+plt.legend()
+
 
 
 
