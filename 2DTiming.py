@@ -117,6 +117,7 @@ plt.loglog(times, stepByStepTimingArrayStorageTR[0],'o', label= "TR, 0% padding"
 plt.legend()
 plt.xlabel("Time")
 plt.ylabel("Total Time")
+plt.savefig('timingFigure.png')
 
 import sys
 original_stdout = sys.stdout # Save a reference to the original standard output
