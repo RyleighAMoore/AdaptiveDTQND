@@ -13,6 +13,7 @@ from Class_PDF import PDF
 from Class_MeshUpdater import MeshUpdater
 from Class_Integrator import IntegratorLejaQuadrature, IntegratorTrapezoidal
 from tqdm import trange
+import time
 
 class Simulation():
     def __init__(self, sde, parameters, endTime):
@@ -92,6 +93,8 @@ class Simulation():
         self.meshTrajectory.append(np.copy(pdf.meshCoordinates))
         self.times.append(parameters.h)
         numSteps = int(self.endTime/parameters.h)
+        timing = []
+        timeStart = time.time()
         for i in trange(1, numSteps):
             if i>2 and parameters.useAdaptiveMesh ==True:
                 self.checkIncreaseSizeStorageMatrices(parameters)
@@ -101,6 +104,8 @@ class Simulation():
                     self.meshUpdater.removePointsFromMeshProcedure(pdf, self, parameters, sde)
             self.StepForwardInTime(sde, pdf, parameters)
             self.times.append((i+1)*parameters.h)
+            timing.append(time.time()- timeStart)
+        return timing
 
 
 

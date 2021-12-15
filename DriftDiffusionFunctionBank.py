@@ -39,6 +39,10 @@ def ptSixDiffusion(mesh):
         mesh = np.expand_dims(mesh, axis=0)
     return 0.6*np.diag(np.ones(np.size(mesh,1)))
 
+def ptfiveDiffusion(mesh):
+    if mesh.ndim == 1:
+        mesh = np.expand_dims(mesh, axis=0)
+    return 0.5*np.diag(np.ones(np.size(mesh,1)))
 
 def erfDrift(mesh):
     if mesh.ndim ==1:

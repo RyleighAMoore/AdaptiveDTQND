@@ -26,7 +26,7 @@ if dimension ==2:
     kstepMax = 0.09
     kstepMin= 0.13
     kstepMax = 0.15
-    h = 0.05
+    h = 0.1
 
 if dimension ==3:
     beta = 3
@@ -59,21 +59,27 @@ betaVals = [3]
 # betaVals = [2.5]
 # radiusVals = [1, 4]
 # spacingVals = [0.08, 0.05]
-spacingVals = [0.12]
+# spacingVals = [0.1, 0.2,0.3, 0.4]
+spacingValsEM = [0.4]
+spacingValsAM = [0.2]
+bufferVals = [1.1, 1.5]
+
 
 # times = [4,8,10]
 # times = [12]
-times= [1,5,10]
+times= [1]
+timingPlot = []
 numPointsAM = []
 numPointsEM = []
 
 for endTime in times:
     for beta in betaVals:
-        for spacing in spacingVals:
-            parametersEM = Parameters(sde, beta, radius, spacing, spacing+0.2, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType="LQ")
+        for spacing in spacingValsEM:
+            timingPlot.append(endTime)
+            parametersEM = Parameters(sde, beta, radius, spacing, spacing+0.1, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType="LQ")
             startEM = time.time()
             simulationEM = Simulation(sde, parametersEM, endTime)
-            simulationEM.computeAllTimes(sde, simulationEM.pdf, parametersEM)
+            timingEM = simulationEM.computeAllTimes(sde, simulationEM.pdf, parametersEM)
             endEM = time.time()
             timesEM.append(np.copy(endEM-startEM))
 
@@ -91,46 +97,51 @@ for endTime in times:
     ymax = max(np.max(simulationEM.meshTrajectory[-1][:,1]),np.max(simulationEM.meshTrajectory[0][:,1]))
 
 
-    for spacing in spacingVals:
-        buffer = 1
-        xstart = np.floor(xmin) - buffer
-        xs = []
-        xs.append(xstart)
-        while xstart< xmax + buffer:
-            xs.append(xstart+spacing)
-            xstart += spacing
+    for spacing in spacingValsAM:
+        for bufferVal in bufferVals:
+            timingPlot.append(endTime)
+            bufferX = (xmax/2 - xmin/2)*bufferVal
+            bufferY = (ymax/2 - ymin/2)*bufferVal
+            xstart = np.floor(xmin) - bufferX
+            xs = []
+            xs.append(xstart)
+            while xstart< xmax + bufferX:
+                xs.append(xstart+spacing)
+                xstart += spacing
 
-        ystart = np.floor(ymin) - buffer
-        ys = []
-        ys.append(ystart)
+            ystart = np.floor(ymin) - bufferY
+            ys = []
+            ys.append(ystart)
 
-        while ystart< ymax+ buffer:
-            ys.append(ystart+spacing)
-            ystart += spacing
+            while ystart< ymax+ bufferY:
+                ys.append(ystart+spacing)
+                ystart += spacing
 
-        mesh = []
-        for i in xs:
-            for j in ys:
-                mesh.append([i,j])
-        mesh = np.asarray(mesh)
-        parametersAM = Parameters(sde, beta, radius, spacing, spacing, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = mesh)
-        startAM = time.time()
-        simulationAM = Simulation(sde, parametersAM, endTime)
-        # plt.figure()
-        # plt.scatter(simulationAM.pdf.meshCoordinates[:,0], simulationAM.pdf.meshCoordinates[:,1])
-        timeStartupAM = time.time() - startAM
-        startAMNoStartup = time.time()
-        simulationAM.computeAllTimes(sde, simulationAM.pdf, parametersAM)
-        endAM =time.time()
-        timesAM.append(np.copy(endAM-startAM))
+            mesh = []
+            for i in xs:
+                for j in ys:
+                    mesh.append([i,j])
+            mesh = np.asarray(mesh)
+            parametersAM = Parameters(sde, beta, radius, spacing, spacing, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = mesh)
+            startAM = time.time()
+            simulationAM = Simulation(sde, parametersAM, endTime)
+            # plt.figure()
+            # plt.scatter(simulationAM.pdf.meshCoordinates[:,0], simulationAM.pdf.meshCoordinates[:,1])
+            timeStartupAM = time.time() - startAM
+            startAMNoStartup = time.time()
+            timingAM = simulationAM.computeAllTimes(sde, simulationAM.pdf, parametersAM)
+            endAM =time.time()
+            timesAM.append(np.copy(endAM-startAM))
 
 
-        if not ApproxSolution:
-            meshApprox = simulationAM.meshTrajectory[-1]
-            pdfApprox = sde.exactSolution(simulationAM.meshTrajectory[-1], endTime)
-        LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationAM.meshTrajectory[-1], simulationAM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
-        ErrorsAM.append(np.copy(L2wErrors))
-        numPointsAM.append(np.copy(simulationAM.pdf.meshLength))
+            if not ApproxSolution:
+                meshApprox = simulationAM.meshTrajectory[-1]
+                pdfApprox = sde.exactSolution(simulationAM.meshTrajectory[-1], endTime)
+            LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationAM.meshTrajectory[-1], simulationAM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
+            ErrorsAM.append(np.copy(L2wErrors))
+            numPointsAM.append(np.copy(simulationAM.pdf.meshLength))
+
+
 
 
 

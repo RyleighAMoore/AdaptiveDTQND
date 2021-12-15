@@ -22,10 +22,10 @@ if dimension ==2:
     # radius = 0.5
     kstepMin= 0.08
     kstepMax = 0.09
-    kstepMin= 0.1
-    kstepMax = 0.12
+    kstepMin= 0.4
+    kstepMax = 0.5
     h = 0.05
-    endTime = 1
+    endTime = 10
 
 if dimension ==3:
     beta = 3
@@ -117,7 +117,7 @@ if dimension ==2:
     title = ax.set_title('3D Test')
 
     graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
-    ax.set_zlim(0, 1.5)
+    ax.set_zlim(0,np.max(simulation.pdfTrajectory[10]))
     ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
     plt.show()
 

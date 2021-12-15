@@ -41,7 +41,7 @@ class Parameters:
         if sde.dimension == 1:
             self.numQuadFit = 30
         elif sde.dimension == 2:
-            self.numQuadFit = 150
+            self.numQuadFit = 20
         else:
             self.numQuadFit = 150
 

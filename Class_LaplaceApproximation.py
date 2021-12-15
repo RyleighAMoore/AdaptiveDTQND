@@ -20,6 +20,7 @@ class LaplaceApproximation:
         denom = reduce(op.mul, range(1, r+1), 1)
         return numer // denom  # or / in Python 2
 
+    # @profile
     def buildVMatForLinFit(self, dimension, QuadMesh, laplaceFitPdf):
         M = np.zeros((len(QuadMesh), self.numLSBasis))
         size = 0
@@ -40,6 +41,7 @@ class LaplaceApproximation:
         M[:,size] = np.ones(np.size(QuadMesh,0))
         return M, comboList
 
+    # @profile
     def computeleastSquares(self, QuadMesh, laplaceFitPdf, dimension):
         M, comboList = self.buildVMatForLinFit(dimension, QuadMesh, laplaceFitPdf)
 

@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib import pyplot
 from mpl_toolkits.mplot3d import Axes3D
 import LejaPoints as LP
+from tqdm import trange
 
 
 class TimeDiscretizationMethod():
@@ -23,13 +24,13 @@ class TimeDiscretizationMethod():
 class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
     def __init__(self, pdf, parameters):
         if parameters.useAdaptiveMesh:
-            self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*3
+            self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*10
         else:
             self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength
 
     def computeTransitionMatrix(self, pdf, sde, parameters):
         GMat = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
-        for indexOfMesh in range(pdf.meshLength):
+        for indexOfMesh in trange(pdf.meshLength):
             m = pdf.meshCoordinates[indexOfMesh,:]
             D = sde.dimension
             scale1 = GaussScale(sde.dimension)
