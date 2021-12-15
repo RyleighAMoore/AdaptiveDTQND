@@ -46,7 +46,8 @@ class LaplaceApproximation:
         M, comboList = self.buildVMatForLinFit(dimension, QuadMesh, laplaceFitPdf)
 
         MT = M.T
-        const = -1*np.linalg.inv(MT@M)@(MT@np.log(laplaceFitPdf))
+        const, residuals, rank,s = np.linalg.lstsq(-M, np.log(laplaceFitPdf))
+        # const = -1*np.linalg.inv(MT@M)@(MT@np.log(laplaceFitPdf))
         c=const.T
 
         if dimension == 1:
