@@ -260,7 +260,7 @@ class IntegratorLejaQuadrature(Integrator):
 
                 if self.lejaSuccess == False: #Getting Leja points failed, use alt method
                      value, condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
-                     print("failed Leja")
+                     # print("failed Leja")
                 else: # Continue with integration, try to use Leja points from last step
                     value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index, sde)
                     if condNumber < self.conditionNumberForAcceptingLejaPointsAtNextTimeStep: # Finished, set Leja values for next time step

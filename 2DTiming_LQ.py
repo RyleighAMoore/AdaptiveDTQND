@@ -14,7 +14,7 @@ radius = 2
 h = 0.05
 beta = 3
 bufferVals = [0,0.2]
-endTime = 40
+endTime = 10#30
 spacingLQ = 0.38
 spacingTR = 0.2
 
@@ -111,15 +111,22 @@ for bufferVal in bufferVals:
     numPointsTR.append(np.copy(simulationTR.pdf.meshLength))
     stepByStepTimingArrayStorageTR.append(np.copy(np.asarray(stepByStepTimingTR)))
 
-
 plt.figure()
 plt.loglog(times, stepByStepTimingArrayStorageLQ[0],'o', label= "LQ")
 plt.loglog(times, stepByStepTimingArrayStorageTR[1],'o', label= "TR, 0.2% padding")
 plt.loglog(times, stepByStepTimingArrayStorageTR[0],'o', label= "TR, 0% padding")
 plt.legend()
 plt.xlabel("Time")
-plt.ylabel("Total Time")
+plt.ylabel("Cumulative Running Time (Seconds)")
 plt.savefig('timingFigure.png')
+
+plt.figure()
+plt.loglog(ErrorsLQ, np.asarray(stepByStepTimingArrayStorageLQ)[:,-1],'o', label= "LQ")
+plt.loglog(ErrorsTR, np.asarray(stepByStepTimingArrayStorageTR)[:,-1],'o', label= "LQ")
+plt.legend()
+plt.xlabel("Errors")
+plt.ylabel("Cumulative Running Time (Seconds)")
+
 
 import sys
 original_stdout = sys.stdout # Save a reference to the original standard output
@@ -134,46 +141,49 @@ with open('outputInformation.txt', 'w') as f:
     print("times", times)
     sys.stdout = original_stdout # Reset the standard output to its original value
 
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 
-simulation = simulationLQ
-if dimension ==1:
-    def update_graph(num):
-        graph.set_data(simulation.meshTrajectory[num], simulation.pdfTrajectory[num])
-        return title, graph
+animate = False
+if animate:
+    import matplotlib.pyplot as plt
+    import matplotlib.animation as animation
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    title = ax.set_title('2D Test')
+    simulation = simulationLQ
+    if dimension ==1:
+        def update_graph(num):
+            graph.set_data(simulation.meshTrajectory[num], simulation.pdfTrajectory[num])
+            return title, graph
 
-    graph, = ax.plot(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], linestyle="", marker=".")
-    ax.set_xlim(-40, 40)
-    ax.set_ylim(0, np.max(simulation.pdfTrajectory[0]))
-    ani = animation.FuncAnimation(fig, update_graph, frames=len(simulation.pdfTrajectory), interval=50, blit=False)
-    plt.show()
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        title = ax.set_title('2D Test')
 
-if dimension ==2:
-    Meshes = simulation.meshTrajectory
-    PdfTraj = simulation.pdfTrajectory
-    def update_graph(num):
-        graph.set_data (Meshes[num][:,0], Meshes[num][:,1])
-        graph.set_3d_properties(PdfTraj[num])
-        title.set_text('3D Test, time={}'.format(num))
-        return title, graph
+        graph, = ax.plot(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], linestyle="", marker=".")
+        ax.set_xlim(-40, 40)
+        ax.set_ylim(0, np.max(simulation.pdfTrajectory[0]))
+        ani = animation.FuncAnimation(fig, update_graph, frames=len(simulation.pdfTrajectory), interval=50, blit=False)
+        plt.show()
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    title = ax.set_title('3D Test')
+    if dimension ==2:
+        Meshes = simulation.meshTrajectory
+        PdfTraj = simulation.pdfTrajectory
+        def update_graph(num):
+            graph.set_data (Meshes[num][:,0], Meshes[num][:,1])
+            graph.set_3d_properties(PdfTraj[num])
+            title.set_text('3D Test, time={}'.format(num))
+            return title, graph
 
-    graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
-    ax.set_zlim(0, 0.5)
-    ax.set_xlim(-15, 15)
-    ax.set_ylim(-15, 15)
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        title = ax.set_title('3D Test')
+
+        graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
+        ax.set_zlim(0, 0.5)
+        ax.set_xlim(-15, 15)
+        ax.set_ylim(-15, 15)
 
 
-    ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=10, blit=False)
-    plt.show()
+        ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=10, blit=False)
+        plt.show()
 
 
 

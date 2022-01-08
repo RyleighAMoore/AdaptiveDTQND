@@ -208,15 +208,15 @@ if dimension ==2:
 
 
 
-plt.figure()
-plt.semilogx(np.asarray(timesEM), np.asarray(ErrorsEM),'o', label= "EM LQ")
-plt.semilogy(np.asarray(timesAM), np.asarray(ErrorsAM),'o', label="EM TR")
-plt.semilogx(np.asarray(timesEM), np.asarray(numPointsEM),'.', label= "LQ Points")
-plt.semilogy(np.asarray(timesAM), np.asarray(numPointsAM),'.', label="TR Points")
-plt.xlabel("Time")
-plt.ylabel("Errors")
-plt.legend()
-plt.savefig('timingPlot.png')
+# plt.figure()
+# plt.semilogx(np.asarray(timesEM), np.asarray(ErrorsEM),'o', label= "EM LQ")
+# plt.semilogy(np.asarray(timesAM), np.asarray(ErrorsAM),'o', label="EM TR")
+# plt.semilogx(np.asarray(timesEM), np.asarray(numPointsEM),'.', label= "LQ Points")
+# plt.semilogy(np.asarray(timesAM), np.asarray(numPointsAM),'.', label="TR Points")
+# plt.xlabel("Time")
+# plt.ylabel("Errors")
+# plt.legend()
+# plt.savefig('timingPlot.png')
 
 
 plt.figure()

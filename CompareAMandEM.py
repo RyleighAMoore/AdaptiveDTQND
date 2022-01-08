@@ -24,8 +24,11 @@ if dimension ==2:
     radius =0.5
     kstepMin= 0.08
     kstepMax = 0.09
-    h = 0.01
-    endTime =0.2
+    kstepMin= 0.13
+    kstepMax = 0.15
+    h = 0.1
+    endTime =1
+
 if dimension ==3:
     beta = 3
     radius = 0.5
@@ -41,7 +44,7 @@ driftFunction = functionBank.oneDrift
 spatialDiff = False
 
 
-diffusionFunction = functionBank.oneDiffusion
+diffusionFunction = functionBank.ptSixDiffusion
 
 
 adaptive = True
@@ -72,8 +75,8 @@ timesNoStartupEM = []
 timesNoStartupAM = []
 timesStartupEM = []
 timesStartupAM = []
-hvals = [0.05, 0.1, 0.15, 0.2]
-hvalsAM = [0.2, 0.15, 0.1]
+hvals = [0.05, 0.1, 0.15, 0.2, 0.3, 0.4]
+hvalsAM = [0.4, 0.3, 0.2, 0.15, 0.1]
 # hvals = [0.1]
 
 for h in hvals:
