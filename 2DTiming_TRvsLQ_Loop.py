@@ -12,10 +12,10 @@ import time
 dimension = 2
 radius = 2
 h = 0.05
-betaVals = [3,4]
+betaVals = [2,3,4]
 bufferVals = [0, 0.5]
 endTime = 30 #30
-spacingLQVals = [0.38, 0.3, 0.25]
+spacingLQVals = [0.38, 0.3]
 spacingTRVals = [0.3, 0.2]
 
 
@@ -141,7 +141,7 @@ for buff in bufferVals:
         timing = bufferDict_times[buff]
         print(timing)
         labelString = 'TR, buffer = %d%%' %(buff*100)
-        plt.semilogx(np.asarray(Errors), np.asarray(timing)/unitTime, label= labelString)
+        plt.semilogx(np.asarray(Errors), np.asarray(timing)/unitTime, "-s", label= labelString)
 
 plt.plot(unitError, unitTime/unitTime, "*k", markersize = "10", label = "Unit Time")
 
