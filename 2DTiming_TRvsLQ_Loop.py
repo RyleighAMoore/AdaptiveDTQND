@@ -14,9 +14,9 @@ radius = 2
 h = 0.05
 betaVals = [2,3,4]
 bufferVals = [0, 0.5]
-endTime = 5 #30
+endTime = 10#30
 spacingLQVals = [0.38, 0.3, 0.25]
-spacingTRVals = [0.3, 0.2, 0.1]
+spacingTRVals = [0.3, 0.2]
 
 
 # SDE creation
@@ -42,7 +42,7 @@ bufferDict_errors = {}
 bufferDict_times = {}
 
 
-def get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, bufferVal = 0):
+def get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, spacingTR, bufferVal = 0):
     xmin = min(np.min(simulationLQ.meshTrajectory[-1][:,0]),np.min(simulationLQ.meshTrajectory[0][:,0]))
     xmax = max(np.max(simulationLQ.meshTrajectory[-1][:,0]),np.max(simulationLQ.meshTrajectory[0][:,0]))
     ymin = min(np.min(simulationLQ.meshTrajectory[-1][:,1]),np.min(simulationLQ.meshTrajectory[0][:,1]))
@@ -101,8 +101,9 @@ for beta in betaVals:
 for bufferVal in bufferVals:
     ErrorsTR = []
     timingArrayStorageTR = []
+
     for spacingTR in spacingTRVals:
-        meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, bufferVal)
+        meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, spacingTR, bufferVal)
         parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR)
 
         startTimeTR = time.time()
@@ -145,7 +146,7 @@ plt.ylabel("Cumulative Running Time (Seconds)")
 plt.savefig('timingFigure.png')
 
 
-ListToSave = [betaDict_times, betaDict_errors, bufferDict_times, bufferDict_errors, betaVals, bufferVals, spacingLQVals, spacingTRVals]
+ListToSave = [betaDict_times, betaDict_errors, bufferDict_times, bufferDict_errors, betaVals, bufferVals, spacingLQVals, spacingTRVals, numPointsLQ, numPointsTR, h, radius, endTime]
 import pickle
 
 # define dictionary
