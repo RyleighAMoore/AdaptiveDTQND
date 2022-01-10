@@ -76,7 +76,7 @@ def getLejaSetFromPoints(scale, Mesh, numLejaPointsToReturn, poly, Pdf, diff, nu
     lejaPointsFinal, indices = getLejaPoints(numLejaPointsToReturn, np.asarray([point]).T, poly, num_candidate_samples = 0, candidateSampleMesh = candidates.T, returnIndices=True)
 
     if math.isnan(indices[0]):
-        print("LEJA FAIL - Try increasing numPointsForLejaCandidates and/or the numQuadFit paramaters.")
+        # print("LEJA FAIL - Try increasing numPointsForLejaCandidates and/or the numQuadFit paramaters.")
         return 0, 0, indices, False
 
     # lejaPointsFinal = VT.map_from_canonical_space(lejaPointsFinal, scale)
