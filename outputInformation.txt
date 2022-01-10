@@ -1,4 +1,4 @@
-Erorrs LQ [array(0.00450063), array(0.00262935), array(8.22639602e-06)]
-Errors TR [array(1882.48213653), array(0.00151739)]
-# points LQ [array(208), array(302), array(373), array(493), array(680), array(848), array(816), array(1036), array(1315)]
-# points TR [array(2961), array(6486), array(6417), array(14178)]
+Erorrs LQ [array(0.01439587), array(0.00111824), array(9.77606091e-06)]
+Errors TR [array(13.44748711), array(0.00154198)]
+# points LQ [array(182), array(246), array(336), array(312), array(448), array(575), array(477), array(633), array(822)]
+# points TR [array(1599), array(3420), array(3300), array(7298)]

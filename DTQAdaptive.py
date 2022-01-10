@@ -47,12 +47,18 @@ spatialDiff = False
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
 parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh =True, timeDiscretizationType = "EM", integratorType = "LQ")
 simulation = Simulation(sde, parameters, endTime)
+
+start = time.time()
 simulation.setUpTransitionMatrix(sde, parameters)
+TMTime = time.time()-start
 
 start = time.time()
 simulation.computeAllTimes(sde, parameters)
 end = time.time()
-print(end-start, '*****************************************')
+print("\n")
+print("Transition Matrix timing:", TMTime)
+print("\n")
+print("Stepping timing",end-start, '*****************************************')
 
 
 

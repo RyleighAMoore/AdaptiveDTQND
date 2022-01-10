@@ -14,7 +14,7 @@ radius = 2
 h = 0.05
 betaVals = [2,3,4]
 bufferVals = [0, 0.5]
-endTime = 10#30
+endTime = 5#30
 spacingLQVals = [0.38, 0.3, 0.25]
 spacingTRVals = [0.3, 0.2]
 
@@ -81,9 +81,12 @@ for beta in betaVals:
         # SDE parameter creation
         parametersLQ = Parameters(sde, beta, radius, spacingLQ, spacingLQ+0.1, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType="LQ")
 
-        startTimeLQ = time.time()
+
         simulationLQ = Simulation(sde, parametersLQ, endTime)
-        stepByStepTimingLQ = simulationLQ.computeAllTimes(sde, simulationLQ.pdf, parametersLQ)
+
+        startTimeLQ = time.time()
+        simulationLQ.setUpTransitionMatrix(sde, parametersLQ)
+        stepByStepTimingLQ = simulationLQ.computeAllTimes(sde, parametersLQ)
         totaTimeLQ = time.time() - startTimeLQ
 
         meshTrueSolnLQ = simulationLQ.meshTrajectory[-1]
@@ -106,9 +109,11 @@ for bufferVal in bufferVals:
         meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, spacingTR, bufferVal)
         parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR)
 
-        startTimeTR = time.time()
         simulationTR = Simulation(sde, parametersTR, endTime)
-        stepByStepTimingTR = simulationTR.computeAllTimes(sde, simulationTR.pdf, parametersTR)
+        startTimeTR = time.time()
+        simulationTR.setUpTransitionMatrix(sde, parametersTR)
+
+        stepByStepTimingTR = simulationTR.computeAllTimes(sde, parametersTR)
         totalTimeTR = time.time() - startTimeTR
 
         meshTrueSolnTR = simulationTR.meshTrajectory[-1]
