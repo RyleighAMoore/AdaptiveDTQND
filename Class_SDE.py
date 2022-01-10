@@ -22,6 +22,8 @@ class SDE:
         parameters = Parameters(self, beta, radius, kstepMin, kstepMax, h, False, timeDiscretizationType = "EM")
         pdf = PDF(self, parameters)
         simulation= Simulation(self, parameters, endTime)
+        simulation.setUpTransitionMatrix(self, parameters)
+
         G = simulation.integrator.TransitionMatrix
         numSteps = int(endTime/parameters.h)
         # plt.figure()

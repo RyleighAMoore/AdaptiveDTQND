@@ -20,13 +20,11 @@ if dimension ==1:
     endTime = 20
 
 if dimension ==2:
-    beta = 5
-    radius =0.5
-    kstepMin= 0.08
-    kstepMax = 0.09
-    kstepMin= 0.13
-    kstepMax = 0.15
-    h = 0.1
+    beta = 3
+    radius =2
+    kstepMin= 0.3
+    kstepMax = 0.3
+    h = 0.05
     endTime =1
 
 if dimension ==3:
@@ -38,8 +36,8 @@ if dimension ==3:
     endTime = 0.1
 
 # driftFunction = functionBank.zeroDrift
-# driftFunction = functionBank.erfDrift
-driftFunction = functionBank.oneDrift
+driftFunction = functionBank.erfDrift
+# driftFunction = functionBank.oneDrift
 
 spatialDiff = False
 
@@ -50,12 +48,12 @@ diffusionFunction = functionBank.ptSixDiffusion
 adaptive = True
 integrationType = "LQ"
 
-ApproxSolution =False
+ApproxSolution =True
 
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
 if ApproxSolution:
-    meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,1, 0.02)
+    meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,10, 0.02)
 
 # with open('time4Erf.npy', 'wb') as f:
 #     np.save(f, meshApprox)
@@ -83,9 +81,10 @@ for h in hvals:
     parametersEM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType=integrationType)
     startEM = time.time()
     simulationEM = Simulation(sde, parametersEM, endTime)
+    simulationEM.setUpTransitionMatrix(sde, parametersEM)
     timeStartupEM = time.time() - startEM
     startEMNoStartup = time.time()
-    simulationEM.computeAllTimes(sde, simulationEM.pdf, parametersEM)
+    simulationEM.computeAllTimes(sde, parametersEM)
     endEM = time.time()
     timesEM.append(np.copy(endEM-startEM))
     timesNoStartupEM.append(np.copy(endEM-startEMNoStartup))
@@ -104,9 +103,11 @@ for h in hvalsAM:
     parametersAM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "AM", integratorType=integrationType)
     startAM = time.time()
     simulationAM = Simulation(sde, parametersAM, endTime)
+    simulationAM.setUpTransitionMatrix(sde, parametersAM)
+
     timeStartupAM = time.time() - startAM
     startAMNoStartup = time.time()
-    simulationAM.computeAllTimes(sde, simulationAM.pdf, parametersAM)
+    simulationAM.computeAllTimes(sde, parametersAM)
     endAM =time.time()
     timesAM.append(np.copy(endAM-startAM))
     timesNoStartupAM.append(np.copy(endAM-startAMNoStartup))
