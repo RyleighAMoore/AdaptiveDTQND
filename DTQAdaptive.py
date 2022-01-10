@@ -25,7 +25,7 @@ if dimension ==2:
     kstepMin= 0.4
     kstepMax = 0.5
     h = 0.05
-    endTime = 10
+    endTime = 4
 
 if dimension ==3:
     beta = 3
@@ -47,8 +47,10 @@ spatialDiff = False
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
 parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh =True, timeDiscretizationType = "EM", integratorType = "LQ")
 simulation = Simulation(sde, parameters, endTime)
+simulation.setUpTransitionMatrix(sde, parameters)
+
 start = time.time()
-simulation.computeAllTimes(sde, simulation.pdf, parameters)
+simulation.computeAllTimes(sde, parameters)
 end = time.time()
 print(end-start, '*****************************************')
 

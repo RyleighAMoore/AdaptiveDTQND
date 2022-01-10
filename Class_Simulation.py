@@ -22,9 +22,9 @@ class Simulation():
         self.pdfTrajectory = []
         self.meshTrajectory = []
         self.times = []
-        self.setTimeDiscretizationDriver(parameters, self.pdf, sde)
-        self.setIntegrator(sde, parameters, self.pdf)
-        self.setUpTransitionMatrix(self.pdf, sde, parameters)
+        self.setTimeDiscretizationDriver(parameters, sde)
+        self.setIntegrator(sde, parameters)
+        # self.setUpTransitionMatrix(self.pdf, sde, parameters)
         self.meshUpdater = MeshUpdater(parameters, self.pdf, sde.dimension)
 
     def removePoints(self, index):
@@ -35,19 +35,18 @@ class Simulation():
 
 
     def checkIncreaseSizeStorageMatrices(self, parameters):
-        pdf = self.pdf
-        sizer = 2*pdf.meshLength
-        if pdf.meshLength*2 >= np.size(self.TransitionMatrix,1):
+        sizer = 2*self.pdf.meshLength
+        if self.pdf.meshLength*2 >= np.size(self.TransitionMatrix,1):
             GMat2 = np.empty([2*sizer, 2*sizer])*np.NaN
-            GMat2[:pdf.meshLength, :pdf.meshLength]= self.TransitionMatrix[:pdf.meshLength, :pdf.meshLength]
+            GMat2[:self.pdf.meshLength, :self.pdf.meshLength]= self.TransitionMatrix[:self.pdf.meshLength, :self.pdf.meshLength]
             self.TransitionMatrix = GMat2
 
             LPMat2 = np.empty([2*sizer, parameters.numLejas])*np.NaN
-            LPMat2[:pdf.meshLength, :pdf.meshLength]= self.LejaPointIndicesMatrix[:pdf.meshLength, :parameters.numLejas]
+            LPMat2[:self.pdf.meshLength, :self.pdf.meshLength]= self.LejaPointIndicesMatrix[:self.pdf.meshLength, :parameters.numLejas]
             self.LejaPointIndicesMatrix = LPMat2
 
             LPMatBool2 = np.zeros((2*sizer,1), dtype=bool)
-            LPMatBool2[:pdf.meshLength]= self.LejaPointIndicesBoolVector[:pdf.meshLength]
+            LPMatBool2[:self.pdf.meshLength]= self.LejaPointIndicesBoolVector[:self.pdf.meshLength]
             self.LejaPointIndicesBoolVector = LPMatBool2
 
 
@@ -64,33 +63,33 @@ class Simulation():
         self.LejaPointIndicesMatrix = np.delete(self.LejaPointIndicesMatrix, indices, 0)
 
 
-    def setUpTransitionMatrix(self, pdf, sde, parameters):
-        self.TransitionMatrix = self.timeDiscretizationMethod.computeTransitionMatrix(pdf, sde, parameters)
+    def setUpTransitionMatrix(self, sde, parameters):
+        self.TransitionMatrix = self.timeDiscretizationMethod.computeTransitionMatrix(self.pdf, sde, parameters)
         self.LejaPointIndicesMatrix = np.zeros((self.timeDiscretizationMethod.sizeTransitionMatrixIncludingEmpty, parameters.numLejas))
         self.LejaPointIndicesBoolVector = np.zeros((self.timeDiscretizationMethod.sizeTransitionMatrixIncludingEmpty,1))
 
 
-    def setTimeDiscretizationDriver(self, parameters, pdf, sde):
+    def setTimeDiscretizationDriver(self, parameters, sde):
         if parameters.timeDiscretizationType == "EM":
-            self.timeDiscretizationMethod = EulerMaruyamaTimeDiscretizationMethod(pdf, parameters)
+            self.timeDiscretizationMethod = EulerMaruyamaTimeDiscretizationMethod(self.pdf, parameters)
         if parameters.timeDiscretizationType == "AM":
-            self.timeDiscretizationMethod = AndersonMattinglyTimeDiscretizationMethod(pdf, parameters, sde.dimension)
+            self.timeDiscretizationMethod = AndersonMattinglyTimeDiscretizationMethod(self.pdf, parameters, sde.dimension)
 
-    def setIntegrator(self, sde, parameters, pdf):
+    def setIntegrator(self, sde, parameters):
         if parameters.integratorType == "LQ":
             self.integrator = IntegratorLejaQuadrature(sde.dimension, parameters)
         if parameters.integratorType == "TR":
             self.integrator = IntegratorTrapezoidal(sde.dimension, parameters)
 
 
-    def StepForwardInTime(self, sde, pdf, parameters):
-        pdf.pdfVals = self.integrator.computeTimeStep(sde, parameters, self)
-        self.pdfTrajectory.append(np.copy(pdf.pdfVals))
-        self.meshTrajectory.append(np.copy(pdf.meshCoordinates))
+    def StepForwardInTime(self, sde, parameters):
+        self.pdf.pdfVals = self.integrator.computeTimeStep(sde, parameters, self)
+        self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
+        self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
 
-    def computeAllTimes(self, sde, pdf, parameters):
-        self.pdfTrajectory.append(np.copy(pdf.pdfVals))
-        self.meshTrajectory.append(np.copy(pdf.meshCoordinates))
+    def computeAllTimes(self, sde, parameters):
+        self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
+        self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
         self.times.append(parameters.h)
         numSteps = int(self.endTime/parameters.h)
         timing = []
@@ -98,11 +97,11 @@ class Simulation():
         for i in trange(1, numSteps):
             if i>2 and parameters.useAdaptiveMesh ==True:
                 self.checkIncreaseSizeStorageMatrices(parameters)
-                self.meshUpdater.addPointsToMeshProcedure(pdf, parameters, self, sde)
+                self.meshUpdater.addPointsToMeshProcedure(self.pdf, parameters, self, sde)
                 # print(len(self.pdfTrajectory[-1]), "****************")
                 if i>=9 and i%25==1:
-                    self.meshUpdater.removePointsFromMeshProcedure(pdf, self, parameters, sde)
-            self.StepForwardInTime(sde, pdf, parameters)
+                    self.meshUpdater.removePointsFromMeshProcedure(self.pdf, self, parameters, sde)
+            self.StepForwardInTime(sde, parameters)
             self.times.append((i+1)*parameters.h)
             timing.append(time.time()- timeStart)
         return timing
