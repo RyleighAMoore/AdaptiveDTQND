@@ -165,8 +165,10 @@ import sys
 original_stdout = sys.stdout # Save a reference to the original standard output
 with open('outputInformationT20.txt', 'w') as f:
     sys.stdout = f # Change the standard output to the file we created.
-    print("Erorrs LQ", ErrorsLQ)
-    print("Errors TR", ErrorsTR)
+    print("Erorrs LQ", betaDict_errors)
+    print("Errors TR", bufferDict_errors)
+    print("LQ timing", betaDict_times)
+    print("TR timing", bufferDict_times)
     print("# points LQ", numPointsLQ)
     print("# points TR", numPointsTR)
     sys.stdout = original_stdout # Reset the standard output to its original value
