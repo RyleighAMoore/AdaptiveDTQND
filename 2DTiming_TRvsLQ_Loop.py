@@ -14,7 +14,7 @@ radius = 2
 h = 0.05
 betaVals = [3]
 bufferVals = [0, 0.5]
-endTime = 40 #30
+endTime = 20 #30
 spacingLQVals = [0.38]
 spacingTRVals = [0.25, 0.2]
 
@@ -148,7 +148,7 @@ plt.plot(unitError, unitTime/unitTime, "*k", markersize = "10", label = "Unit Ti
 plt.legend()
 plt.xlabel("Errors")
 plt.ylabel("Cumulative Running Time (Seconds)")
-plt.savefig('timingFigureT40.png')
+plt.savefig('timingFigureT20.png')
 
 
 ListToSave = [betaDict_times, betaDict_errors, bufferDict_times, bufferDict_errors, betaVals, bufferVals, spacingLQVals, spacingTRVals, numPointsLQ, numPointsTR, h, radius, endTime]
@@ -156,14 +156,14 @@ import pickle
 
 # define dictionary
 # create a binary pickle file
-f = open("fileT40.pkl","wb")
+f = open("fileT20.pkl","wb")
 pickle.dump(ListToSave,f)
 f.close()
 
 
 import sys
 original_stdout = sys.stdout # Save a reference to the original standard output
-with open('outputInformationT40.txt', 'w') as f:
+with open('outputInformationT20.txt', 'w') as f:
     sys.stdout = f # Change the standard output to the file we created.
     print("Erorrs LQ", ErrorsLQ)
     print("Errors TR", ErrorsTR)
