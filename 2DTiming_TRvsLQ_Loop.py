@@ -125,14 +125,14 @@ for bufferVal in bufferVals:
     bufferDict_times[bufferVal] = np.copy(timingArrayStorageTR)
     bufferDict_errors[bufferVal] = np.copy(ErrorsTR)
 
-unitTime = np.asarray(betaDict_times[3])[0]
-unitError = np.asarray(betaDict_errors[3])[0]
+unitTime = np.asarray(betaDict_times[min(betaVals)])[0]
+unitError = np.asarray(betaDict_errors[min(betaVals)])[0]
 plt.figure()
 for betaVal in betaVals:
     if betaVal in betaDict_errors:
         Errors = betaDict_errors[betaVal]
         timing = betaDict_times[betaVal]
-        labelString = 'LQ, \u03B2 = %d' %betaVal
+        labelString = 'LQ, \u03B2 = %.2f' %betaVal
         plt.semilogx(np.asarray(Errors), np.asarray(timing)/unitTime, "-o", label= labelString)
 
 for buff in bufferVals:
