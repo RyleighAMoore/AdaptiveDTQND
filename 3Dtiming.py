@@ -42,9 +42,10 @@ for endTime in endTimes:
 
     startEM = time.time()
     simulationEM = Simulation(sde, parametersEM, endTime)
+    simulationEM.setUpTransitionMatrix(sde, parametersEM)
     startupEM = time.time() - startEM
 
-    timingEM = simulationEM.computeAllTimes(sde, simulationEM.pdf, parametersEM)
+    timingEM = simulationEM.computeAllTimes(sde, parametersEM)
     for i in range(len(timingEM)):
         timingEM[i] += startupEM
 

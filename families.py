@@ -2,6 +2,10 @@ import numpy as np
 from scipy import special as sp
 from opoly1d import OrthogonalPolynomialBasis1D
 
+'''
+Credit: Akil Narayan - Pyopoly
+'''
+
 class JacobiPolynomials(OrthogonalPolynomialBasis1D):
     def __init__(self, alpha=0., beta=0.):
         OrthogonalPolynomialBasis1D.__init__(self)

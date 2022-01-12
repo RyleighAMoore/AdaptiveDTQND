@@ -8,6 +8,12 @@ from functools import reduce
 
 class LaplaceApproximation:
     def __init__(self, dimension):
+        '''
+        Used to approimate the log of the local PDF via Lapalce approximation
+        of a quadratic form.
+
+        dimenion: dimension of the SDE
+        '''
         self.scalingForGaussian = None
         self.leastSqauresFit= None
         self.constantOfGaussian= None

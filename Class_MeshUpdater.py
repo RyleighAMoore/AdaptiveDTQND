@@ -18,6 +18,14 @@ random.seed(10)
 
 class MeshUpdater:
     def __init__(self, parameters, pdf,dimension):
+        '''
+        Used to update the mesh adaptively.
+
+        Paramters:
+        parameters: parameters defined by the user (class object)
+        pdf: manages the probability density function of the solution of the SDE (PDF class object)
+        dimension: dimension of the SDE
+        '''
         self.addPointsToBoundaryIfBiggerThanTolerance = 10**(-parameters.beta)
         self.removeZerosValuesIfLessThanTolerance = 10**(-parameters.beta-0.5)
         self.changedBoolean = False

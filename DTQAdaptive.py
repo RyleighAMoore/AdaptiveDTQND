@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import DriftDiffusionFunctionBank as functionBank
 import time
 
+#TODO: Update this and clean up
 dimension =2
 if dimension ==1:
     beta = 4

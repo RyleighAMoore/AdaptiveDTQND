@@ -14,7 +14,7 @@ radius = 2
 h = 0.05
 betaVals = [2, 2.5, 3]
 bufferVals = [0, 0.5]
-endTime = 20 #30
+endTime = 2 #30
 spacingLQVals = [0.38, 0.3]
 spacingTRVals = [0.25, 0.2, 0.18]
 

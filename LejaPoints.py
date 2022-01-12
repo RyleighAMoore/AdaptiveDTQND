@@ -16,6 +16,7 @@ np.random.seed(10)
 
 
 '''
+Parameters:
 num_leja_samples: Total number of samples to be returned (including initial samples).
 initial_samples: The samples that we must include in the leja sequence.
 poly: Polynomial chaos expansion, fully implemented with options, indices, etc.
@@ -60,26 +61,18 @@ def getLejaPoints(num_leja_samples, initial_samples, poly, num_candidate_samples
 
 import Functions as fun
 
-# @profile
 def getLejaSetFromPoints(scale, Mesh, numLejaPointsToReturn, poly, Pdf, diff, numPointsForLejaCandidates):
-    # candidatesFull = VT.map_to_canonical_space(Mesh,scale)
     candidatesFull = Mesh # don't need to transform since the scale is normal when this function is used.
     indices = [np.nan]
     candidates, distances, indik = fun.findNearestKPoints(scale.mu, candidatesFull,numPointsForLejaCandidates, getIndices = True)
-    # Px = candidates[0,0]
-    # Py = candidates[0,1]
     point = candidates[0]
     pointPDF = Pdf[0]
     candidates = candidates[1:]
-    # lejaPointsFinal, indices = getLejaPoints(numLejaPointsToReturn, np.asarray([[Px,Py]]).T, poly, num_candidate_samples = 0, candidateSampleMesh = candidates.T, returnIndices=True)
 
     lejaPointsFinal, indices = getLejaPoints(numLejaPointsToReturn, np.asarray([point]).T, poly, num_candidate_samples = 0, candidateSampleMesh = candidates.T, returnIndices=True)
 
     if math.isnan(indices[0]):
-        # print("LEJA FAIL - Try increasing numPointsForLejaCandidates and/or the numQuadFit paramaters.")
         return 0, 0, indices, False
-
-    # lejaPointsFinal = VT.map_from_canonical_space(lejaPointsFinal, scale)
 
     plot= False
     if plot:

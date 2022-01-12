@@ -1,4 +1,8 @@
-# https://github.com/python-adaptive/adaptive/blob/master/adaptive/learner/triangulation.py
+
+'''
+Source and Credit:
+https://github.com/python-adaptive/adaptive/blob/master/adaptive/learner/triangulation.py
+'''
 from collections import Counter
 from collections.abc import Iterable, Sized
 from itertools import chain, combinations
