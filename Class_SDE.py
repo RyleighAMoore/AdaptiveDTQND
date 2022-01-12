@@ -15,6 +15,7 @@ class SDE:
         dXt = f(Xt)dt + g(Xt)dWt
         Wt: Brownian motion
         X0: Initial condition, we assume a Dirac mass centered at the origin
+
         Parameters:
         dimension: dimension of the SDE, typically 1,2, 3, or 4 but code can do higher
         driftFunction: the vector-valued function defining the drift f(Xt)

@@ -4,6 +4,12 @@ import matplotlib.pyplot as plt
 from Functions import nDGridMeshCenteredAtOrigin, nDGridMeshSquareCenteredAroundGivenPoint
 class PDF:
     def __init__(self, sde, parameters, UseNoise=False):
+        '''
+        Parameters:
+        sde: stochastic differential equation to solve (class object)
+        parameters: parameters for the simulation (class object)
+        endTime: ending time of simulation
+        '''
         self.pdfVals = None
         self.meshCoordinates = None
         self.meshLength = None
@@ -54,27 +60,4 @@ class PDF:
         plt.figure()
         plt.scatter(self.meshCoordinates, self.pdfVals)
         plt.show()
-
-
-# def nDGridMeshCenteredAtOrigin(dimension, radius, stepSize, useNoiseBool = False):
-#         subdivision = radius/stepSize
-#         step = radius/subdivision
-#         grid= np.mgrid[tuple(slice(step - radius, radius, step) for _ in range(dimension))]
-#         mesh = []
-#         for i in range(grid.shape[0]):
-#             new = grid[i].ravel()
-#             if useNoiseBool:
-#                 shake = 0.1*stepSize
-#                 noise = np.random.uniform(-stepSize, stepSize ,size = (len(new)))
-#                 noise = -stepSize*shake +(stepSize*shake - - stepSize*shake)/(np.max(noise)-np.min(noise))*(noise-np.min(noise))
-#                 new = new+noise
-#             mesh.append(new)
-#         grid = np.asarray(mesh).T
-#         distance = 0
-#         for i in range(dimension):
-#             distance += grid[:,i]**2
-#         distance = distance**(1/2)
-#         distance = distance < radius
-#         grid  =  grid[distance,:]
-#         return grid
 

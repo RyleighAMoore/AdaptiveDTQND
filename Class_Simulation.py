@@ -5,9 +5,6 @@ Created on Tue Sep  7 22:07:18 2021
 @author: Rylei
 """
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-
 from Class_TimeDiscretizationMethod import EulerMaruyamaTimeDiscretizationMethod, AndersonMattinglyTimeDiscretizationMethod
 from Class_PDF import PDF
 from Class_MeshUpdater import MeshUpdater
@@ -17,6 +14,14 @@ import time
 
 class Simulation():
     def __init__(self, sde, parameters, endTime):
+        '''
+        Manages computing the solution of the SDE.
+
+        Parameters:
+        sde: stochastic differential equation to solve (class object)
+        parameters: parameters for the simulation (class object)
+        endTime: ending time of simulation
+        '''
         self.pdf = PDF(sde, parameters)
         self.endTime = endTime
         self.pdfTrajectory = []

@@ -11,7 +11,8 @@ from tqdm import trange
 
 class TimeDiscretizationMethod():
     def __init__(self):
-        self
+        pass
+
     def computeTransitionMatrix(self):
         pass
 
@@ -23,6 +24,13 @@ class TimeDiscretizationMethod():
 
 class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
     def __init__(self, pdf, parameters):
+        '''
+        Manages the time discretization for the Euler-Maruyama method
+
+        Parameters:
+        pdf: manages the probability density function of the solution of the SDE (PDF class object)
+        parameters: parameters for the simulation (class object)
+        '''
         if parameters.useAdaptiveMesh:
             self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*10
         else:
@@ -73,8 +81,6 @@ class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
 
 from Class_PDF import nDGridMeshCenteredAtOrigin
 from Class_Gaussian import GaussScale
-from tqdm import tqdm
-from LejaPoints import getLejaPoints
 from Class_Integrator import IntegratorLejaQuadrature
 from variableTransformations import map_to_canonical_space, map_from_canonical_space
 import opolynd
@@ -82,7 +88,15 @@ import opolynd
 
 class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
     ## TODO: RECHECK THAT RHO ISNT NEEDED, Combine the N2 computations
+    ##TODO: Finish this method
     def __init__(self, pdf, parameters, dimension):
+        '''
+        Manages the time discretization for the Anderson-Mattingly method
+
+        Parameters:
+        pdf: manages the probability density function of the solution of the SDE (PDF class object)
+        parameters: parameters: parameters defined by the user (Parameters class object)
+        '''
         if parameters.useAdaptiveMesh:
             self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*3
         else:
