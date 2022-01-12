@@ -11,7 +11,6 @@ from LejaPoints import getLejaPoints
 from scipy.interpolate import griddata
 from Functions import weightExp, G
 
-
 class Integrator:
     def __init__(self, simulation, sde, parameters, pdf):
         pass
