@@ -15,7 +15,7 @@ h = 0.05
 betaVals = [2, 2.5, 3]
 bufferVals = [0, 0.5]
 endTime = 20
-spacingLQVals = [0.5, 0.45, 0.38]
+spacingLQVals = [0.45, 0.38]
 spacingTRVals = [0.25, 0.2, 0.18]
 
 
