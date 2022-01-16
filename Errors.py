@@ -6,6 +6,8 @@ from scipy.stats import multivariate_normal
 import opolynd as op
 import families as f
 from indexing import total_degree_indices
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 def ErrorValsOneTime(Meshes, PdfTraj, mesh2, surfaces, interpolate= True):
@@ -20,6 +22,12 @@ def ErrorValsOneTime(Meshes, PdfTraj, mesh2, surfaces, interpolate= True):
     # fig = plt.figure()
     # plt.scatter(Meshes, np.abs((PdfTraj-gridSolnOnLejas)), c='k', marker='.')
     # plt.show()
+
+    # fig = plt.figure()
+    # ax = plt.axes(projection='3d')
+    # ax.scatter(Meshes[:,0], Meshes[:,1],  np.abs((PdfTraj-gridSolnOnLejas)))
+    # plt.show()
+
     #compute errors
     l2w = np.sqrt(np.sum(np.abs((gridSolnOnLejas - PdfTraj))**2*gridSolnOnLejas)/np.sum(gridSolnOnLejas))
 

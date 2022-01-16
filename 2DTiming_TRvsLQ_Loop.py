@@ -11,10 +11,10 @@ import time
 # startup parameters
 dimension = 2
 radius = 2
-h = 0.1
-betaVals = [2, 3]
+h = 0.05
+betaVals = [2, 2.5]
 bufferVals = [0, 0.5]
-endTime = 20
+endTime = 10
 spacingLQVals = [0.45, 0.35]
 spacingTRVals = [0.25, 0.2]
 
