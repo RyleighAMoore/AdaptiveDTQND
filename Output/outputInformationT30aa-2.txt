@@ -1,6 +1,6 @@
 Erorrs LQ {2: array([0.00388468, 0.00062502])}
-Errors TR {0: array([0.61429588, 0.00488781]), 0.5: array([1.41667273, 0.00349671])}
-LQ timing {2: array([ 99.02374625, 127.88085389])}
-TR timing {0: array([ 8.60098934, 20.47508287]), 0.5: array([40.59232545, 96.9984889 ])}
+Errors TR {0: array([0.61429588, 0.00488781]), 0.2: array([1.3068031 , 0.00436287])}
+LQ timing {2: array([ 86.53164411, 107.65783978])}
+TR timing {0: array([ 8.05094123, 18.82800007]), 0.2: array([28.95725298, 69.83799267])}
 # points LQ [array(102), array(71)]
-# points TR [array(2124), array(3234), array(4576), array(7040)]
+# points TR [array(2124), array(3234), array(3960), array(6150)]
