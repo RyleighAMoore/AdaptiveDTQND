@@ -15,7 +15,7 @@ h = 0.05
 betaVals = [2, 3]
 bufferVals = [0, 0.5]
 endTime = 30
-spacingLQVals = [0.45, 0.35]
+spacingLQVals = [0.44, 0.35]
 spacingTRVals = [0.25, 0.2]
 
 
@@ -73,7 +73,7 @@ def get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, spacingTR, b
 
     return mesh
 
-numIterations = 3
+numIterations = 2
 
 for beta in betaVals:
     ErrorsLQ = []
