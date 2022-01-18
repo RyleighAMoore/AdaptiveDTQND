@@ -12,10 +12,10 @@ import time
 dimension = 2
 radius = 2
 h = 0.05
-betaVals = [3]
+betaVals = [2.5,3.5]
 bufferVals = [0, 0.5]
 endTime = 20
-spacingLQVals = [0.3]
+spacingLQVals = [0.38, 0.3]
 spacingTRVals = [0.25, 0.2]
 
 
@@ -83,7 +83,7 @@ def get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, spacingTR, b
 
     return mesh
 
-numIterations = 1
+numIterations = 4
 
 for beta in betaVals:
     ErrorsLQ = []
@@ -195,7 +195,7 @@ for buff in bufferVals:
 plt.legend()
 plt.xlabel("Errors")
 plt.ylabel("Cumulative Running Time (Seconds)")
-plt.savefig('Output/timingFigureT30aaa-2.png')
+plt.savefig('Output/timingFigureT20.png')
 
 
 ListToSave = [betaDict_times, betaDict_errors, bufferDict_times, bufferDict_errors, betaVals, bufferVals, spacingLQVals, spacingTRVals, numPointsLQ, numPointsTR, h, radius, endTime]
@@ -203,14 +203,14 @@ import pickle
 
 # define dictionary
 # create a binary pickle file
-f = open("Output/fileT30aaa-2.pkl","wb")
+f = open("Output/fileT20.pkl","wb")
 pickle.dump(ListToSave,f)
 f.close()
 
 
 import sys
 original_stdout = sys.stdout # Save a reference to the original standard output
-with open('Output/outputInformationT30aaa-2.txt', 'w') as f:
+with open('Output/outputInformationT20.txt', 'w') as f:
     sys.stdout = f # Change the standard output to the file we created.
     print("Erorrs LQ", betaDict_errors)
     print("Errors TR", bufferDict_errors)
@@ -221,48 +221,48 @@ with open('Output/outputInformationT30aaa-2.txt', 'w') as f:
     sys.stdout = original_stdout # Reset the standard output to its original value
 
 
-animate = True
-if animate:
-    import matplotlib.pyplot as plt
-    import matplotlib.animation as animation
+# animate = True
+# if animate:
+#     import matplotlib.pyplot as plt
+#     import matplotlib.animation as animation
 
-    simulation = simulationLQ
-    if dimension ==1:
-        def update_graph(num):
-            graph.set_data(simulation.meshTrajectory[num], simulation.pdfTrajectory[num])
-            return title, graph
+#     simulation = simulationLQ
+#     if dimension ==1:
+#         def update_graph(num):
+#             graph.set_data(simulation.meshTrajectory[num], simulation.pdfTrajectory[num])
+#             return title, graph
 
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        title = ax.set_title('2D Test')
+#         fig = plt.figure()
+#         ax = fig.add_subplot(111)
+#         title = ax.set_title('2D Test')
 
-        graph, = ax.plot(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], linestyle="", marker=".")
-        ax.set_xlim(-40, 40)
-        ax.set_ylim(0, np.max(simulation.pdfTrajectory[0]))
-        ani = animation.FuncAnimation(fig, update_graph, frames=len(simulation.pdfTrajectory), interval=50, blit=False)
-        plt.show()
+#         graph, = ax.plot(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], linestyle="", marker=".")
+#         ax.set_xlim(-40, 40)
+#         ax.set_ylim(0, np.max(simulation.pdfTrajectory[0]))
+#         ani = animation.FuncAnimation(fig, update_graph, frames=len(simulation.pdfTrajectory), interval=50, blit=False)
+#         plt.show()
 
-    if dimension ==2:
-        Meshes = simulation.meshTrajectory
-        PdfTraj = simulation.pdfTrajectory
-        def update_graph(num):
-            graph.set_data (Meshes[num][:,0], Meshes[num][:,1])
-            graph.set_3d_properties(PdfTraj[num])
-            title.set_text('3D Test, time={}'.format(num))
-            return title, graph
+#     if dimension ==2:
+#         Meshes = simulation.meshTrajectory
+#         PdfTraj = simulation.pdfTrajectory
+#         def update_graph(num):
+#             graph.set_data (Meshes[num][:,0], Meshes[num][:,1])
+#             graph.set_3d_properties(PdfTraj[num])
+#             title.set_text('3D Test, time={}'.format(num))
+#             return title, graph
 
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        title = ax.set_title('3D Test')
+#         fig = plt.figure()
+#         ax = fig.add_subplot(111, projection='3d')
+#         title = ax.set_title('3D Test')
 
-        graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
-        ax.set_zlim(0, 0.1)
-        ax.set_xlim(-15, 15)
-        ax.set_ylim(-15, 15)
+#         graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
+#         ax.set_zlim(0, 0.1)
+#         ax.set_xlim(-15, 15)
+#         ax.set_ylim(-15, 15)
 
 
-        ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=10, blit=False)
-        plt.show()
+#         ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=10, blit=False)
+#         plt.show()
 
 
 
