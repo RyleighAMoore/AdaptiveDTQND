@@ -13,9 +13,9 @@ dimension = 2
 radius = 2
 h = 0.05
 betaVals = [3]
-bufferVals = [0, 0.3, 0.5]
-endTime = 25
-spacingLQVals = [0.38]
+bufferVals = [0, 0.5]
+endTime = 20
+spacingLQVals = [0.3]
 spacingTRVals = [0.25, 0.2]
 
 
@@ -175,6 +175,7 @@ for bufferVal in bufferVals:
 unitTime = np.asarray(betaDict_times[min(betaVals)])[0]
 unitError = np.asarray(betaDict_errors[min(betaVals)])[0]
 plt.figure()
+plt.plot(unitError, unitTime/unitTime, "*k", markersize = "10", label = "Unit Time")
 for betaVal in betaVals:
     if betaVal in betaDict_errors:
         Errors = betaDict_errors[betaVal]
@@ -190,7 +191,6 @@ for buff in bufferVals:
         labelString = 'TR, buffer = %d%%' %(buff*100)
         plt.semilogx(np.asarray(Errors), np.asarray(timing)/unitTime, "-s", label= labelString)
 
-plt.plot(unitError, unitTime/unitTime, "*k", markersize = "10", label = "Unit Time")
 
 plt.legend()
 plt.xlabel("Errors")
