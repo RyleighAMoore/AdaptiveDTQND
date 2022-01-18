@@ -12,11 +12,11 @@ import time
 dimension = 2
 radius = 2
 h = 0.05
-betaVals = [2, 3]
-bufferVals = [0, 0.5]
-endTime = 30
-spacingLQVals = [0.44, 0.35]
-spacingTRVals = [0.25, 0.2]
+betaVals = [2.5]
+bufferVals = [0]
+endTime = 20
+spacingLQVals = [0.38]
+spacingTRVals = []#[0.25, 0.2]
 
 
 # SDE creation
@@ -73,7 +73,7 @@ def get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, spacingTR, b
 
     return mesh
 
-numIterations = 2
+numIterations = 1
 
 for beta in betaVals:
     ErrorsLQ = []
@@ -82,8 +82,7 @@ for beta in betaVals:
         timingPerRunArrayLQ = []
         for iteration in range(numIterations):
             # SDE parameter creation
-            parametersLQ = Parameters(sde, beta, radius, spacingLQ, spacingLQ+0.1, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType="LQ")
-
+            parametersLQ = Parameters(sde, beta, radius, spacingLQ, spacingLQ+0.05, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType="LQ")
             simulationLQ = Simulation(sde, parametersLQ, endTime)
 
             startTimeLQ = time.time()
@@ -98,6 +97,34 @@ for beta in betaVals:
 
             LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationLQ.meshTrajectory[-1], simulationLQ.pdfTrajectory[-1], meshTrueSolnLQ, pdfTrueSolnLQ, interpolate=False)
             print(L2wErrors)
+
+            # import matplotlib.pyplot as plt
+            # import matplotlib.animation as animation
+
+            # simulation = simulationLQ
+
+            # if dimension ==2:
+            #     Meshes = simulation.meshTrajectory
+            #     PdfTraj = simulation.pdfTrajectory
+            #     def update_graph(num):
+            #         graph.set_data (Meshes[num][:,0], Meshes[num][:,1])
+            #         graph.set_3d_properties(PdfTraj[num])
+            #         title.set_text('3D Test, time={}'.format(num))
+            #         return title, graph
+
+            #     fig = plt.figure()
+            #     ax = fig.add_subplot(111, projection='3d')
+            #     title = ax.set_title('3D Test')
+
+            #     graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
+            #     ax.set_zlim(0, 0.5)
+            #     ax.set_xlim(-15, 15)
+            #     ax.set_ylim(-15, 15)
+
+
+            #     ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=10, blit=False)
+            #     plt.show()
+
         medianTimingLQ = np.median(np.asarray(timingPerRunArrayLQ))
         ErrorsLQ.append(np.copy(L2wErrors))
         timingArrayStorageLQ.append(np.copy(medianTimingLQ))
@@ -184,12 +211,12 @@ with open('Output/outputInformationT30aaa-2.txt', 'w') as f:
     sys.stdout = original_stdout # Reset the standard output to its original value
 
 
-animate = False
+animate = True
 if animate:
     import matplotlib.pyplot as plt
     import matplotlib.animation as animation
 
-    simulation = simulationTR
+    simulation = simulationLQ
     if dimension ==1:
         def update_graph(num):
             graph.set_data(simulation.meshTrajectory[num], simulation.pdfTrajectory[num])
@@ -219,13 +246,15 @@ if animate:
         title = ax.set_title('3D Test')
 
         graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
-        ax.set_zlim(0, 0.5)
+        ax.set_zlim(0, 0.1)
         ax.set_xlim(-15, 15)
         ax.set_ylim(-15, 15)
 
 
         ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=10, blit=False)
         plt.show()
+
+
 
 
 

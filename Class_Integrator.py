@@ -10,6 +10,8 @@ import opolynd
 from LejaPoints import getLejaPoints
 from scipy.interpolate import griddata
 from Functions import weightExp, G
+import matplotlib.pyplot as plt
+
 
 class Integrator:
     def __init__(self, simulation, sde, parameters, pdf):
@@ -74,7 +76,17 @@ class IntegratorLejaQuadrature(Integrator):
 
     def divideOutGaussianAndSetIntegrand(self, pdf, sde, index):
         gaussianToDivideOut = self.laplaceApproximation.ComputeDividedOut(pdf, sde.dimension)
-        pdf.setIntegrandAfterDividingOut(pdf.integrandBeforeDividingOut/gaussianToDivideOut)
+        # print(np.min(gaussianToDivideOut))
+        if np.min(gaussianToDivideOut)<=0:
+            gaussianToDivideOut[gaussianToDivideOut <=0] = np.min(gaussianToDivideOut)
+        try:
+            integrand = pdf.integrandBeforeDividingOut/gaussianToDivideOut
+            integrand = np.nan_to_num(integrand, nan=np.nanmin(integrand))
+        except:
+            print(np.min(gaussianToDivideOut))
+
+        pdf.setIntegrandAfterDividingOut(integrand)
+
 
 
     def setLejaPoints(self, simulation, index, parameters, sde):
@@ -100,7 +112,14 @@ class IntegratorLejaQuadrature(Integrator):
     def computeUpdateWithInterpolatoryQuadrature(self, parameters, pdf, index, sde):
         self.lejaPointsPdfVals = pdf.integrandAfterDividingOut[self.indicesOfLejaPoints]
         V = opolynd.opolynd_eval(self.lejaPoints, self.poly.lambdas[:parameters.numLejas,:], self.poly.ab, self.poly)
-        vinv = np.linalg.inv(V)
+        try:
+            vinv = np.linalg.inv(V)
+        except:
+            # plt.figure()
+            # plt.scatter(pdf.meshCoordinates[:,0], pdf.meshCoordinates[:,1])
+            # plt.scatter(self.lejaPoints[:,0], self.lejaPoints[:,1])
+            # plt.show()
+            return -1, 100000
         value = np.matmul(vinv[0,:], self.lejaPointsPdfVals)
         condNumber = np.sum(np.abs(vinv[0,:]))
         return value, condNumber

@@ -42,7 +42,8 @@ class MeshUpdater:
                 right = np.argmax(pdf.meshCoordinates)
                 newPointsBool = False
                 newPoints = [] # Use as temporary mesh
-                numIters = int(parameters.h*10*20)
+                numIters = int(parameters.h*10)
+                numIters = 2
                 if pdf.pdfVals[left] > self.addPointsToBoundaryIfBiggerThanTolerance:
                     radius = parameters.minDistanceBetweenPoints/2 + parameters.maxDistanceBetweenPoints/2
                     mm = np.min(pdf.meshCoordinates)
@@ -63,7 +64,7 @@ class MeshUpdater:
                         newPoints.append(np.asarray(MM+i*radius))
                 if newPointsBool:
                     interp1 = [griddata(MeshOrig,PdfOrig, np.asarray(newPoints), method='linear', fill_value=np.min(pdf.pdfVals)/2)][0]
-                    interp1[interp1<0] = np.min(PdfOrig)
+                    interp1[interp1<=0] = 0.5*np.min(PdfOrig)
                     pdf.addPointsToPdf(interp1)
                     self.changedBoolean =1
 

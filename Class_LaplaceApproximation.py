@@ -52,8 +52,15 @@ class LaplaceApproximation:
         M, comboList = self.buildVMatForLinFit(dimension, QuadMesh, laplaceFitPdf)
 
         MT = M.T
-        const, residuals, rank,s = np.linalg.lstsq(-M, np.log(laplaceFitPdf))
-        # const = -1*np.linalg.inv(MT@M)@(MT@np.log(laplaceFitPdf))
+        try:
+            const, residuals, rank,s = np.linalg.lstsq(-M, np.log(laplaceFitPdf))
+        except:
+            self.scalingForGaussian = None
+            self.leastSqauresFit= None
+            self.constantOfGaussian= None
+            self.combinationOfBasisFunctionsList = None
+            return
+            const = -1*np.linalg.inv(MT@M)@(MT@np.log(laplaceFitPdf))
         c=const.T
 
         if dimension == 1:
@@ -142,6 +149,9 @@ class LaplaceApproximation:
                 count +=1
             vals2 += self.leastSqauresFit[count]*np.ones(np.shape(vals2))
             vals = 1/(np.sqrt(np.pi)**dimension*JacFactor)*np.exp(-(vals2))/self.constantOfGaussian
+
+        if np.min(np.squeeze(vals).T) <= 0:
+            t=0
         return np.squeeze(vals).T
 
 
