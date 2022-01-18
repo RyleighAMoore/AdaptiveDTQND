@@ -12,11 +12,11 @@ import time
 dimension = 2
 radius = 2
 h = 0.05
-betaVals = [2.5]
+betaVals = [2.5, 3.5, 4.5]
 bufferVals = [0, 0.5]
-endTime = 30
+endTime = 10
 spacingLQVals = [0.38]
-spacingTRVals = [0.25, 0.2]
+spacingTRVals = [0.25, 0.2, 0.18]
 
 
 # dimension = 2
@@ -83,7 +83,7 @@ def get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, spacingTR, b
 
     return mesh
 
-numIterations = 4
+numIterations = 1
 
 for beta in betaVals:
     ErrorsLQ = []
@@ -164,6 +164,8 @@ for bufferVal in bufferVals:
             pdfTrueSolnTR = sde.exactSolution(simulationTR.meshTrajectory[-1], endTime)
             LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationTR.meshTrajectory[-1], simulationTR.pdfTrajectory[-1], meshTrueSolnTR, pdfTrueSolnTR, interpolate=False)
             ErrorsTR.append(np.copy(L2wErrors))
+            print(L2wErrors)
+
             numPointsTR.append(np.copy(simulationTR.pdf.meshLength))
 
             medianTimingTR = np.median(np.asarray(timingPerRunArrayTR))
