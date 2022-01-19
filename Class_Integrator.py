@@ -69,6 +69,8 @@ class IntegratorLejaQuadrature(Integrator):
             pdfValuesOfQuadraticFitPoints = pdf.integrandBeforeDividingOut[simulation.LejaPointIndicesMatrix[index,:].astype(int)]
             self.laplaceApproximation.computeleastSquares(quadraticFitMeshPoints, pdfValuesOfQuadraticFitPoints,sde.dimension)
 
+        if np.min(pdf.integrandBeforeDividingOut)==0:
+            pdf.integrandBeforeDividingOut[pdf.integrandBeforeDividingOut ==0] = 1.66886859e-315
         if np.any(self.laplaceApproximation.constantOfGaussian)==None: # Fit failed
             return False
         else:
@@ -81,7 +83,8 @@ class IntegratorLejaQuadrature(Integrator):
             gaussianToDivideOut[gaussianToDivideOut <=0] = np.min(gaussianToDivideOut)
         try:
             integrand = pdf.integrandBeforeDividingOut/gaussianToDivideOut
-            integrand = np.nan_to_num(integrand, nan=np.nanmin(integrand))
+            if np.isnan(np.min(integrand)):
+                integrand = np.nan_to_num(integrand, nan=np.nanmin(integrand))
         except:
             print(np.min(gaussianToDivideOut))
 

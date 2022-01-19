@@ -12,7 +12,7 @@ import time
 dimension = 2
 radius = 2
 h = 0.05
-betaVals = [2.5, 3.5, 4.5]
+betaVals = [3,4]
 bufferVals = [0, 0.5]
 endTime = 20
 spacingLQVals = [0.38]
@@ -20,11 +20,11 @@ spacingTRVals = [0.25, 0.2, 0.18]
 
 
 # dimension = 2
-# radius = 2
+# radius = 3
 # h = 0.05
 # betaVals = [3]
 # bufferVals = [0, 0.3, 0.5]
-# endTime = 30
+# endTime = 10
 
 # spacingLQVals = [0.38]
 # spacingTRVals = []
@@ -232,7 +232,7 @@ if animate:
         title = ax.set_title('3D Test')
 
         graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
-        ax.set_zlim(0, 0.05)
+        ax.set_zlim(0, 0.5)
         ax.set_xlim(-25, 25)
         ax.set_ylim(-25, 25)
 
