@@ -51,9 +51,13 @@ def findNearestKPoints(Coord, AllPoints, numNeighbors, getIndices = False):
         return AllPoints[idx[:numNeighbors]], normList[idx[:numNeighbors]]
 
 
-def findNearestPoint(Coord, AllPoints):
+def findNearestPoint(Coord, AllPoints, CoordInAllPoints = False):
     points, normList, indices = findNearestKPoints(Coord, AllPoints, 2, getIndices = True)
-    return points[0], np.sqrt(normList[0]), indices[0]
+    if not CoordInAllPoints:
+        return points[0], np.sqrt(normList[0]), indices[0]
+    else:
+        return points[1], np.sqrt(normList[1]), indices[1]
+
 
 
 

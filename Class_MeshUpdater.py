@@ -91,7 +91,8 @@ class MeshUpdater:
                             else:
                                 nearestPoint,distToNearestPoint, idx = fun.findNearestPoint(newPoint, pdf.meshCoordinates)
 
-                            if distToNearestPoint >= parameters.minDistanceBetweenPoints:
+                            # print(distToNearestPoint)
+                            if distToNearestPoint >= 0.99*parameters.minDistanceBetweenPoints and distToNearestPoint <= 1.1*parameters.maxDistanceBetweenPoints:
                                 points.append(newPoint)
 
                         newPoints = points
@@ -102,7 +103,7 @@ class MeshUpdater:
                     if numPointsAdded > 0:
                         newPoints = pdf.meshCoordinates[-numPointsAdded:,:]
                         interp = [griddata(MeshOrig, PdfOrig, newPoints, method='linear', fill_value=np.min(pdf.pdfVals)/2)][0]
-                        interp[interp<0] = np.min(pdf.pdfVals)
+                        interp[interp<=0] = np.min(pdf.pdfVals)
                         pdf.addPointsToPdf(interp)
                         self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)
 
@@ -138,6 +139,26 @@ class MeshUpdater:
         addingAround = [np.asarray(valueList) >= self.addPointsToBoundaryIfBiggerThanTolerance]
         return np.asarray(addingAround).T
 
+
+    # def removeOutlierPoints(self, pdf, simulation, parameters, sde):
+    #     pointIndicesToRemove = []
+    #     for indx in reversed(range(len(pdf.meshCoordinates))):
+    #         point = pdf.meshCoordinates[indx]
+    #         nearestPoint,distToNearestPoint, idx = fun.findNearestPoint(point, pdf.meshCoordinates, CoordInAllPoints=True)
+    #         print(distToNearestPoint)
+    #         if distToNearestPoint > parameters.maxDistanceBetweenPoints:
+    #             pointIndicesToRemove.append(indx)
+    #             print(distToNearestPoint)
+    #     if len(pointIndicesToRemove)>0:
+    #         pdf.removePointsFromMesh(pointIndicesToRemove)
+    #         pdf.removePointsFromPdf(pointIndicesToRemove)
+    #         simulation.removePoints(pointIndicesToRemove)
+    #         simulation.houseKeepingStorageMatrices(pointIndicesToRemove)
+    #         print("removed", len(pointIndicesToRemove), "outliers")
+    #         if not sde.dimension ==1:
+    #             self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)
+
+
     def removePointsFromMeshProcedure(self, pdf, simulation, parameters, sde):
         '''# Removing boundary points'''
         ZeroPointsBoolArray = np.asarray([np.asarray(pdf.pdfVals) < self.removeZerosValuesIfLessThanTolerance]).T
@@ -151,7 +172,6 @@ class MeshUpdater:
 
             if not sde.dimension ==1:
                 self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)
-
 
 
 
