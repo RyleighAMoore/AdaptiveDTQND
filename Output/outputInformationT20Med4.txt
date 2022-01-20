@@ -1,6 +1,6 @@
-Erorrs LQ {3: array([0.00039279])}
+Erorrs LQ {3: array([0.00027582])}
 Errors TR {0: array([], dtype=float64), 0.3: array([], dtype=float64), 0.5: array([], dtype=float64)}
-LQ timing {3: array([67.37848854])}
+LQ timing {3: array([93.07339358])}
 TR timing {0: array([], dtype=float64), 0.3: array([], dtype=float64), 0.5: array([], dtype=float64)}
-# points LQ [array(489)]
+# points LQ [array(742)]
 # points TR []

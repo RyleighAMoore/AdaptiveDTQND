@@ -302,8 +302,13 @@ class IntegratorLejaQuadrature(Integrator):
                                 simulation.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
                             if condNumber > parameters.conditionNumForAltMethod or value < 0: # Nothing worked, use alt method
                                 value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
+
+            if value > 0.5 and value > 10*pdf.pdfVals[index]:
+                print(pdf.meshCoordinates[index])
+
             if value <= 0:
-                value = 10**(-parameters.beta)
+                value = griddata(pdf.meshCoordinates, pdf.pdfVals, pdf.meshCoordinates[index], method='nearest') #, fill_value=np.min(pdf.pdfVals)/2)][0]
+                # value = 10**(-parameters.beta)
             newPdf[index] =value
         # print(LPReuseCount/pdf.meshLength*100, "% Leja Reuse")
         # print(self.AltMethodUseCount/pdf.meshLength*100, "% Alt method Use")

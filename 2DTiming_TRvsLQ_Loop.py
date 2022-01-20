@@ -22,7 +22,7 @@ spacingTRVals = [0.25, 0.2, 0.18]
 # dimension = 2
 # radius = 3
 # h = 0.05
-# betaVals = [3]
+# betaVals = [4]
 # bufferVals = [0, 0.3, 0.5]
 # endTime = 10
 
@@ -93,7 +93,7 @@ for beta in betaVals:
         timingPerRunArrayLQ = []
         for iteration in range(numIterations):
             # SDE parameter creation
-            parametersLQ = Parameters(sde, beta, radius, spacingLQ, spacingLQ+0.1, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType="LQ")
+            parametersLQ = Parameters(sde, beta, radius, spacingLQ, spacingLQ, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType="LQ")
             simulationLQ = Simulation(sde, parametersLQ, endTime)
 
             startTimeLQ = time.time()
@@ -233,8 +233,8 @@ if animate:
 
         graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
         ax.set_zlim(0, 0.5)
-        ax.set_xlim(-25, 25)
-        ax.set_ylim(-25, 25)
+        ax.set_xlim(-15, 15)
+        ax.set_ylim(-15, 15)
 
 
         ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=10, blit=False)
