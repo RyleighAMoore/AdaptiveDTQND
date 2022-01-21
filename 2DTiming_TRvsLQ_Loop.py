@@ -192,17 +192,17 @@ for buff in bufferVals:
     if buff in bufferDict_errors:
         Errors = bufferDict_errors[buff]
         timing = bufferDict_times[buff]
-        if buff ==0:
+        if buff == 0:
             labelString = 'TR Oracle, buffer = %d%%' %(buff*100)
         else:
-            labelString = 'TR Oracle, buffer = %d%%' %(buff*100)
+            labelString = 'TR, buffer = %d%%' %(buff*100)
         plt.semilogx(np.asarray(Errors), np.asarray(timing)/unitTime, "-s", label= labelString)
 
 
 plt.legend()
 plt.xlabel(r'$L_{2w}$ Error')
 plt.ylabel("Relative Running Time (Seconds)")
-# plt.savefig('Output/timingFigureT20Med4.png')
+plt.savefig('Output/timingFigureT20.png')
 
 
 ListToSave = [betaDict_times, betaDict_errors, bufferDict_times, bufferDict_errors, betaVals, bufferVals, spacingLQVals, spacingTRVals, numPointsLQ, numPointsTR, h, radius, endTime]
@@ -210,7 +210,7 @@ import pickle
 
 # define dictionary
 # create a binary pickle file
-f = open("Output/fileT20Med4.pkl","wb")
+f = open("Output/fileT20.pkl","wb")
 pickle.dump(ListToSave,f)
 f.close()
 
