@@ -54,8 +54,8 @@ class LaplaceApproximation:
         MT = M.T
         try:
             const, residuals, rank,s = np.linalg.lstsq(-M, np.log(laplaceFitPdf))
-            if residuals > 1:
-                t=0
+            # if residuals > 1:
+            #     t=0
         except:
             self.scalingForGaussian = None
             self.leastSqauresFit= None
