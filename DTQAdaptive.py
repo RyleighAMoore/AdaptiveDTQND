@@ -7,25 +7,26 @@ import matplotlib.pyplot as plt
 import DriftDiffusionFunctionBank as functionBank
 import time
 
+#TODO: Update this and clean up
 dimension =2
-
 if dimension ==1:
     beta = 4
     radius = 5
     kstepMin= 0.06
     kstepMax = 0.07
     h = 0.1
-    endTime =10
+    endTime =0
 
 if dimension ==2:
     beta = 3
-    radius =1.5
+    radius =2
     # radius = 0.5
     kstepMin= 0.08
     kstepMax = 0.09
-    h = 0.01
-    endTime = 0.05
-
+    kstepMin= 0.4
+    kstepMax = 0.5
+    h = 0.05
+    endTime = 4
 
 if dimension ==3:
     beta = 3
@@ -45,12 +46,20 @@ diffusionFunction = functionBank.oneDiffusion
 
 spatialDiff = False
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
-parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh =True, timeDiscretizationType = "AM", integratorType = "LQ")
+parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh =True, timeDiscretizationType = "EM", integratorType = "LQ")
 simulation = Simulation(sde, parameters, endTime)
+
 start = time.time()
-simulation.computeAllTimes(sde, simulation.pdf, parameters)
+simulation.setUpTransitionMatrix(sde, parameters)
+TMTime = time.time()-start
+
+start = time.time()
+simulation.computeAllTimes(sde, parameters)
 end = time.time()
-print(end-start)
+print("\n")
+print("Transition Matrix timing:", TMTime)
+print("\n")
+print("Stepping timing",end-start, '*****************************************')
 
 
 
@@ -117,7 +126,7 @@ if dimension ==2:
     title = ax.set_title('3D Test')
 
     graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
-    ax.set_zlim(0, 1.5)
+    ax.set_zlim(0,np.max(simulation.pdfTrajectory[10]))
     ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
     plt.show()
 

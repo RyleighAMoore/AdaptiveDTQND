@@ -7,12 +7,18 @@ import operator as op
 from functools import reduce
 
 class LaplaceApproximation:
-    def __init__(self, sde):
+    def __init__(self, dimension):
+        '''
+        Used to approimate the log of the local PDF via Lapalce approximation
+        of a quadratic form.
+
+        dimenion: dimension of the SDE
+        '''
         self.scalingForGaussian = None
         self.leastSqauresFit= None
         self.constantOfGaussian= None
         self.combinationOfBasisFunctionsList = None
-        self.numLSBasis = self.computeShapeOfMatrix(sde.dimension+2, 2)
+        self.numLSBasis = self.computeShapeOfMatrix(dimension+2, 2)
 
     def computeShapeOfMatrix(self, n, r):
         r = min(r, n-r)
@@ -20,6 +26,7 @@ class LaplaceApproximation:
         denom = reduce(op.mul, range(1, r+1), 1)
         return numer // denom  # or / in Python 2
 
+    # @profile
     def buildVMatForLinFit(self, dimension, QuadMesh, laplaceFitPdf):
         M = np.zeros((len(QuadMesh), self.numLSBasis))
         size = 0
@@ -40,11 +47,22 @@ class LaplaceApproximation:
         M[:,size] = np.ones(np.size(QuadMesh,0))
         return M, comboList
 
-    def copmuteleastSquares(self, QuadMesh, laplaceFitPdf, dimension):
+    # @profile
+    def computeleastSquares(self, QuadMesh, laplaceFitPdf, dimension):
         M, comboList = self.buildVMatForLinFit(dimension, QuadMesh, laplaceFitPdf)
 
         MT = M.T
-        const = -1*np.linalg.inv(MT@M)@(MT@np.log(laplaceFitPdf))
+        try:
+            const, residuals, rank,s = np.linalg.lstsq(-M, np.log(laplaceFitPdf))
+            # if residuals > 1:
+            #     t=0
+        except:
+            self.scalingForGaussian = None
+            self.leastSqauresFit= None
+            self.constantOfGaussian= None
+            self.combinationOfBasisFunctionsList = None
+            return
+            const = -1*np.linalg.inv(MT@M)@(MT@np.log(laplaceFitPdf))
         c=const.T
 
         if dimension == 1:
@@ -133,6 +151,16 @@ class LaplaceApproximation:
                 count +=1
             vals2 += self.leastSqauresFit[count]*np.ones(np.shape(vals2))
             vals = 1/(np.sqrt(np.pi)**dimension*JacFactor)*np.exp(-(vals2))/self.constantOfGaussian
+
+        if np.min(np.squeeze(vals).T) <= 0:
+            t=0
         return np.squeeze(vals).T
 
+
+    def ComputeDividedOutAM(self, pdf, dimension, mesh):
+       temp = pdf.meshCoordinates
+       pdf.meshCoordinates = mesh
+       vals = self.ComputeDividedOut(pdf, dimension)
+       pdf.meshCoordinates = temp
+       return vals
 

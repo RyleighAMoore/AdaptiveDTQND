@@ -6,14 +6,36 @@ from Class_Simulation import Simulation
 import matplotlib.pyplot as plt
 from tqdm import trange
 
+
 class SDE:
+
     def __init__(self, dimension, driftFunction, diffusionFunction, spatialDiff):
+        '''
+        Manages the stochastic differential equation we are solving.
+        dXt = f(Xt)dt + g(Xt)dWt
+        Wt: Brownian motion
+        X0: Initial condition, we assume a Dirac mass centered at the origin
+
+        Parameters:
+        dimension: dimension of the SDE, typically 1,2, 3, or 4 but code can do higher
+        driftFunction: the vector-valued function defining the drift f(Xt)
+        diffFunction: the square matrix-valued function denining the diffusion g(Xt)
+        spatialDiff: boolean True if the diffusion is dependent on space, False if independent
+        '''
         self.dimension = dimension
         self.driftFunction = driftFunction
         self.diffusionFunction = diffusionFunction
         self.spatialDiff = spatialDiff
 
-    def ApproxExactSoln(self, endTime, radius,xStep):
+    def ApproxExactSoln(self, endTime, radius, xStep):
+        '''
+        Uses the Trapezoidal rule to approximate the solution of the SDE for error analysis.
+
+        Parameters:
+        endTime: The time we want to solve the SDE at
+        radius: Determines the points of the approximated solution
+        xStep: The spacing of the approximiated solution
+        '''
         beta = 3 # Not really used
         kstepMin = xStep
         kstepMax = xStep # Not really used
@@ -22,6 +44,8 @@ class SDE:
         parameters = Parameters(self, beta, radius, kstepMin, kstepMax, h, False, timeDiscretizationType = "EM")
         pdf = PDF(self, parameters)
         simulation= Simulation(self, parameters, endTime)
+        simulation.setUpTransitionMatrix(self, parameters)
+
         G = simulation.integrator.TransitionMatrix
         numSteps = int(endTime/parameters.h)
         # plt.figure()
@@ -31,6 +55,14 @@ class SDE:
         return pdf.meshCoordinates, pdf.pdfVals
 
     def exactSolution(self, mesh, endTime):
+        '''
+        Computes the exact solution for an SDE with constant drift and diffusion.
+
+        Parameters:
+        mesh: Mesh values at which to compute the exact solution
+        endTime: the time which to approximate the solution up to
+        '''
+        print("WARNING: The exact solution is only accurate if the drift and diffusion are constant.")
         drift = self.driftFunction(np.asarray([mesh[0]]))
         drift = drift[0][0]
         diff = self.diffusionFunction(mesh[0])[0,0]
@@ -40,17 +72,4 @@ class SDE:
             r += (mesh[:,ii])**2
         vals = np.exp(-r/(4*D*endTime))*(1/(4*np.pi*D*endTime))**(self.dimension/2)
         return vals
-
-
-
-        # surfaces2 = []
-        # for i in solnIndices:
-        #     surfaces2.append(surfaces[int(i)])
-        # solns = []
-        # for i in range(len(surfaces2)):
-        #     gridSolnOnLejas = griddata(mesh, surfaces2[i], Meshes[i], method='cubic', fill_value=-1)
-        #     solns.append(np.squeeze(gridSolnOnLejas))
-
-        # LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(Meshes, PdfTraj, solns, h, plot=False)
-
 

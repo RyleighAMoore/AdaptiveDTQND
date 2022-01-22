@@ -1,10 +1,15 @@
 import numpy as np
 
+'''
+Credit: John Jakeman PyApprox
+https://sandialabs.github.io/pyapprox/auto_tutorials/polynomial_chaos/plot_adaptive_leja_interpolation.html
+'''
+
 def get_lu_leja_samples(poly, generate_basis_matrix,
                         candidate_samples,num_leja_samples,
                         preconditioning_function=None,initial_samples=None):
     """
-    Generate Leja samples using LU factorization. 
+    Generate Leja samples using LU factorization.
 
     Parameters
     ----------
@@ -24,7 +29,7 @@ def get_lu_leja_samples(poly, generate_basis_matrix,
         basis_matrix = preconditioning_function(basis_matrix)
         precondition a basis matrix to improve stability
         samples are the samples used to build the basis matrix. They must
-        be in the same order as they were used to create the rows of the basis 
+        be in the same order as they were used to create the rows of the basis
         matrix.
 
     TODO unfortunately some preconditioing_functions need only basis matrix
@@ -54,7 +59,7 @@ def get_lu_leja_samples(poly, generate_basis_matrix,
         num_initial_rows = initial_samples.shape[1]
     else:
         num_initial_rows=0
-    
+
     numSamples = len(candidate_samples.T)
     basis_matrix = generate_basis_matrix(candidate_samples.T, poly.lambdas[:num_leja_samples,:], poly.ab, poly)
 
@@ -66,7 +71,7 @@ def get_lu_leja_samples(poly, generate_basis_matrix,
         weights = None
     import scipy as sp
     import matplotlib.pyplot as plt
-    
+
     L,U,p, successBoolean = truncated_pivoted_lu_factorization(
         basis_matrix,num_leja_samples,num_initial_rows)
     if (p.shape[0]!=num_leja_samples):
@@ -101,7 +106,7 @@ def truncated_pivoted_lu_factorization(A,max_iters,num_initial_rows=0,
         The matrix to be factored
 
     max_iters : integer
-        The maximum number of pivots to perform. Internally max)iters will be 
+        The maximum number of pivots to perform. Internally max)iters will be
         set such that max_iters = min(max_iters,K), K=min(num_rows,num_cols)
 
     num_initial_rows: integer or np.ndarray()
@@ -109,20 +114,20 @@ def truncated_pivoted_lu_factorization(A,max_iters,num_initial_rows=0,
         any remaining rows can be chosen.
         If object is an array then entries are raw pivots which
         will be used in order.
-    
+
 
     Returns
     -------
     L_factor : np.ndarray (max_iters,K)
-        The lower triangular factor with a unit diagonal. 
+        The lower triangular factor with a unit diagonal.
         K=min(num_rows,num_cols)
 
     U_factor : np.ndarray (K,num_cols)
         The upper triangular factor
 
     raw_pivots : np.ndarray (num_rows)
-        The sequential pivots used to during algorithm to swap rows of A. 
-        pivots can be obtained from raw_pivots using 
+        The sequential pivots used to during algorithm to swap rows of A.
+        pivots can be obtained from raw_pivots using
         get_final_pivots_from_sequential_pivots(raw_pivots)
 
     pivots : np.ndarray (max_iters)
@@ -143,7 +148,7 @@ def truncated_pivoted_lu_factorization(A,max_iters,num_initial_rows=0,
     raw_pivots = np.arange(num_rows)#np.empty(num_rows,dtype=int)
     LU_factor,raw_pivots,it, successBoolean = continue_pivoted_lu_factorization(
         LU_factor,raw_pivots,0,max_iters,num_initial_rows)
-        
+
     if not truncate_L_factor:
         return LU_factor, raw_pivots
     else:
@@ -153,15 +158,15 @@ def truncated_pivoted_lu_factorization(A,max_iters,num_initial_rows=0,
         L_factor = L_factor[:it+1,:it+1]
         U_factor = U_factor[:it+1,:it+1]
         return L_factor, U_factor, pivots, successBoolean
-    
+
 def add_columns_to_pivoted_lu_factorization(LU_factor,new_cols,raw_pivots):
     """
     Given factorization PA=LU add new columns to A in unpermuted order and update
     LU factorization
-    
+
     raw_pivots : np.ndarray (num_pivots)
     The pivots applied at each iteration of pivoted LU factorization.
-    If desired one can use get_final_pivots_from_sequential_pivots to 
+    If desired one can use get_final_pivots_from_sequential_pivots to
     compute final position of rows after all pivots have been applied.
     """
     assert LU_factor.shape[0]==new_cols.shape[0]
@@ -207,7 +212,7 @@ def add_rows_to_pivoted_lu_factorization(LU_factor,new_rows,num_pivots):
         row_vector = LU_factor[it,it+1:]
         update = np.outer(col_vector,row_vector)
         LU_factor_extra[:,it+1:] -= update
-        
+
     return np.vstack([LU_factor,LU_factor_extra])
 
 def swap_rows(matrix,ii,jj):
@@ -233,7 +238,7 @@ def get_final_pivots_from_sequential_pivots(sequential_pivots,num_pivots=None):
 
 def christoffel_weights(basis_matrix):
     """
-    Evaluate the 1/K(x),from a basis matrix, where K(x) is the 
+    Evaluate the 1/K(x),from a basis matrix, where K(x) is the
     Christoffel function.
     """
     return 1./np.sum(basis_matrix**2,axis=1)
@@ -243,7 +248,7 @@ def sqrtNormal_weights(candidate_samples):
     z=1/(np.sqrt(np.pi)**d)
     for i in range(d):
         z =z*np.exp(-candidate_samples[i,:]**2)
-        
+
     # x = candidate_samples[0,:]
     # y = candidate_samples[1,:]
     # z1 =(1/np.pi)*np.exp(-(x**2/(1)+ y**2/(1)))
@@ -268,7 +273,7 @@ def continue_pivoted_lu_factorization(LU_factor,raw_pivots,current_iter,
         # update pivots vector
         #swap_rows(pivots,it,pivot)
         raw_pivots[it]=pivot
-      
+
         # apply pivots(swap rows) in L factorization
         swap_rows(LU_factor,it,pivot)
 
@@ -287,7 +292,7 @@ def continue_pivoted_lu_factorization(LU_factor,raw_pivots,current_iter,
         # udpate U_factor
         col_vector = LU_factor[it+1:,it]
         row_vector = LU_factor[it,it+1:]
-        
+
         update = np.outer(col_vector,row_vector)
         LU_factor[it+1:,it+1:]-= update
     return LU_factor, raw_pivots, it, successBoolean

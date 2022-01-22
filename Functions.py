@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def nDGridMeshCenteredAtOrigin(dimension, radius, stepSize, useNoiseBool = False):
+def nDGridMeshCenteredAtOrigin(dimension, radius, stepSize, useNoiseBool = False, trimToCircle = True):
         subdivision = radius/stepSize
         # step = radius/subdivision
         grid= np.mgrid[tuple(slice(- radius*2, radius*2, stepSize) for _ in range(dimension))]
@@ -15,12 +15,20 @@ def nDGridMeshCenteredAtOrigin(dimension, radius, stepSize, useNoiseBool = False
                 new = new+noise
             mesh.append(new)
         grid = np.asarray(mesh).T
-        distance = 0
-        for i in range(dimension):
-            distance += (-grid[:,i])**2
-        distance = distance**(1/2)
-        distance = distance < radius-0.0001
-        grid  =  grid[distance,:]
+        if trimToCircle:
+            distance = 0
+            for i in range(dimension):
+                distance += (-grid[:,i])**2
+            distance = distance**(1/2)
+            distance = distance < radius-0.0001
+            grid  =  grid[distance,:]
+        return grid
+
+def nDGridMeshSquareCenteredAroundGivenPoint(dimension, radius, stepSize, centering):
+        grid = nDGridMeshCenteredAtOrigin(dimension, radius, stepSize, useNoiseBool = False, trimToCircle = False)
+        for dim in range(dimension):
+            grid[:, dim] += centering[dim]
+
         return grid
 
 
@@ -43,31 +51,14 @@ def findNearestKPoints(Coord, AllPoints, numNeighbors, getIndices = False):
         return AllPoints[idx[:numNeighbors]], normList[idx[:numNeighbors]]
 
 
-def findNearestPoint(Coord, AllPoints):
+def findNearestPoint(Coord, AllPoints, CoordInAllPoints = False):
     points, normList, indices = findNearestKPoints(Coord, AllPoints, 2, getIndices = True)
-    # if normList[0]==0:
-    #     return points[1], np.sqrt(normList[1]), indices[1]
-    # else:
-    return points[0], np.sqrt(normList[0]), indices[0]
-# from scipy.stats import multivariate_normal
-# def Gaussian(scaling, mesh):
-#     # rv = multivariate_normal(scaling.mu.T[0], scaling.cov)
-#     # soln_vals = np.asarray([rv.pdf(mesh)]).T
-#     # soln = np.squeeze(soln_vals)
-#     # print(scaling.invCov)
-#     D = mesh.shape[1]
-#     if D == 1:
-#         mu = np.repeat(scaling.mu, len(mesh),axis = 0)
-#         invCov= scaling.invCov
-#         norm = np.zeros(len(mesh))
-#         for dim in range(D):
-#             norm += (mesh[:,dim] - mu[:,dim])**2
-#         const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(scaling.cov))))
-#         soln = const*np.exp(-1/2*invCov*norm).T
-#     else:
-#         print("need to imlement Gaussian ND")
+    if not CoordInAllPoints:
+        return points[0], np.sqrt(normList[0]), indices[0]
+    else:
+        return points[1], np.sqrt(normList[1]), indices[1]
 
-#     return np.squeeze(soln)
+
 
 
 def weightExp(scaling,mesh):

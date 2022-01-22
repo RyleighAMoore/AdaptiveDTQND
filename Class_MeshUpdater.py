@@ -18,6 +18,14 @@ random.seed(10)
 
 class MeshUpdater:
     def __init__(self, parameters, pdf,dimension):
+        '''
+        Used to update the mesh adaptively.
+
+        Paramters:
+        parameters: parameters defined by the user (class object)
+        pdf: manages the probability density function of the solution of the SDE (PDF class object)
+        dimension: dimension of the SDE
+        '''
         self.addPointsToBoundaryIfBiggerThanTolerance = 10**(-parameters.beta)
         self.removeZerosValuesIfLessThanTolerance = 10**(-parameters.beta-0.5)
         self.changedBoolean = False
@@ -34,7 +42,8 @@ class MeshUpdater:
                 right = np.argmax(pdf.meshCoordinates)
                 newPointsBool = False
                 newPoints = [] # Use as temporary mesh
-                numIters = int(parameters.h*10*20)
+                numIters = int(parameters.h*10)
+                numIters = 2
                 if pdf.pdfVals[left] > self.addPointsToBoundaryIfBiggerThanTolerance:
                     radius = parameters.minDistanceBetweenPoints/2 + parameters.maxDistanceBetweenPoints/2
                     mm = np.min(pdf.meshCoordinates)
@@ -55,7 +64,7 @@ class MeshUpdater:
                         newPoints.append(np.asarray(MM+i*radius))
                 if newPointsBool:
                     interp1 = [griddata(MeshOrig,PdfOrig, np.asarray(newPoints), method='linear', fill_value=np.min(pdf.pdfVals)/2)][0]
-                    interp1[interp1<0] = np.min(PdfOrig)
+                    interp1[interp1<=0] = 0.5*np.min(PdfOrig)
                     pdf.addPointsToPdf(interp1)
                     self.changedBoolean =1
 
@@ -82,7 +91,8 @@ class MeshUpdater:
                             else:
                                 nearestPoint,distToNearestPoint, idx = fun.findNearestPoint(newPoint, pdf.meshCoordinates)
 
-                            if distToNearestPoint >= parameters.minDistanceBetweenPoints:
+                            # print(distToNearestPoint)
+                            if distToNearestPoint >= 0.99*parameters.minDistanceBetweenPoints and distToNearestPoint <= 1.1*parameters.maxDistanceBetweenPoints:
                                 points.append(newPoint)
 
                         newPoints = points
@@ -93,7 +103,7 @@ class MeshUpdater:
                     if numPointsAdded > 0:
                         newPoints = pdf.meshCoordinates[-numPointsAdded:,:]
                         interp = [griddata(MeshOrig, PdfOrig, newPoints, method='linear', fill_value=np.min(pdf.pdfVals)/2)][0]
-                        interp[interp<0] = np.min(pdf.pdfVals)
+                        interp[interp<=0] = np.min(pdf.pdfVals)
                         pdf.addPointsToPdf(interp)
                         self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)
 
@@ -106,10 +116,10 @@ class MeshUpdater:
             newMeshSize = len(pdf.meshCoordinates)
             if parameters.timeDiscretizationType == "EM":
                 for i in range(meshSizeBeforeUpdates+1, newMeshSize+1):
-                        simulation.timeDiscretizationMethod.AddPointToG(pdf.meshCoordinates[:i,:], i-1, parameters, sde, pdf, simulation.integrator)
+                        simulation.timeDiscretizationMethod.AddPointToG(pdf.meshCoordinates[:i,:], i-1, parameters, sde, pdf, simulation.integrator, simulation)
             elif parameters.timeDiscretizationType == "AM":
                 indices = list(range(meshSizeBeforeUpdates, newMeshSize))
-                simulation.timeDiscretizationMethod.AddPointToG(pdf, indices, parameters, simulation.integrator, sde)
+                simulation.timeDiscretizationMethod.AddPointToG(simulation, indices, parameters, simulation.integrator, sde)
 
 
     def getBoundaryPoints(self, pdf, dimension, parameters, sde):
@@ -129,6 +139,26 @@ class MeshUpdater:
         addingAround = [np.asarray(valueList) >= self.addPointsToBoundaryIfBiggerThanTolerance]
         return np.asarray(addingAround).T
 
+
+    # def removeOutlierPoints(self, pdf, simulation, parameters, sde):
+    #     pointIndicesToRemove = []
+    #     for indx in reversed(range(len(pdf.meshCoordinates))):
+    #         point = pdf.meshCoordinates[indx]
+    #         nearestPoint,distToNearestPoint, idx = fun.findNearestPoint(point, pdf.meshCoordinates, CoordInAllPoints=True)
+    #         print(distToNearestPoint)
+    #         if distToNearestPoint > parameters.maxDistanceBetweenPoints:
+    #             pointIndicesToRemove.append(indx)
+    #             print(distToNearestPoint)
+    #     if len(pointIndicesToRemove)>0:
+    #         pdf.removePointsFromMesh(pointIndicesToRemove)
+    #         pdf.removePointsFromPdf(pointIndicesToRemove)
+    #         simulation.removePoints(pointIndicesToRemove)
+    #         simulation.houseKeepingStorageMatrices(pointIndicesToRemove)
+    #         print("removed", len(pointIndicesToRemove), "outliers")
+    #         if not sde.dimension ==1:
+    #             self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)
+
+
     def removePointsFromMeshProcedure(self, pdf, simulation, parameters, sde):
         '''# Removing boundary points'''
         ZeroPointsBoolArray = np.asarray([np.asarray(pdf.pdfVals) < self.removeZerosValuesIfLessThanTolerance]).T
@@ -137,12 +167,11 @@ class MeshUpdater:
         if len(indices)>0:
             pdf.removePointsFromMesh(indices)
             pdf.removePointsFromPdf(indices)
-            simulation.integrator.removePoints(indices)
-            simulation.integrator.houseKeepingStorageMatrices(indices)
+            simulation.removePoints(indices)
+            simulation.houseKeepingStorageMatrices(indices)
 
             if not sde.dimension ==1:
                 self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)
-
 
 
 
