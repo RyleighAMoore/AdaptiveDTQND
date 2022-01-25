@@ -38,7 +38,7 @@ diffusionFunction = functionBank.ptSixDiffusion
 spatialDiff = False
 adaptive = True
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
-
+saveHistory = False
 
 # Data Storage
 ErrorsLQ = []
@@ -102,7 +102,7 @@ with open('Output/outputInformationAllTimes.txt', 'w') as g:
             meshLengthsPerRunArrayLQ = []
             for iteration in range(numIterations):
                 # SDE parameter creation
-                parametersLQ = Parameters(sde, beta, radius, spacingLQ, spacingLQ, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType="LQ", saveHistory=False)
+                parametersLQ = Parameters(sde, beta, radius, spacingLQ, spacingLQ, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType="LQ", saveHistory=saveHistory)
                 simulationLQ = Simulation(sde, parametersLQ, endTime)
 
                 startTimeLQ = time.time()
@@ -142,7 +142,7 @@ with open('Output/outputInformationAllTimes.txt', 'w') as g:
             meshLengthsPerRunArrayTR = []
             for iteration in range(numIterations):
                 meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, spacingTR, bufferVal)
-                parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR, saveHistory=False)
+                parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR, saveHistory=saveHistory)
 
                 simulationTR = Simulation(sde, parametersTR, endTime)
                 startTimeTR = time.time()
