@@ -29,7 +29,7 @@ class IntegratorTrapezoidal(Integrator):
         self.stepSize = parameters.minDistanceBetweenPoints
 
     def computeTimeStep(self, sde, parameters, simulation):
-        vals= np.asarray(self.stepSize**sde.dimension*simulation.TransitionMatrix[:simulation.pdf.meshLength, :simulation.pdf.meshLength]@simulation.pdf.pdfVals)
+        vals= np.asarray(self.stepSize**sde.dimension*simulation.TransitionMatrix@simulation.pdf.pdfVals)
         return np.squeeze(vals)
 
 

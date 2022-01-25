@@ -1,25 +1,48 @@
-dimension:  2  Iterations:  1  initial radius:  2 endTime:  1 time step:  0.05 
+dimension:  2  Iterations:  1  initial radius:  2 endTime:  5 time step:  0.05 
 
+
+LQ: beta=  3 , spacing=  0.38 :
+
+WARNING: The exact solution is only accurate if the drift and diffusion are constant.
+Timing LQ:  [array(23.9920187)]
+Errors LQ:  [array(0.00099599)]
+Mesh Size LQ:  [array(443)]
 
 LQ: beta=  4 , spacing=  0.38 :
 
 WARNING: The exact solution is only accurate if the drift and diffusion are constant.
-Timing LQ:  [array(4.94364357)]
-Errors LQ:  [array(0.00296911)]
-Mesh Size LQ:  [array(174)]
+Timing LQ:  [array(34.5529449)]
+Errors LQ:  [array(0.00068199)]
+Mesh Size LQ:  [array(644)]
 
 TR: buffer=  0 , spacing=  0.2 :
 
 Warning: You must have an equispaced mesh!
 WARNING: The exact solution is only accurate if the drift and diffusion are constant.
-Timing TR:  [array(0.16302013)]
-Errors TR:  [array(0.002217)]
-Mesh Size TR:  [array(841)]
+Timing TR:  [array(4.64195132)]
+Errors TR:  [array(0.00157026)]
+Mesh Size TR:  [array(3534)]
 
-TR: buffer=  0 , spacing=  0.1 :
+TR: buffer=  0 , spacing=  0.18 :
 
 Warning: You must have an equispaced mesh!
 WARNING: The exact solution is only accurate if the drift and diffusion are constant.
-Timing TR:  [array(1.48518491)]
-Errors TR:  [array(3.08842906e-08)]
-Mesh Size TR:  [array(3192)]
+Timing TR:  [array(6.88997817)]
+Errors TR:  [array(0.00016144)]
+Mesh Size TR:  [array(4347)]
+
+TR: buffer=  0.5 , spacing=  0.2 :
+
+Warning: You must have an equispaced mesh!
+WARNING: The exact solution is only accurate if the drift and diffusion are constant.
+Timing TR:  [array(19.56496024)]
+Errors TR:  [array(0.00157587)]
+Mesh Size TR:  [array(7553)]
+
+TR: buffer=  0.5 , spacing=  0.18 :
+
+Warning: You must have an equispaced mesh!
+WARNING: The exact solution is only accurate if the drift and diffusion are constant.
+Timing TR:  [array(29.27595448)]
+Errors TR:  [array(0.0001619)]
+Mesh Size TR:  [array(9292)]

@@ -92,8 +92,12 @@ class Simulation():
 
 
     def computeAllTimes(self, sde, parameters):
-        self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
-        self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
+        if parameters.integratorType == "LQ" and not parameters.saveHistory:
+            self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
+            self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
+        if parameters.saveHistory:
+            self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
+            self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
         self.times.append(parameters.h)
         numSteps = int(self.endTime/parameters.h)
         timing = []
