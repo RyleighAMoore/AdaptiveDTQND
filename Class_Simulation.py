@@ -89,12 +89,12 @@ class Simulation():
 
     def StepForwardInTime(self, sde, parameters):
         self.pdf.pdfVals = self.integrator.computeTimeStep(sde, parameters, self)
-        self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
-        self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
+
 
     def computeAllTimes(self, sde, parameters):
-        self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
-        self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
+        if parameters.saveHistory:
+            self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
+            self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
         self.times.append(parameters.h)
         numSteps = int(self.endTime/parameters.h)
         timing = []
@@ -108,6 +108,9 @@ class Simulation():
                     self.meshUpdater.removePointsFromMeshProcedure(self.pdf, self, parameters, sde)
             # self.meshUpdater.removeOutlierPoints(self.pdf, self, parameters, sde)
             self.StepForwardInTime(sde, parameters)
+            if i==numSteps-1 or parameters.saveHistory:
+                self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
+                self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
             self.times.append((i+1)*parameters.h)
             timing.append(time.time()- timeStart)
         return timing

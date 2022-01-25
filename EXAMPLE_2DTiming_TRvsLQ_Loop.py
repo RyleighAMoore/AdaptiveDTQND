@@ -16,7 +16,7 @@ radius = 2
 h = 0.05
 betaVals = [3, 4]
 bufferVals = [0, 0.5]
-endTime = 20
+endTime = 0.5#10
 spacingLQVals = [0.38]
 spacingTRVals = [0.25, 0.2, 0.18]
 
@@ -86,7 +86,7 @@ def get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, spacingTR, b
 
     return mesh
 
-numIterations =5
+numIterations =1
 original_stdout = sys.stdout # Save a reference to the original standard output
 with open('Output/outputInformationAllTimes.txt', 'w') as g:
     sys.stdout = g
@@ -102,7 +102,7 @@ with open('Output/outputInformationAllTimes.txt', 'w') as g:
             meshLengthsPerRunArrayLQ = []
             for iteration in range(numIterations):
                 # SDE parameter creation
-                parametersLQ = Parameters(sde, beta, radius, spacingLQ, spacingLQ, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType="LQ")
+                parametersLQ = Parameters(sde, beta, radius, spacingLQ, spacingLQ, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType="LQ", saveHistory=False)
                 simulationLQ = Simulation(sde, parametersLQ, endTime)
 
                 startTimeLQ = time.time()
@@ -142,7 +142,7 @@ with open('Output/outputInformationAllTimes.txt', 'w') as g:
             meshLengthsPerRunArrayTR = []
             for iteration in range(numIterations):
                 meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, spacingTR, bufferVal)
-                parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR)
+                parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR, saveHistory=False)
 
                 simulationTR = Simulation(sde, parametersTR, endTime)
                 startTimeTR = time.time()

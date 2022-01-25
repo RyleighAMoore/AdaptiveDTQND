@@ -1,5 +1,5 @@
 class Parameters:
-    def __init__(self, sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh, timeDiscretizationType = "EM", integratorType = "LQ", AMSpacing = 0.05, initialMeshCentering=None, OverideMesh = None, suppressOutput = False):
+    def __init__(self, sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh, timeDiscretizationType = "EM", integratorType = "LQ", AMSpacing = 0.05, initialMeshCentering=None, OverideMesh = None, suppressOutput = False, saveHistory = True):
         '''
         Manages parameters for the simulation for approximating the solution of the stochastic differential equation
 
@@ -36,6 +36,7 @@ class Parameters:
         self.AMMeshSpacing = AMSpacing
         self.OverideMesh = OverideMesh
         self.suppressOutput = suppressOutput
+        self.saveHistory = saveHistory
 
     def tuneOnSdeUnlessDefined(self, sde):
         self.numberOfLejaPoints = self.getOptimalNumberOfLejaPoints(sde)
