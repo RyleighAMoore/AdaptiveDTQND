@@ -114,7 +114,7 @@ with open('Output/outputInformationAllTimes.txt', 'w') as g:
 
                 LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationLQ.meshTrajectory[-1], simulationLQ.pdfTrajectory[-1], meshTrueSolnLQ, pdfTrueSolnLQ, interpolate=False)
 
-                timingPerRunArrayLQ.append(totalTimeLQ)
+                timingPerRunArrayLQ.append(np.copy(totalTimeLQ))
                 errorsPerRunArrayLQ.append(np.copy(L2wErrors))
                 meshLengthsPerRunArrayLQ.append(np.copy(simulationLQ.pdf.meshLength))
 
@@ -155,7 +155,7 @@ with open('Output/outputInformationAllTimes.txt', 'w') as g:
                 pdfTrueSolnTR = sde.exactSolution(simulationTR.meshTrajectory[-1], endTime)
                 LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationTR.meshTrajectory[-1], simulationTR.pdfTrajectory[-1], meshTrueSolnTR, pdfTrueSolnTR, interpolate=False)
 
-                timingPerRunArrayTR.append(totalTimeTR)
+                timingPerRunArrayTR.append(np.copy(totalTimeTR))
                 errorsPerRunArrayTR.append(np.copy(L2wErrors))
                 meshLengthsPerRunArrayTR.append(np.copy(simulationTR.pdf.meshLength))
 
