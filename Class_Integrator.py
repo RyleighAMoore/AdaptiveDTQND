@@ -9,7 +9,7 @@ import LejaPoints as LP
 import opolynd
 from LejaPoints import getLejaPoints
 from scipy.interpolate import griddata
-from Functions import weightExp, G
+from Functions import weightExp
 import matplotlib.pyplot as plt
 
 
@@ -89,8 +89,6 @@ class IntegratorLejaQuadrature(Integrator):
             print(np.min(gaussianToDivideOut))
 
         pdf.setIntegrandAfterDividingOut(integrand)
-
-
 
     def setLejaPoints(self, simulation, index, parameters, sde):
         pdf = simulation.pdf

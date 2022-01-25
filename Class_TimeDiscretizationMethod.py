@@ -1,6 +1,6 @@
 import Class_PDF
 import numpy as np
-from Functions import G, alpha1, alpha2
+from Functions import  alpha1, alpha2
 from tqdm import trange
 import matplotlib.pyplot as plt
 from matplotlib import pyplot
@@ -39,43 +39,60 @@ class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
     def computeTransitionMatrix(self, pdf, sde, parameters):
         GMat = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
         for indexOfMesh in trange(pdf.meshLength):
-            m = pdf.meshCoordinates[indexOfMesh,:]
-            D = sde.dimension
-            scale1 = GaussScale(sde.dimension)
-            mu = m+sde.driftFunction(m)*parameters.h
-            scale1.setMu(np.asarray(mu.T))
-            if D == 1:
-                var = parameters.h*sde.diffusionFunction(m)**2
-                scale1.setCov(np.asarray(var))
-            else:
-                cov = sde.diffusionFunction(m)@sde.diffusionFunction(m).T * parameters.h
-                scale1.setCov(cov)
-
-            soln_vals = np.zeros(pdf.meshLength)
-            vals = scale1.ComputeGaussian(pdf.meshCoordinates, sde.dimension)
-
-            GMat[:len(vals), indexOfMesh] = vals
+            y = pdf.meshCoordinates[indexOfMesh,:]
+            GMat[:pdf.meshLength, indexOfMesh] = self.computeTransitionMatrixColumn(y, sde, parameters, pdf)
         return GMat
 
     def AddPointToG(self, meshPartial, newPointindex, parameters,sde, pdf, integrator, simulation):
-        m = pdf.meshCoordinates[newPointindex,:]
-        D = sde.dimension
-        scale1 = GaussScale(sde.dimension)
-        mu = m+sde.driftFunction(m)*parameters.h
-        scale1.setMu(np.asarray(mu.T))
-        if D == 1:
-            var = parameters.h*sde.diffusionFunction(m)**2
-            scale1.setCov(np.asarray(var))
-        else:
-            cov = sde.diffusionFunction(m)@sde.diffusionFunction(m).T * parameters.h
-            scale1.setCov(cov)
+        y = pdf.meshCoordinates[newPointindex,:]
+        simulation.TransitionMatrix[:pdf.meshLength, newPointindex] = self.computeTransitionMatrixColumn(y, sde, parameters, pdf)
 
-        soln_vals = np.zeros(pdf.meshLength)
-        vals = scale1.ComputeGaussian(pdf.meshCoordinates, sde.dimension)
-        simulation.TransitionMatrix[:len(vals), newPointindex] = vals
-
-        newRow = G(newPointindex, meshPartial, parameters.h, sde.driftFunction, sde.diffusionFunction, sde.spatialDiff)
+        newRow = self.computeTransitionMatrixRow(newPointindex, meshPartial, parameters.h, sde.driftFunction, sde.diffusionFunction, sde.spatialDiff)
         simulation.TransitionMatrix[newPointindex, :len(newRow)] = newRow
+
+    def computeTransitionMatrixColumn(self, y, sde, parameters, pdf):
+        scale1 = GaussScale(sde.dimension)
+        mu = y+sde.driftFunction(y)*parameters.h
+        scale1.setMu(np.asarray(mu.T))
+
+        diff_y = sde.diffusionFunction(y)
+        cov = diff_y@diff_y.T * parameters.h
+        scale1.setCov(cov)
+        vals = scale1.ComputeGaussian(pdf.meshCoordinates, sde.dimension)
+        return vals
+
+    def computeTransitionMatrixRow(self, indexOfMesh, mesh, h, drift, diff, SpatialDiff):
+        '''Changing mu and cov over each row'''
+        x = mesh[indexOfMesh,:]
+        D = mesh.shape[1]
+        mean = mesh+drift(mesh)*h
+        if D == 1:
+            newpointVect = x*np.ones(np.shape(mesh))
+            var = h*diff(mesh)**2
+            newVals = 1/(np.sqrt((2*np.pi*var)))*np.exp(-(newpointVect-mean)**2/(2*var))
+            return np.squeeze(newVals)
+
+        if not SpatialDiff:
+            '''diff(y) = diff(x) since diffusion constant'''
+            diff = diff(x)
+            cov = diff@diff.T * h
+            const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(cov))))
+            invCov = np.linalg.inv(cov)
+
+        soln_vals = np.empty(len(mesh))
+        for j in range(len(mesh)):
+            if SpatialDiff:
+                y = mesh[j,:]
+                diff_y = diff(y)
+                cov = diff_y@diff_y.T * h
+                const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(cov))))
+                invCov = np.linalg.inv(cov)
+            mu = mean[j,:]
+            Gs = np.exp(-1/2*((x-mu).T@invCov@(x.T-mu.T)))
+            soln_vals[j] = Gs
+        return soln_vals*const
+
+
 
 
 

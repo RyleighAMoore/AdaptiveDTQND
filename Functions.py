@@ -82,34 +82,7 @@ def weightExp(scaling,mesh):
 
 
 
-def G(indexOfMesh, mesh, h, drift, diff, SpatialDiff):
-    '''Changing mu and cov over each row'''
-    x = mesh[indexOfMesh,:]
-    D = mesh.shape[1]
-    mean = mesh+drift(mesh)*h
 
-    if D == 1:
-        newpointVect = x*np.ones(np.shape(mesh))
-        var = h*diff(mesh)**2
-        newVals = 1/(np.sqrt((2*np.pi*var)))*np.exp(-(newpointVect-mean)**2/(2*var))
-        return np.squeeze(newVals)
-
-    if not SpatialDiff:
-            cov = diff(x)@diff(x).T * h
-            const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(cov))))
-            invCov = np.linalg.inv(cov)
-
-    soln_vals = np.empty(len(mesh))
-    for j in range(len(mesh)):
-        if SpatialDiff:
-            m = mesh[j,:]
-            cov = diff(m)@diff(m).T * h
-            const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(cov))))
-            invCov = np.linalg.inv(cov)
-        mu = mean[j,:]
-        Gs = np.exp(-1/2*((x-mu).T@invCov@(x.T-mu.T)))
-        soln_vals[j] = Gs
-    return soln_vals*const
 
 def G2(indexOfMesh,mesh, h, drift, diff, SpatialDiff):
     '''Changing mu and cov over each row'''
