@@ -33,18 +33,12 @@ def nDGridMeshSquareCenteredAroundGivenPoint(dimension, radius, stepSize, center
 
 
 def findNearestKPoints(Coord, AllPoints, numNeighbors, getIndices = False):
-    # xCoord = Coord[0]
-    # yCoord= Coord[1]
-    # normList1 = (xCoord*np.ones(len(AllPoints)) - AllPoints[:,0])**2 + (yCoord*np.ones(len(AllPoints)) - AllPoints[:,1])**2
-
     normList = np.zeros(np.size(AllPoints,0))
     size = np.size(AllPoints,0)
     for i in range(np.size(AllPoints,1)):
         normList += (Coord[i]*np.ones(size) - AllPoints[:,i])**2
 
     idx = np.argsort(normList)
-
-
     if getIndices:
         return AllPoints[idx[:numNeighbors]], normList[idx[:numNeighbors]], idx[:numNeighbors]
     else:
@@ -61,63 +55,35 @@ def findNearestPoint(Coord, AllPoints, CoordInAllPoints = False):
 
 
 
-def weightExp(scaling,mesh):
-    if np.size(mesh,1) == 1:
-        mu = scaling.mu
-        cov = scaling.cov
-        newvals = np.exp(-(mesh-mu)**2)*(1/cov)
-        return np.squeeze(newvals)
 
-    mu = scaling.mu
-    D = mesh.shape[1]
-    cov = scaling.cov
-    soln_vals = np.empty(len(mesh))
-    # const = 1/(np.sqrt((np.pi)**D*abs(np.linalg.det(cov))))
-    invCov = np.linalg.inv(cov)
-    for j in range(len(mesh)):
-        x = np.expand_dims(mesh[j,:],1)
-        Gs = np.exp(-(x-mu).T@invCov@(x-mu))
-        soln_vals[j] = Gs
-    return soln_vals
+# def G2(indexOfMesh,mesh, h, drift, diff, SpatialDiff):
+#     '''Changing mu and cov over each row'''
+#     x = mesh[indexOfMesh,:]
+#     D = mesh.shape[1]
+#     mean = mesh+drift(mesh)*h
 
+#     if D == 1:
+#         newpointVect = x*np.ones(np.shape(mesh))
+#         var = h*diff(mesh)**2
+#         newVals = 1/(np.sqrt((2*np.pi*var)))*np.exp(-(newpointVect-mean)**2/(2*var))
+#         return np.squeeze(newVals)
 
+#     if not SpatialDiff:
+#             cov = diff(x)@diff(x).T * h
+#             const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(cov))))
+#             invCov = np.linalg.inv(cov)
 
-
-
-def G2(indexOfMesh,mesh, h, drift, diff, SpatialDiff):
-    '''Changing mu and cov over each row'''
-    x = mesh[indexOfMesh,:]
-    D = mesh.shape[1]
-    mean = mesh+drift(mesh)*h
-
-    if D == 1:
-        newpointVect = x*np.ones(np.shape(mesh))
-        var = h*diff(mesh)**2
-        newVals = 1/(np.sqrt((2*np.pi*var)))*np.exp(-(newpointVect-mean)**2/(2*var))
-        return np.squeeze(newVals)
-
-    if not SpatialDiff:
-            cov = diff(x)@diff(x).T * h
-            const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(cov))))
-            invCov = np.linalg.inv(cov)
-
-    soln_vals = np.empty(len(mesh))
-    for j in range(len(mesh)):
-        if SpatialDiff:
-            m = mesh[j,:]
-            cov = diff(m)@diff(m).T * h
-            const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(cov))))
-            invCov = np.linalg.inv(cov)
-        mu = mean[j,:]
-        Gs = np.exp(-1/2*((x-mu).T@invCov@(x.T-mu.T)))
-        soln_vals[j] = Gs
-    return soln_vals*const
+#     soln_vals = np.empty(len(mesh))
+#     for j in range(len(mesh)):
+#         if SpatialDiff:
+#             m = mesh[j,:]
+#             cov = diff(m)@diff(m).T * h
+#             const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(cov))))
+#             invCov = np.linalg.inv(cov)
+#         mu = mean[j,:]
+#         Gs = np.exp(-1/2*((x-mu).T@invCov@(x.T-mu.T)))
+#         soln_vals[j] = Gs
+#     return soln_vals*const
 
 
-def alpha1(th):
-    return(1/(2*th*(1-th)))
 
-def alpha2(th):
-  num = (1-th)**2 + th**2
-  denom = 2*th*(1-th)
-  return(num/denom)

@@ -1,6 +1,5 @@
 import Class_PDF
 import numpy as np
-from Functions import  alpha1, alpha2
 from tqdm import trange
 import matplotlib.pyplot as plt
 from matplotlib import pyplot
@@ -96,6 +95,7 @@ class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
 
 
 
+
 from Class_PDF import nDGridMeshCenteredAtOrigin
 from Class_Gaussian import GaussScale
 from Class_Integrator import IntegratorLejaQuadrature
@@ -120,11 +120,19 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
             self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength
         self.meshSpacingAM = parameters.AMMeshSpacing
         self.theta = 0.5
-        self.a1 = alpha1(self.theta)
-        self.a2 = alpha2(self.theta)
+        self.a1 = self.alpha1(self.theta)
+        self.a2 = self.alpha2(self.theta)
         self.meshAM = None
         self.N2s = None
         self.integrator = IntegratorLejaQuadrature(dimension, parameters)
+
+    def alpha1(self, theta):
+        return(1/(2*theta*(1-theta)))
+
+    def alpha2(self, theta):
+      num = (1-theta)**2 + theta**2
+      denom = 2*theta*(1-theta)
+      return(num/denom)
 
 
     def setAndersonMattinglyMeshAroundPoint(self, point, sde, radius, Noise = False):
