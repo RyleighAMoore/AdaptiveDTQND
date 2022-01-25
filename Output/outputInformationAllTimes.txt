@@ -1,4 +1,4 @@
-dimension:  2  Iterations:  9  initial radius:  2 endTime:  20 time step:  0.05 
+dimension:  2  Iterations:  1  initial radius:  2 endTime:  10 time step:  0.05 
 
 
 LQ: beta=  3 , spacing=  0.38 :
