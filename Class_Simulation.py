@@ -92,9 +92,8 @@ class Simulation():
 
 
     def computeAllTimes(self, sde, parameters):
-        if parameters.saveHistory:
-            self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
-            self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
+        self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
+        self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
         self.times.append(parameters.h)
         numSteps = int(self.endTime/parameters.h)
         timing = []
