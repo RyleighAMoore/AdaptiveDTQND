@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import DriftDiffusionFunctionBank as functionBank
 import time
-
+from PlottingResults import plotRowSixPlots
 #TODO: Update this and clean up
 dimension =2
 if dimension ==1:
@@ -21,12 +21,10 @@ if dimension ==2:
     beta = 3
     radius =2
     # radius = 0.5
-    kstepMin= 0.08
-    kstepMax = 0.09
-    kstepMin= 0.4
-    kstepMax = 0.5
+    kstepMin= 0.2
+    kstepMax = 0.3
     h = 0.05
-    endTime = 4
+    endTime = 3
 
 if dimension ==3:
     beta = 3
@@ -37,11 +35,11 @@ if dimension ==3:
     endTime = 0.1
 
 # driftFunction = functionBank.zeroDrift
-# driftFunction = functionBank.erfDrift
-driftFunction = functionBank.oneDrift
+driftFunction = functionBank.erfDrift
+# driftFunction = functionBank.oneDrift
 
 
-diffusionFunction = functionBank.oneDiffusion
+diffusionFunction = functionBank.pt75Diffusion
 
 
 spatialDiff = False
@@ -175,4 +173,6 @@ if dimension ==2:
 # from Errors import ErrorValsExact
 # LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(simulation.meshTrajectory, simulation.pdfTrajectory, trueSoln, h, plot=False)
 
+
+plotRowSixPlots(simulation.meshTrajectory, simulation.pdfTrajectory, h, [5, 10,20])
 

@@ -4,10 +4,18 @@ Created on Sat Jan 22 13:43:57 2022
 
 @author: Rylei
 """
+
+
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
 
+# Font styling
+rcParams['font.family'] = 'serif'
+rcParams['font.weight'] = 'bold'
+rcParams['font.size'] = '18'
+fontprops = {'fontweight': 'bold'}
 
 
 objects = []
@@ -56,8 +64,8 @@ for buff in bufferVals:
 plt.ylim([0, 5])
 plt.legend()
 plt.xlabel(r'$L_{2w}$ Error')
-plt.ylabel("Relative Running Time (Seconds)")
-plt.title(r"Error vs. Timing, Moving Hill $T=20$")
+plt.ylabel("Relative Running Time")
+plt.title(r"Error vs. Timing, Moving Hill, $T=20$")
 
 
 
@@ -114,5 +122,5 @@ plt.legend()
 plt.xlabel(r'$L_{2w}$ Error')
 plt.ylabel(r'Number of Points')
 plt.ylim([0, 40000])
-plt.title(r"Error vs. Number of Points, Moving Hill $T=20$")
+plt.title(r"Error vs. # of Points, Moving Hill, $T=20$")
 
