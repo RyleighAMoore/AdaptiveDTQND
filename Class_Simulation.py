@@ -84,7 +84,7 @@ class Simulation():
         if parameters.integratorType == "LQ":
             self.integrator = IntegratorLejaQuadrature(sde.dimension, parameters, self.timeDiscretizationMethod)
         if parameters.integratorType == "TR":
-            self.integrator = IntegratorTrapezoidal(sde.dimension, parameters, self.timeDiscretizationMethod)
+            self.integrator = IntegratorTrapezoidal(sde.dimension, parameters)
 
 
     def StepForwardInTime(self, sde, parameters):
