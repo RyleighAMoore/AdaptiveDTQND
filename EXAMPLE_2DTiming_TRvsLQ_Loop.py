@@ -86,7 +86,7 @@ def get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, spacingTR, b
 
     return mesh
 
-numIterations =1
+numIterations =3
 original_stdout = sys.stdout # Save a reference to the original standard output
 with open('Output/outputInformationAllTimes.txt', 'w') as g:
     sys.stdout = g
