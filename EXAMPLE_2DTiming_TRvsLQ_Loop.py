@@ -16,20 +16,19 @@ radius = 2
 h = 0.05
 betaVals = [3, 4]
 bufferVals = [0, 0.5]
-endTime =20
+endTime =10
 spacingLQVals = [0.38]
-spacingTRVals = [0.2, 0.18]
+spacingTRVals = [0.25, 0.2, 0.18]
 
 
 # dimension = 2
-# radius = 3
+# radius = 2
 # h = 0.05
 # betaVals = [4]
-# bufferVals = [0, 0.3, 0.5]
-# endTime =1
-
+# bufferVals = [0.5]
+# endTime =20
 # spacingLQVals = [0.38]
-# spacingTRVals = [0.2]
+# spacingTRVals = [0.18]
 
 
 # SDE creation
@@ -86,94 +85,101 @@ def get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, spacingTR, b
 
     return mesh
 
-numIterations =3
+numIterations =9
 original_stdout = sys.stdout # Save a reference to the original standard output
-with open('Output/outputInformationAllTimes.txt', 'w') as g:
-    sys.stdout = g
-    print("dimension: ", dimension, " Iterations: ", numIterations, " initial radius: ", radius, "endTime: ", endTime, "time step: ", h, "\n")
+# with open('Output/outputInformationAllTimes.txt', 'w') as g:
+    # sys.stdout = g
+    # print("dimension: ", dimension, " Iterations: ", numIterations, " initial radius: ", radius, "endTime: ", endTime, "time step: ", h, "\n")
 
-    for beta in betaVals:
-        ErrorsLQ = []
-        timingArrayStorageLQ = []
-        for spacingLQ in spacingLQVals:
-            print("\nLQ: beta= ", beta, ", spacing= ", spacingLQ, ":\n")
-            timingPerRunArrayLQ = []
-            errorsPerRunArrayLQ = []
-            meshLengthsPerRunArrayLQ = []
-            for iteration in range(numIterations):
-                # SDE parameter creation
-                parametersLQ = Parameters(sde, beta, radius, spacingLQ, spacingLQ, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType="LQ", saveHistory=saveHistory)
-                simulationLQ = Simulation(sde, parametersLQ, endTime)
+for beta in betaVals:
+    ErrorsLQ = []
+    timingArrayStorageLQ = []
+    allTimingsArrayStorageLQ = []
+    allErrorsTimingArrayStorageLQ = []
+    for spacingLQ in spacingLQVals:
+        print("\nLQ: beta= ", beta, ", spacing= ", spacingLQ, ":\n")
+        timingPerRunArrayLQ = []
+        errorsPerRunArrayLQ = []
+        meshLengthsPerRunArrayLQ = []
+        for iteration in range(numIterations):
+            # SDE parameter creation
+            parametersLQ = Parameters(sde, beta, radius, spacingLQ, spacingLQ, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType="LQ", saveHistory=saveHistory)
+            simulationLQ = Simulation(sde, parametersLQ, endTime)
 
-                startTimeLQ = time.time()
-                simulationLQ.setUpTransitionMatrix(sde, parametersLQ)
-                stepByStepTimingLQ = simulationLQ.computeAllTimes(sde, parametersLQ)
-                totalTimeLQ = time.time() - startTimeLQ
-                meshTrueSolnLQ = simulationLQ.meshTrajectory[-1]
-                pdfTrueSolnLQ = sde.exactSolution(simulationLQ.meshTrajectory[-1], endTime)
+            startTimeLQ = time.time()
+            simulationLQ.setUpTransitionMatrix(sde, parametersLQ)
+            stepByStepTimingLQ = simulationLQ.computeAllTimes(sde, parametersLQ)
+            totalTimeLQ = time.time() - startTimeLQ
+            meshTrueSolnLQ = simulationLQ.meshTrajectory[-1]
+            pdfTrueSolnLQ = sde.exactSolution(simulationLQ.meshTrajectory[-1], endTime)
 
-                LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationLQ.meshTrajectory[-1], simulationLQ.pdfTrajectory[-1], meshTrueSolnLQ, pdfTrueSolnLQ, interpolate=False)
+            LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationLQ.meshTrajectory[-1], simulationLQ.pdfTrajectory[-1], meshTrueSolnLQ, pdfTrueSolnLQ, interpolate=False)
 
-                timingPerRunArrayLQ.append(np.copy(totalTimeLQ))
-                errorsPerRunArrayLQ.append(np.copy(L2wErrors))
-                meshLengthsPerRunArrayLQ.append(np.copy(simulationLQ.pdf.meshLength))
+            timingPerRunArrayLQ.append(np.copy(totalTimeLQ))
+            errorsPerRunArrayLQ.append(np.copy(L2wErrors))
+            meshLengthsPerRunArrayLQ.append(np.copy(simulationLQ.pdf.meshLength))
 
-            print("Timing LQ: ", timingPerRunArrayLQ)
-            print("Errors LQ: ", errorsPerRunArrayLQ)
-            print("Mesh Size LQ: ", meshLengthsPerRunArrayLQ)
+        print("Timing LQ: ", timingPerRunArrayLQ)
+        print("Errors LQ: ", errorsPerRunArrayLQ)
+        print("Mesh Size LQ: ", meshLengthsPerRunArrayLQ)
 
-            medianTimingLQ = np.median(np.asarray(timingPerRunArrayLQ))
-            indx,  = np.where(timingPerRunArrayLQ == medianTimingLQ)[0]
-            timingArrayStorageLQ.append(np.copy(medianTimingLQ))
-            ErrorsLQ.append(np.copy(errorsPerRunArrayLQ[indx]))
+        allTimingsArrayStorageLQ.append(np.copy(np.asarray(timingPerRunArrayLQ)))
+        allErrorsTimingArrayStorageLQ.append(np.copy(errorsPerRunArrayLQ))
 
-            numPointsLQ.append(np.copy(meshLengthsPerRunArrayLQ[indx]))
+        medianTimingLQ = np.median(np.asarray(timingPerRunArrayLQ))
+        indx,  = np.where(timingPerRunArrayLQ == medianTimingLQ)[0]
+        timingArrayStorageLQ.append(np.copy(medianTimingLQ))
+        ErrorsLQ.append(np.copy(errorsPerRunArrayLQ[indx]))
 
-        betaDict_times[beta] = np.copy(timingArrayStorageLQ)
-        betaDict_errors[beta] = np.copy(ErrorsLQ)
+        numPointsLQ.append(np.copy(meshLengthsPerRunArrayLQ[indx]))
 
-    for bufferVal in bufferVals:
-        ErrorsTR = []
-        timingArrayStorageTR = []
-        for spacingTR in spacingTRVals:
-            print("\nTR: buffer= ", bufferVal, ", spacing= ", spacingTR, ":\n")
-            timingPerRunArrayTR = []
-            errorsPerRunArrayTR = []
-            meshLengthsPerRunArrayTR = []
-            for iteration in range(numIterations):
-                meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, spacingTR, bufferVal)
-                parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR, saveHistory=saveHistory)
+    betaDict_times[beta] = np.copy(timingArrayStorageLQ)
+    betaDict_errors[beta] = np.copy(ErrorsLQ)
 
-                simulationTR = Simulation(sde, parametersTR, endTime)
-                startTimeTR = time.time()
-                simulationTR.setUpTransitionMatrix(sde, parametersTR)
+for bufferVal in bufferVals:
+    ErrorsTR = []
+    timingArrayStorageTR = []
+    allTimingsArrayStorageTR = []
+    for spacingTR in spacingTRVals:
+        print("\nTR: buffer= ", bufferVal, ", spacing= ", spacingTR, ":\n")
+        timingPerRunArrayTR = []
+        errorsPerRunArrayTR = []
+        meshLengthsPerRunArrayTR = []
+        for iteration in range(numIterations):
+            meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, spacingTR, bufferVal)
+            parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR, saveHistory=saveHistory)
 
-                stepByStepTimingTR = simulationTR.computeAllTimes(sde, parametersTR)
-                totalTimeTR = time.time() - startTimeTR
+            simulationTR = Simulation(sde, parametersTR, endTime)
+            startTimeTR = time.time()
+            simulationTR.setUpTransitionMatrix(sde, parametersTR)
 
-                meshTrueSolnTR = simulationTR.meshTrajectory[-1]
-                pdfTrueSolnTR = sde.exactSolution(simulationTR.meshTrajectory[-1], endTime)
-                LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationTR.meshTrajectory[-1], simulationTR.pdfTrajectory[-1], meshTrueSolnTR, pdfTrueSolnTR, interpolate=False)
+            stepByStepTimingTR = simulationTR.computeAllTimes(sde, parametersTR)
+            totalTimeTR = time.time() - startTimeTR
 
-                timingPerRunArrayTR.append(np.copy(totalTimeTR))
-                errorsPerRunArrayTR.append(np.copy(L2wErrors))
-                meshLengthsPerRunArrayTR.append(np.copy(simulationTR.pdf.meshLength))
+            meshTrueSolnTR = simulationTR.meshTrajectory[-1]
+            pdfTrueSolnTR = sde.exactSolution(simulationTR.meshTrajectory[-1], endTime)
+            LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationTR.meshTrajectory[-1], simulationTR.pdfTrajectory[-1], meshTrueSolnTR, pdfTrueSolnTR, interpolate=False)
 
-            print("Timing TR: ", timingPerRunArrayTR)
-            print("Errors TR: ", errorsPerRunArrayTR)
-            print("Mesh Size TR: ", meshLengthsPerRunArrayTR)
+            timingPerRunArrayTR.append(np.copy(totalTimeTR))
+            errorsPerRunArrayTR.append(np.copy(L2wErrors))
+            meshLengthsPerRunArrayTR.append(np.copy(simulationTR.pdf.meshLength))
 
-            medianTimingTR = np.median(np.asarray(timingPerRunArrayTR))
+        print("Timing TR: ", timingPerRunArrayTR)
+        print("Errors TR: ", errorsPerRunArrayTR)
+        print("Mesh Size TR: ", meshLengthsPerRunArrayTR)
 
-            numPointsTR.append(np.copy(simulationTR.pdf.meshLength))
+        allTimingsArrayStorageTR.append(np.copy(np.asarray(timingPerRunArrayTR)))
 
-            timingArrayStorageTR.append(np.copy(medianTimingTR))
-            ErrorsTR.append(np.copy(errorsPerRunArrayTR[0]))
+        medianTimingTR = np.median(np.asarray(timingPerRunArrayTR))
 
-        bufferDict_times[bufferVal] = np.copy(timingArrayStorageTR)
-        bufferDict_errors[bufferVal] = np.copy(ErrorsTR)
-g.close()
-sys.stdout = original_stdout # Reset the standard output to its original value
+        numPointsTR.append(np.copy(simulationTR.pdf.meshLength))
+
+        timingArrayStorageTR.append(np.copy(medianTimingTR))
+        ErrorsTR.append(np.copy(errorsPerRunArrayTR[0]))
+
+
+    bufferDict_times[bufferVal] = np.copy(timingArrayStorageTR)
+    bufferDict_errors[bufferVal] = np.copy(ErrorsTR)
 
 
 
@@ -202,21 +208,21 @@ for buff in bufferVals:
 plt.legend()
 plt.xlabel(r'$L_{2w}$ Error')
 plt.ylabel("Relative Running Time (Seconds)")
-plt.savefig('Output/timingFigureT20.png')
+plt.savefig('Output/timingFigureT20-9.png')
 
 
-ListToSave = [betaDict_times, betaDict_errors, bufferDict_times, bufferDict_errors, betaVals, bufferVals, spacingLQVals, spacingTRVals, numPointsLQ, numPointsTR, h, radius, endTime]
+ListToSave = [betaDict_times, betaDict_errors, bufferDict_times, bufferDict_errors, betaVals, bufferVals, spacingLQVals, spacingTRVals, numPointsLQ, numPointsTR, h, radius, endTime, allTimingsArrayStorageLQ, allErrorsTimingArrayStorageLQ, allTimingsArrayStorageTR]
 import pickle
 
 # define dictionary
 # create a binary pickle file
-f = open("Output/fileT20.pkl","wb")
+f = open("Output/fileT20-9.pkl","wb")
 pickle.dump(ListToSave,f)
 f.close()
 
 
 original_stdout = sys.stdout # Save a reference to the original standard output
-with open('Output/outputInformationSummary.txt', 'w') as f:
+with open('Output/outputInformationSummary-9.txt', 'w') as f:
     sys.stdout = f # Change the standard output to the file we created.
     print("dimension: ", dimension, " Iterations: ", numIterations, " initial radius: ", radius, "endTime: ", endTime, "time step: ", h, "\n")
     print("Erorrs LQ", betaDict_errors)

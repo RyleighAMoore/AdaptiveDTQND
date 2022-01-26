@@ -1,48 +1,68 @@
-dimension:  2  Iterations:  1  initial radius:  2 endTime:  5 time step:  0.05 
+dimension:  2  Iterations:  3  initial radius:  2 endTime:  2 time step:  0.05 
 
 
 LQ: beta=  3 , spacing=  0.38 :
 
 WARNING: The exact solution is only accurate if the drift and diffusion are constant.
-Timing LQ:  [array(23.9920187)]
-Errors LQ:  [array(0.00099599)]
-Mesh Size LQ:  [array(443)]
+WARNING: The exact solution is only accurate if the drift and diffusion are constant.
+WARNING: The exact solution is only accurate if the drift and diffusion are constant.
+Timing LQ:  [array(7.22198248), array(7.05197787), array(7.54098868)]
+Errors LQ:  [array(0.00228055), array(0.00235214), array(0.00230488)]
+Mesh Size LQ:  [array(224), array(224), array(224)]
 
 LQ: beta=  4 , spacing=  0.38 :
 
 WARNING: The exact solution is only accurate if the drift and diffusion are constant.
-Timing LQ:  [array(34.5529449)]
-Errors LQ:  [array(0.00068199)]
-Mesh Size LQ:  [array(644)]
+WARNING: The exact solution is only accurate if the drift and diffusion are constant.
+WARNING: The exact solution is only accurate if the drift and diffusion are constant.
+Timing LQ:  [array(9.94098163), array(9.71301937), array(9.92998171)]
+Errors LQ:  [array(0.00154908), array(0.00154908), array(0.00154908)]
+Mesh Size LQ:  [array(307), array(307), array(307)]
 
 TR: buffer=  0 , spacing=  0.2 :
 
 Warning: You must have an equispaced mesh!
 WARNING: The exact solution is only accurate if the drift and diffusion are constant.
-Timing TR:  [array(4.64195132)]
-Errors TR:  [array(0.00157026)]
-Mesh Size TR:  [array(3534)]
+Warning: You must have an equispaced mesh!
+WARNING: The exact solution is only accurate if the drift and diffusion are constant.
+Warning: You must have an equispaced mesh!
+WARNING: The exact solution is only accurate if the drift and diffusion are constant.
+Timing TR:  [array(0.48699975), array(0.5329988), array(0.52499938)]
+Errors TR:  [array(0.00177956), array(0.00177956), array(0.00177956)]
+Mesh Size TR:  [array(1521), array(1521), array(1521)]
 
 TR: buffer=  0 , spacing=  0.18 :
 
 Warning: You must have an equispaced mesh!
 WARNING: The exact solution is only accurate if the drift and diffusion are constant.
-Timing TR:  [array(6.88997817)]
-Errors TR:  [array(0.00016144)]
-Mesh Size TR:  [array(4347)]
+Warning: You must have an equispaced mesh!
+WARNING: The exact solution is only accurate if the drift and diffusion are constant.
+Warning: You must have an equispaced mesh!
+WARNING: The exact solution is only accurate if the drift and diffusion are constant.
+Timing TR:  [array(0.76199794), array(0.77199912), array(0.77799797)]
+Errors TR:  [array(0.00019155), array(0.00019155), array(0.00019155)]
+Mesh Size TR:  [array(1892), array(1892), array(1892)]
 
 TR: buffer=  0.5 , spacing=  0.2 :
 
 Warning: You must have an equispaced mesh!
 WARNING: The exact solution is only accurate if the drift and diffusion are constant.
-Timing TR:  [array(19.56496024)]
-Errors TR:  [array(0.00157587)]
-Mesh Size TR:  [array(7553)]
+Warning: You must have an equispaced mesh!
+WARNING: The exact solution is only accurate if the drift and diffusion are constant.
+Warning: You must have an equispaced mesh!
+WARNING: The exact solution is only accurate if the drift and diffusion are constant.
+Timing TR:  [array(2.19099569), array(2.21999621), array(2.28399563)]
+Errors TR:  [array(0.00177295), array(0.00177295), array(0.00177295)]
+Mesh Size TR:  [array(3306), array(3306), array(3306)]
 
 TR: buffer=  0.5 , spacing=  0.18 :
 
 Warning: You must have an equispaced mesh!
 WARNING: The exact solution is only accurate if the drift and diffusion are constant.
-Timing TR:  [array(29.27595448)]
-Errors TR:  [array(0.0001619)]
-Mesh Size TR:  [array(9292)]
+Warning: You must have an equispaced mesh!
+WARNING: The exact solution is only accurate if the drift and diffusion are constant.
+Warning: You must have an equispaced mesh!
+WARNING: The exact solution is only accurate if the drift and diffusion are constant.
+Timing TR:  [array(3.02499604), array(2.98899555), array(3.09099483)]
+Errors TR:  [array(0.00019012), array(0.00019012), array(0.00019012)]
+Mesh Size TR:  [array(4032), array(4032), array(4032)]
