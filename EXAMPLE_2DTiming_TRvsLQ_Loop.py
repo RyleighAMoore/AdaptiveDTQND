@@ -208,7 +208,7 @@ for buff in bufferVals:
 plt.legend()
 plt.xlabel(r'$L_{2w}$ Error')
 plt.ylabel("Relative Running Time (Seconds)")
-plt.savefig('Output/timingFigureT20-9.png')
+plt.savefig('Output/timingFigureT40-9.png')
 
 
 ListToSave = [betaDict_times, betaDict_errors, bufferDict_times, bufferDict_errors, betaVals, bufferVals, spacingLQVals, spacingTRVals, numPointsLQ, numPointsTR, h, radius, endTime, allTimingsArrayStorageLQ, allErrorsTimingArrayStorageLQ, allTimingsArrayStorageTR]
@@ -216,13 +216,13 @@ import pickle
 
 # define dictionary
 # create a binary pickle file
-f = open("Output/fileT20-9.pkl","wb")
+f = open("Output/fileT40-9.pkl","wb")
 pickle.dump(ListToSave,f)
 f.close()
 
 
 original_stdout = sys.stdout # Save a reference to the original standard output
-with open('Output/outputInformationSummary-9.txt', 'w') as f:
+with open('Output/outputInformationSummary4T40-9.txt', 'w') as f:
     sys.stdout = f # Change the standard output to the file we created.
     print("dimension: ", dimension, " Iterations: ", numIterations, " initial radius: ", radius, "endTime: ", endTime, "time step: ", h, "\n")
     print("Erorrs LQ", betaDict_errors)
