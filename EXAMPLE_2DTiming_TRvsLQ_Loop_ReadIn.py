@@ -42,6 +42,7 @@ endTime = objects[0][12]
 allTimingsArrayStorageLQ = objects[0][13]
 allErrorsTimingArrayStorageLQ=objects[0][14]
 allTimingsArrayStorageTR = objects[0][15]
+allErrorArrayStorageTR = objects[0][16]
 
 unitTime = np.asarray(betaDict_times[min(betaVals)])[0]
 unitError = np.asarray(betaDict_errors[min(betaVals)])[0]

@@ -16,7 +16,7 @@ radius = 2
 h = 0.05
 betaVals = [3, 4]
 bufferVals = [0, 0.5]
-endTime =40
+endTime = 40
 spacingLQVals = [0.38]
 spacingTRVals = [0.25, 0.2, 0.18]
 
@@ -91,11 +91,11 @@ original_stdout = sys.stdout # Save a reference to the original standard output
     # sys.stdout = g
     # print("dimension: ", dimension, " Iterations: ", numIterations, " initial radius: ", radius, "endTime: ", endTime, "time step: ", h, "\n")
 
+allTimingsArrayStorageLQ = []
+allErrorsTimingArrayStorageLQ = []
 for beta in betaVals:
     ErrorsLQ = []
     timingArrayStorageLQ = []
-    allTimingsArrayStorageLQ = []
-    allErrorsTimingArrayStorageLQ = []
     for spacingLQ in spacingLQVals:
         print("\nLQ: beta= ", beta, ", spacing= ", spacingLQ, ":\n")
         timingPerRunArrayLQ = []
@@ -136,10 +136,12 @@ for beta in betaVals:
     betaDict_times[beta] = np.copy(timingArrayStorageLQ)
     betaDict_errors[beta] = np.copy(ErrorsLQ)
 
+
+allTimingsArrayStorageTR = []
+allErrorArrayStorageTR = []
 for bufferVal in bufferVals:
     ErrorsTR = []
     timingArrayStorageTR = []
-    allTimingsArrayStorageTR = []
     for spacingTR in spacingTRVals:
         print("\nTR: buffer= ", bufferVal, ", spacing= ", spacingTR, ":\n")
         timingPerRunArrayTR = []
@@ -159,6 +161,7 @@ for bufferVal in bufferVals:
             meshTrueSolnTR = simulationTR.meshTrajectory[-1]
             pdfTrueSolnTR = sde.exactSolution(simulationTR.meshTrajectory[-1], endTime)
             LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationTR.meshTrajectory[-1], simulationTR.pdfTrajectory[-1], meshTrueSolnTR, pdfTrueSolnTR, interpolate=False)
+            allErrorArrayStorageTR.append(L2wErrors)
 
             timingPerRunArrayTR.append(np.copy(totalTimeTR))
             errorsPerRunArrayTR.append(np.copy(L2wErrors))
@@ -169,7 +172,6 @@ for bufferVal in bufferVals:
         print("Mesh Size TR: ", meshLengthsPerRunArrayTR)
 
         allTimingsArrayStorageTR.append(np.copy(np.asarray(timingPerRunArrayTR)))
-
         medianTimingTR = np.median(np.asarray(timingPerRunArrayTR))
 
         numPointsTR.append(np.copy(simulationTR.pdf.meshLength))
@@ -208,21 +210,21 @@ for buff in bufferVals:
 plt.legend()
 plt.xlabel(r'$L_{2w}$ Error')
 plt.ylabel("Relative Running Time (Seconds)")
-plt.savefig('Output/timingFigureT40-9.png')
+plt.savefig('Output/timingFigureT40-3.png')
 
 
-ListToSave = [betaDict_times, betaDict_errors, bufferDict_times, bufferDict_errors, betaVals, bufferVals, spacingLQVals, spacingTRVals, numPointsLQ, numPointsTR, h, radius, endTime, allTimingsArrayStorageLQ, allErrorsTimingArrayStorageLQ, allTimingsArrayStorageTR]
+ListToSave = [betaDict_times, betaDict_errors, bufferDict_times, bufferDict_errors, betaVals, bufferVals, spacingLQVals, spacingTRVals, numPointsLQ, numPointsTR, h, radius, endTime, allTimingsArrayStorageLQ, allErrorsTimingArrayStorageLQ, allTimingsArrayStorageTR, allErrorArrayStorageTR]
 import pickle
 
 # define dictionary
 # create a binary pickle file
-f = open("Output/fileT40-9.pkl","wb")
+f = open("Output/fileT40-3.pkl","wb")
 pickle.dump(ListToSave,f)
 f.close()
 
 
 original_stdout = sys.stdout # Save a reference to the original standard output
-with open('Output/outputInformationSummary4T40-9.txt', 'w') as f:
+with open('Output/outputInformationSummary4T40-3.txt', 'w') as f:
     sys.stdout = f # Change the standard output to the file we created.
     print("dimension: ", dimension, " Iterations: ", numIterations, " initial radius: ", radius, "endTime: ", endTime, "time step: ", h, "\n")
     print("Erorrs LQ", betaDict_errors)
