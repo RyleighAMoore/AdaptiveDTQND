@@ -43,8 +43,11 @@ class PDF:
         if parameters.integratorType == "LQ":
             self.meshCoordinates = nDGridMeshCenteredAtOrigin(sde.dimension, parameters.radius, parameters.kstepMin)
         if parameters.integratorType == "TR":
-            # self.meshCoordinates = nDGridMeshSquareCenteredAroundGivenPoint(sde.dimension, parameters.radius, parameters.kstepMin, parameters.initialMeshCentering)
-            self.meshCoordinates = parameters.OverideMesh
+            if parameters.OverideMesh is not None:
+                self.meshCoordinates = parameters.OverideMesh
+            else:
+                self.meshCoordinates = nDGridMeshSquareCenteredAroundGivenPoint(sde.dimension, parameters.radius, parameters.kstepMin, parameters.initialMeshCentering)
+
         # self.meshCoordinates = self.meshCoordinates + parameters.initialMeshCentering*np.ones(np.shape(self.meshCoordinates))
         self.meshLength = len(self.meshCoordinates)
 

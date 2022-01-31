@@ -124,7 +124,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         self.a2 = self.alpha2(self.theta)
         self.meshAM = None
         self.N2s = None
-        self.integrator = IntegratorLejaQuadrature(dimension, parameters)
+        self.integrator = IntegratorLejaQuadrature(dimension, parameters, parameters.timeDiscretizationType)
 
     def alpha1(self, theta):
         return(1/(2*theta*(1-theta)))
@@ -235,7 +235,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
 
 
 
-    def computeTransitionMatrix1(self, pdf, sde, parameters):
+    def computeTransitionMatrix(self, pdf, sde, parameters):
         self.meshSpacingAM = 0.1
         matrix = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
         for j in trange(pdf.meshLength):
@@ -497,7 +497,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         return matrix
 
     # @profile
-    def computeTransitionMatrix(self, pdf, sde, parameters):
+    def computeTransitionMatrix1(self, pdf, sde, parameters):
         self.meshSpacingAM = 0.05
         matrix = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
         meshDTQ = np.copy(pdf.meshCoordinates)
@@ -554,7 +554,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         return matrix
 
 
-    def computeTransitionMatrix(self, pdf, sde, parameters):
+    # def computeTransitionMatrix1(self, pdf, sde, parameters):
         matrix = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
         for j in trange(pdf.meshLength):
             mu1= pdf.meshCoordinates[j]+sde.driftFunction(np.asarray([pdf.meshCoordinates[j]]))*self.theta*parameters.h
@@ -620,6 +620,37 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         # assert np.isclose(10**(-16),np.max(abs(matrix - integrator.TransitionMatrix[:pdf.meshLength,:pdf.meshLength])))
         t=0
 
+    #TODO: This is a copy of the other class currently
+    def computeTransitionMatrixRow(self, indexOfMesh, mesh, h, drift, diff, SpatialDiff):
+        '''Changing mu and cov over each row'''
+        x = mesh[indexOfMesh,:]
+        D = mesh.shape[1]
+        mean = mesh+drift(mesh)*h
+        if D == 1:
+            newpointVect = x*np.ones(np.shape(mesh))
+            var = h*diff(mesh)**2
+            newVals = 1/(np.sqrt((2*np.pi*var)))*np.exp(-(newpointVect-mean)**2/(2*var))
+            return np.squeeze(newVals)
+
+        if not SpatialDiff:
+            '''diff(y) = diff(x) since diffusion constant'''
+            diff = diff(x)
+            cov = diff@diff.T * h
+            const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(cov))))
+            invCov = np.linalg.inv(cov)
+
+        soln_vals = np.empty(len(mesh))
+        for j in range(len(mesh)):
+            if SpatialDiff:
+                y = mesh[j,:]
+                diff_y = diff(y)
+                cov = diff_y@diff_y.T * h
+                const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(cov))))
+                invCov = np.linalg.inv(cov)
+            mu = mean[j,:]
+            Gs = np.exp(-1/2*((x-mu).T@invCov@(x.T-mu.T)))
+            soln_vals[j] = Gs
+        return soln_vals*const
 
 
 

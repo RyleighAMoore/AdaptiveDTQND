@@ -27,7 +27,7 @@ class SDE:
         self.diffusionFunction = diffusionFunction
         self.spatialDiff = spatialDiff
 
-    def ApproxExactSoln(self, endTime, radius, xStep):
+    def ApproxExactSoln(self, endTime, radius, kstepMin, sde):
         '''
         Uses the Trapezoidal rule to approximate the solution of the SDE for error analysis.
 
@@ -37,22 +37,13 @@ class SDE:
         xStep: The spacing of the approximiated solution
         '''
         beta = 3 # Not really used
-        kstepMin = xStep
-        kstepMax = xStep # Not really used
         h = 0.005 # Do not make less
 
-        parameters = Parameters(self, beta, radius, kstepMin, kstepMax, h, False, timeDiscretizationType = "EM")
-        pdf = PDF(self, parameters)
-        simulation= Simulation(self, parameters, endTime)
+        parameters = Parameters(sde, beta, radius, kstepMin, kstepMin, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", saveHistory=False, initialMeshCentering=[0,0])
+        simulation= Simulation(sde, parameters, endTime)
         simulation.setUpTransitionMatrix(self, parameters)
-
-        G = simulation.integrator.TransitionMatrix
-        numSteps = int(endTime/parameters.h)
-        # plt.figure()
-        for i in trange(numSteps):
-            pdf.pdfVals = kstepMin**self.dimension*G[:len(pdf.pdfVals), :len(pdf.pdfVals)]@pdf.pdfVals
-            # plt.scatter(pdf.meshCoordinates, pdf.pdfVals)
-        return pdf.meshCoordinates, pdf.pdfVals
+        stepByStepTiming = simulation.computeAllTimes(sde, parameters)
+        return simulation.pdf.meshCoordinates, simulation.pdf.pdfVals
 
     def exactSolution(self, mesh, endTime):
         '''

@@ -8,16 +8,16 @@ import DriftDiffusionFunctionBank as functionBank
 from Errors import ErrorValsOneTime
 import time
 
-dimension = 2
+dimension = 1
 if dimension ==1:
     beta = 5
-    radius = 3
-    kstepMin= 0.08
-    kstepMax = 0.09
+    radius = 5
+    kstepMin= 0.01
+    kstepMax = 0.01
     # kstepMin= 0.15
     # kstepMax = 0.2
     # h = 0.01
-    endTime = 20
+    endTime =3
 
 if dimension ==2:
     beta = 3
@@ -45,15 +45,15 @@ spatialDiff = False
 diffusionFunction = functionBank.ptSixDiffusion
 
 
-adaptive = True
-integrationType = "LQ"
+adaptive = False
+integrationType = "TR"
 
 ApproxSolution =True
 
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
 if ApproxSolution:
-    meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,10, 0.02)
+    meshApprox, pdfApprox = sde.ApproxExactSoln(endTime,radius, 0.005, sde)
 
 # with open('time4Erf.npy', 'wb') as f:
 #     np.save(f, meshApprox)
@@ -73,12 +73,15 @@ timesNoStartupEM = []
 timesNoStartupAM = []
 timesStartupEM = []
 timesStartupAM = []
-hvals = [0.05, 0.1, 0.15, 0.2, 0.3, 0.4]
-hvalsAM = [0.4, 0.3, 0.2, 0.15, 0.1]
-# hvals = [0.1]
+hvals = [0.25, 0.35, 0.45]
+hvalsAM =hvals# [0.4, 0.3, 0.2, 0.15, 0.1]
+# hvals = [0.05]
+# hvalsAM = [0.05]
+
+initialCentering = [0]
 
 for h in hvals:
-    parametersEM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType=integrationType)
+    parametersEM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "EM", integratorType=integrationType, initialMeshCentering=initialCentering)
     startEM = time.time()
     simulationEM = Simulation(sde, parametersEM, endTime)
     simulationEM.setUpTransitionMatrix(sde, parametersEM)
@@ -97,10 +100,9 @@ for h in hvals:
 
     LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationEM.meshTrajectory[-1], simulationEM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
     ErrorsEM.append(np.copy(L2wErrors))
-    del simulationEM
 
 for h in hvalsAM:
-    parametersAM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "AM", integratorType=integrationType)
+    parametersAM = Parameters(sde, beta, radius, kstepMin, kstepMax, h,useAdaptiveMesh =adaptive, timeDiscretizationType = "AM", integratorType=integrationType, initialMeshCentering=initialCentering)
     startAM = time.time()
     simulationAM = Simulation(sde, parametersAM, endTime)
     simulationAM.setUpTransitionMatrix(sde, parametersAM)
@@ -148,24 +150,24 @@ from mpl_toolkits.mplot3d import Axes3D
 # plt.show()
 # plt.savefig('result.png')
 
-plt.figure()
-plt.loglog(np.asarray(timesEM), np.asarray(ErrorsEM),'o-',label= "EM: Total Time")
-plt.loglog(np.asarray(timesAM), np.asarray(ErrorsAM), 'o-', label="AM: Total Time")
-# plt.loglog(np.asarray(timesNoStartupEM), np.asarray(ErrorsEM),'.-', label= "EM: No Startup")
-# plt.loglog(np.asarray(timesNoStartupAM), np.asarray(ErrorsAM),'.-', label="AM: No Startup")
-# plt.loglog(np.asarray(timesStartupAM), np.asarray(ErrorsAM),'.-', label="AM: Startup")
-# plt.loglog(np.asarray(timesStartupEM), np.asarray(ErrorsEM),'.-', label="EM: Startup")
+# plt.figure()
+# plt.loglog(np.asarray(timesEM), np.asarray(ErrorsEM),'o-',label= "EM: Total Time")
+# plt.loglog(np.asarray(timesAM), np.asarray(ErrorsAM), 'o-', label="AM: Total Time")
+# # plt.loglog(np.asarray(timesNoStartupEM), np.asarray(ErrorsEM),'.-', label= "EM: No Startup")
+# # plt.loglog(np.asarray(timesNoStartupAM), np.asarray(ErrorsAM),'.-', label="AM: No Startup")
+# # plt.loglog(np.asarray(timesStartupAM), np.asarray(ErrorsAM),'.-', label="AM: Startup")
+# # plt.loglog(np.asarray(timesStartupEM), np.asarray(ErrorsEM),'.-', label="EM: Startup")
 
-plt.legend()
-plt.xlabel("Time (Seconds)")
-plt.ylabel("Error")
+# plt.legend()
+# plt.xlabel("Time (Seconds)")
+# plt.ylabel("Error")
 
-plt.show()
+# plt.show()
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-simulation = simulationAM
+simulation = simulationEM
 if dimension ==1:
     def update_graph(num):
         graph.set_data(simulation.meshTrajectory[num], simulation.pdfTrajectory[num])
@@ -181,12 +183,12 @@ if dimension ==1:
     ani = animation.FuncAnimation(fig, update_graph, frames=len(simulation.pdfTrajectory), interval=50, blit=False)
     plt.show()
 
-# plt.figure()
+plt.figure()
 
-# lengths = []
-# for  i in range(len(simulation.pdfTrajectory)):
-#     l = len(np.asarray((simulation.pdfTrajectory[i])))
-#     lengths.append(l)
+lengths = []
+for  i in range(len(simulation.pdfTrajectory)):
+    l = len(np.asarray((simulation.pdfTrajectory[i])))
+    lengths.append(l)
 
 
 plt.figure()
@@ -196,12 +198,12 @@ plt.ylabel("Errors")
 plt.xlabel("Temporal Step Size")
 plt.legend()
 
-plt.figure()
-plt.plot(np.asarray(hvals), np.asarray(timesEM),label= "EM")
-plt.plot(np.asarray(hvalsAM), np.asarray(timesAM), label="AM")
-plt.ylabel("Time")
-plt.xlabel("Temporal Step Size")
-plt.legend()
+# plt.figure()
+# plt.plot(np.asarray(hvals), np.asarray(timesEM),label= "EM")
+# plt.plot(np.asarray(hvalsAM), np.asarray(timesAM), label="AM")
+# plt.ylabel("Time")
+# plt.xlabel("Temporal Step Size")
+# plt.legend()
 
 
 
