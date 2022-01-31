@@ -42,9 +42,11 @@ class PDF:
     def setInitialConditionMeshCoordinates(self, sde, parameters):
         if parameters.integratorType == "LQ":
             self.meshCoordinates = nDGridMeshCenteredAtOrigin(sde.dimension, parameters.radius, parameters.kstepMin)
-        if parameters.integratorType == "TR":
-            # self.meshCoordinates = nDGridMeshSquareCenteredAroundGivenPoint(sde.dimension, parameters.radius, parameters.kstepMin, parameters.initialMeshCentering)
+        if parameters.integratorType == "TR" and parameters.OverideMesh is not None:
             self.meshCoordinates = parameters.OverideMesh
+        if parameters.integratorType == "TR" and parameters.OverideMesh is None:
+            self.meshCoordinates = nDGridMeshCenteredAtOrigin(sde.dimension, parameters.radius, parameters.kstepMin, parameters.initialMeshCentering)
+
         # self.meshCoordinates = self.meshCoordinates + parameters.initialMeshCentering*np.ones(np.shape(self.meshCoordinates))
         self.meshLength = len(self.meshCoordinates)
 

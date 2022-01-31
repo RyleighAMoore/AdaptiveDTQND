@@ -219,7 +219,7 @@ class IntegratorLejaQuadrature(Integrator):
             newPdf[index] =value
         # print(LPReuseCount/pdf.meshLength*100, "% Leja Reuse")
         # print(self.AltMethodUseCount/pdf.meshLength*100, "% Alt method Use")
-        assert self.AltMethodUseCount/pdf.meshLength*100 < 10, "WARNING: Alt method use is high*************"
+        # assert self.AltMethodUseCount/pdf.meshLength*100 < 10, "WARNING: Alt method use is high*************"
         # print(counting, "-----------------------------------")
         return newPdf
 

@@ -61,7 +61,7 @@ class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
         return vals
 
     def computeTransitionMatrixRow(self, indexOfMesh, mesh, h, drift, diff, SpatialDiff):
-        '''Changing mu and cov over each row'''
+        '''Changing mu and cov over each column'''
         x = mesh[indexOfMesh,:]
         D = mesh.shape[1]
         mean = mesh+drift(mesh)*h

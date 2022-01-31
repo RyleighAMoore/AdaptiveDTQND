@@ -14,8 +14,8 @@ problem = "erf" # "spiral" "complex"
 
 dimension =2
 beta = 3
-radius =2
-kstepMin= 0.25
+radius = 2
+kstepMin = 0.25
 kstepMax = 0.3
 h = 0.05
 
@@ -33,7 +33,7 @@ if problem == "spiral":
 
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
-parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh =True, timeDiscretizationType = "EM", integratorType = "LQ")
+parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh =True, timeDiscretizationType = "EM", integratorType = "TR")
 simulation = Simulation(sde, parameters, endTime)
 
 start = time.time()
@@ -71,6 +71,11 @@ if animate ==True:
 from PlottingResults import plotRowSixPlots
 
 if problem == "erf":
+    plottingMax = 0.1
+    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [15, (len(simulation.meshTrajectory)-1)//2,len(simulation.meshTrajectory)-1])
+
+
+if problem == "spiral":
     plottingMax = 0.1
     plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [15, (len(simulation.meshTrajectory)-1)//2,len(simulation.meshTrajectory)-1])
 

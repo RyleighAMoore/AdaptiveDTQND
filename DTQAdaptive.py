@@ -8,12 +8,14 @@ import DriftDiffusionFunctionBank as functionBank
 import time
 from PlottingResults import plotRowSixPlots
 #TODO: Update this and clean up
-dimension =2
+dimension =1
 if dimension ==1:
     beta = 4
-    radius = 5
+    radius = 6
     kstepMin= 0.06
     kstepMax = 0.07
+    kstepMin= 0.25
+    kstepMax = 0.25
     h = 0.05
     endTime =5
 
@@ -35,8 +37,8 @@ if dimension ==3:
     endTime = 0.1
 
 # driftFunction = functionBank.zeroDrift
-driftFunction = functionBank.erfDrift
-# driftFunction = functionBank.oneDrift
+# driftFunction = functionBank.erfDrift
+driftFunction = functionBank.oneDrift
 
 
 diffusionFunction = functionBank.oneDiffusion
@@ -130,10 +132,10 @@ if dimension ==2:
 
 
 
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-index = 20
-ax.plot(Meshes[index][:,0], Meshes[index][:,1], PdfTraj[index], linestyle="", marker=".")
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+# index = 20
+# ax.plot(Meshes[index][:,0], Meshes[index][:,1], PdfTraj[index], linestyle="", marker=".")
 
 # if dimension ==3:
 #     Meshes = simulation.meshTrajectory

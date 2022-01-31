@@ -59,7 +59,7 @@ class Parameters:
 
     def setNumQuadFit(self,sde):
         if sde.dimension == 1:
-            self.numQuadFit = 30
+            self.numQuadFit = 20
         elif sde.dimension == 2:
             self.numQuadFit = 20
         else:
