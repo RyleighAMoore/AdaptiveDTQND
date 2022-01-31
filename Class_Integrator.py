@@ -189,14 +189,13 @@ class IntegratorLejaQuadrature(Integrator):
                 value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
             else: # Get Leja points, or compute them if they aren't set
                 self.setLejaPoints(simulation, index, parameters,sde)
-
                 if self.lejaSuccess == False: #Getting Leja points failed, use alt method
                      value, condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
-                     # print("failed Leja")
                 else: # Continue with integration, try to use Leja points from last step
                     value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index, sde)
                     if condNumber < self.conditionNumberForAcceptingLejaPointsAtNextTimeStep: # Finished, set Leja values for next time step
-                        LPReuseCount = LPReuseCount +1
+                        if self.freshLejaPoints ==False:
+                            LPReuseCount = LPReuseCount +1
                         simulation.LejaPointIndicesBoolVector[index] = True
                         simulation.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
 
@@ -221,7 +220,7 @@ class IntegratorLejaQuadrature(Integrator):
         # print(self.AltMethodUseCount/pdf.meshLength*100, "% Alt method Use")
         # assert self.AltMethodUseCount/pdf.meshLength*100 < 10, "WARNING: Alt method use is high*************"
         # print(counting, "-----------------------------------")
-        return newPdf
+        return newPdf, LPReuseCount, self.AltMethodUseCount
 
 
 def findNearestKPoints(Coord, AllPoints, numNeighbors, getIndices = False):

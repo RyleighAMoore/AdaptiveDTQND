@@ -31,6 +31,8 @@ class Simulation():
         self.setIntegrator(sde, parameters)
         # self.setUpTransitionMatrix(self.pdf, sde, parameters)
         self.meshUpdater = MeshUpdater(parameters, self.pdf, sde.dimension)
+        self.LPReuseCount = []
+        self.AltMethodUseCount = []
 
     def removePoints(self, index):
         self.TransitionMatrix = np.delete(self.TransitionMatrix, index,0)
@@ -88,8 +90,10 @@ class Simulation():
 
 
     def StepForwardInTime(self, sde, parameters):
-        self.pdf.pdfVals = self.integrator.computeTimeStep(sde, parameters, self)
-
+        self.pdf.pdfVals, LPReuseCount, AltMethodUseCount = self.integrator.computeTimeStep(sde, parameters, self)
+        if parameters.saveHistory:
+            self.LPReuseCount.append(np.copy(LPReuseCount))
+            self.AltMethodUseCount.append(np.copy(AltMethodUseCount))
 
     def computeAllTimes(self, sde, parameters):
         if parameters.integratorType == "LQ" and not parameters.saveHistory:
