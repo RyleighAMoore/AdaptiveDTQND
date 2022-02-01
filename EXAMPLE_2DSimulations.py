@@ -10,26 +10,34 @@ from PlottingResults import plotRowSixPlots
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-problem = "erf" # "spiral" "complex"
+problem = "complex" # "spiral" "complex"
 
 dimension =2
 beta = 3
 radius = 2
-kstepMin = 0.25
-kstepMax = 0.3
-h = 0.05
+kstepMin = 0.1
+kstepMax = 0.1
+h = 0.01
 
 if problem == "erf":
     driftFunction = functionBank.erfDrift
     diffusionFunction = functionBank.pt75Diffusion
     spatialDiff = False
+    kstepMin = 0.25
+    kstepMax = 0.3
     endTime = 4
 
 if problem == "spiral":
-    driftFunction = functionBank.spiral
-    diffusionFunction = functionBank.pt6Diffusion
+    driftFunction = functionBank.spiralDrift_2D
+    diffusionFunction = functionBank.ptSixDiffusion
     spatialDiff = False
-    endTime = 5
+    endTime = 3
+
+if problem == "complex":
+    driftFunction = functionBank.complextDrift_2D
+    diffusionFunction = functionBank.complexDiff
+    spatialDiff = True
+    endTime = 1.5
 
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
@@ -77,5 +85,32 @@ if problem == "erf":
 
 if problem == "spiral":
     plottingMax = 0.1
-    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [15, (len(simulation.meshTrajectory)-1)//2,len(simulation.meshTrajectory)-1])
+    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [35, 45 ,len(simulation.meshTrajectory)-1])
+
+
+if problem == "complex":
+    plottingMax = 0.1
+    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [5, 15 ,len(simulation.meshTrajectory)-1])
+
+
+'''Compute Leja reuse and Alt method use'''
+lengths = []
+for mesh in simulation.meshTrajectory[1:]:
+    lengths.append(len(mesh))
+
+percentLejaReuse = np.asarray(simulation.LPReuseCount)/np.asarray(lengths)*100
+
+print("Average LEJA REUSE Percent: ", np.mean(percentLejaReuse))
+
+percentAltMethodUse = np.asarray(simulation.AltMethodUseCount)/np.asarray(lengths)*100
+print("Average ALT METHOD USE Percent: ", np.mean(percentAltMethodUse))
+
+
+
+
+
+
+
+
+
 

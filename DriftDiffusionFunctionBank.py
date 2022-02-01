@@ -41,7 +41,13 @@ def spiralDrift_2D(mesh):
     x = mesh[:,0]
     y = mesh[:,1]
     r = np.sqrt(x ** 2 + y ** 2)
-    return np.asarray([3*(10*erf(10*x)+5*y)/(r+10), 6*(-2*x+y)/(r+10)]).T
+    return np.asarray([2*(10*erf(10*x)+5*y)/(r+10), 5*(-2*x+y)/(r+10)]).T
+
+def complextDrift_2D(mesh):
+    if mesh.ndim ==1:
+        mesh = np.expand_dims(mesh, axis=0)
+    x = mesh[:,0]
+    return np.asarray([2*erf(10*x), 0*x]).T
 
 def oneDiffusion(mesh):
     if mesh.ndim == 1:
@@ -68,7 +74,7 @@ def oneDiffusion(mesh):
         mesh = np.expand_dims(mesh, axis=0)
     return np.diag(np.ones(np.size(mesh,1)))
 
-def ComplexDiff(mesh):
+def complexDiff(mesh):
     if mesh.ndim == 1:
         mesh = np.expand_dims(mesh, axis=0)
     return np.diag([0.01*mesh[:,0][0]**2+0.5,0.01*mesh[:,1][0]**2+0.5]) + np.ones((2,2))*0.2

@@ -91,7 +91,7 @@ class MeshUpdater:
                                 nearestPoint,distToNearestPoint, idx = fun.findNearestPoint(newPoint, pdf.meshCoordinates)
 
                             # print(distToNearestPoint)
-                            if distToNearestPoint >= 0.99*parameters.minDistanceBetweenPoints and distToNearestPoint <= 1.1*parameters.maxDistanceBetweenPoints:
+                            if distToNearestPoint >= 0.99*parameters.minDistanceBetweenPoints and distToNearestPoint <= 1.01*parameters.maxDistanceBetweenPoints:
                                 points.append(newPoint)
 
                         newPoints = points
