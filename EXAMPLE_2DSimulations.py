@@ -15,9 +15,6 @@ problem = "complex" # "spiral" "complex"
 dimension =2
 beta = 3
 radius = 2
-kstepMin = 0.1
-kstepMax = 0.1
-h = 0.01
 
 if problem == "erf":
     driftFunction = functionBank.erfDrift
@@ -26,18 +23,25 @@ if problem == "erf":
     kstepMin = 0.25
     kstepMax = 0.3
     endTime = 4
+    h=0.05
 
 if problem == "spiral":
     driftFunction = functionBank.spiralDrift_2D
     diffusionFunction = functionBank.ptSixDiffusion
     spatialDiff = False
+    kstepMin = 0.15
+    kstepMax = 0.15
     endTime = 3
+    h=0.05
 
 if problem == "complex":
     driftFunction = functionBank.complextDrift_2D
     diffusionFunction = functionBank.complexDiff
     spatialDiff = True
+    kstepMin = 0.1
+    kstepMax = 0.1
     endTime = 1.5
+    h=0.01
 
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
@@ -89,8 +93,8 @@ if problem == "spiral":
 
 
 if problem == "complex":
-    plottingMax = 0.1
-    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [5, 15 ,len(simulation.meshTrajectory)-1])
+    plottingMax = 0.3
+    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [65, 105 ,len(simulation.meshTrajectory)-1])
 
 
 '''Compute Leja reuse and Alt method use'''
