@@ -10,7 +10,7 @@ from PlottingResults import plotRowSixPlots
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-problem = "complex" # "spiral" "complex"
+problem = "spiral" # "spiral" "complex"
 
 dimension =2
 beta = 3
@@ -83,18 +83,18 @@ if animate ==True:
 from PlottingResults import plotRowSixPlots
 
 if problem == "erf":
-    plottingMax = 0.1
-    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [15, (len(simulation.meshTrajectory)-1)//2,len(simulation.meshTrajectory)-1])
+    plottingMax = 0.3
+    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [5, 15,len(simulation.meshTrajectory)-1], [-10,10,-10,10])
 
 
 if problem == "spiral":
-    plottingMax = 0.1
-    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [35, 45 ,len(simulation.meshTrajectory)-1])
+    plottingMax = 0.3
+    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [15, 35 ,len(simulation.meshTrajectory)-1], [-12,12,-12,12])
 
 
 if problem == "complex":
     plottingMax = 0.3
-    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [65, 105 ,len(simulation.meshTrajectory)-1])
+    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [59, 99 ,len(simulation.meshTrajectory)-1], [-6,6,-6,6])
 
 
 '''Compute Leja reuse and Alt method use'''

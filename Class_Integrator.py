@@ -30,7 +30,7 @@ class IntegratorTrapezoidal(Integrator):
 
     def computeTimeStep(self, sde, parameters, simulation):
         vals= np.asarray(self.stepSize**sde.dimension*simulation.TransitionMatrix@simulation.pdf.pdfVals)
-        return np.squeeze(vals)
+        return np.squeeze(vals), 0, 0
 
 
 class IntegratorLejaQuadrature(Integrator):

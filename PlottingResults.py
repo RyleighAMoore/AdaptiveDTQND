@@ -130,7 +130,7 @@ def plotRowThreePlots(Meshes, PdfTraj, h, indices, includeMeshPoints = False):
     fig.text(0.04, 0.57, r'$\mathbf{x}^{(2)}$', va='center', rotation='vertical')
 
 
-def plotRowSixPlots(plottingMax, Meshes, PdfTraj, h, indices):
+def plotRowSixPlots(plottingMax, Meshes, PdfTraj, h, indices, limits):
     minVal = 0.002
     maxVal = plottingMax
     # plt.figure()
@@ -154,11 +154,11 @@ def plotRowSixPlots(plottingMax, Meshes, PdfTraj, h, indices):
         axs[1, times].scatter(Meshes[ij][:,0], Meshes[ij][:,1],marker=".", color="k", s=0.005)
         val = str(np.round((ij+1)*h,4))
         axs[0,times].set_title('t = %s' %val)
-        axs[0,times].set_xlim([-15, 15])
-        axs[0,times].set_ylim([-15, 15])
+        axs[0,times].set_xlim([limits[0], limits[1]])
+        axs[0,times].set_ylim([limits[2], limits[3]])
         # axs[1,times].set_title('t = %s' %val)
-        axs[1,times].set_xlim([-15, 15])
-        axs[1,times].set_ylim([-15, 15])
+        axs[1,times].set_xlim([limits[0], limits[1]])
+        axs[1,times].set_ylim([limits[2], limits[3]])
         for tick in axs[1,times].xaxis.get_major_ticks():
             tick.label.set_fontsize(14)
         for tick in axs[1,times].yaxis.get_major_ticks():
