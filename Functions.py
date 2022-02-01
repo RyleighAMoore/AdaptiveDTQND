@@ -4,7 +4,11 @@ import matplotlib.pyplot as plt
 def nDGridMeshCenteredAtOrigin(dimension, radius, stepSize, useNoiseBool = False, trimToCircle = True):
         subdivision = radius/stepSize
         # step = radius/subdivision
-        grid= np.mgrid[tuple(slice(- radius*2, radius*2, stepSize) for _ in range(dimension))]
+        fullNum =  int(radius/stepSize)
+        radius2 = fullNum*stepSize + stepSize
+
+
+        grid= np.mgrid[tuple(slice(-radius2, radius2+stepSize, stepSize) for _ in range(dimension))]
         mesh = []
         for i in range(grid.shape[0]):
             new = grid[i].ravel()
@@ -20,9 +24,11 @@ def nDGridMeshCenteredAtOrigin(dimension, radius, stepSize, useNoiseBool = False
             for i in range(dimension):
                 distance += (-grid[:,i])**2
             distance = distance**(1/2)
-            distance = distance < radius-0.0001
+            distance = distance < radius+0.0001
             grid  =  grid[distance,:]
         return grid
+
+
 
 def nDGridMeshSquareCenteredAroundGivenPoint(dimension, radius, stepSize, centering):
         grid = nDGridMeshCenteredAtOrigin(dimension, radius, stepSize, useNoiseBool = False, trimToCircle = False)

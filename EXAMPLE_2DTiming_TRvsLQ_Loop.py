@@ -239,7 +239,7 @@ with open('Output/outputInformationSummaryT40_' +str(timestr)+ '.txt', 'w') as f
     sys.stdout = original_stdout # Reset the standard output to its original value
 
 
-animate = False
+animate = True
 if animate:
     import matplotlib.pyplot as plt
     import matplotlib.animation as animation

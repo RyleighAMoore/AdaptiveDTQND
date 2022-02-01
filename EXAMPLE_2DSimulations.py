@@ -10,7 +10,7 @@ from PlottingResults import plotRowSixPlots
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-problem = "spiral" # "spiral" "complex"
+problem = "erf" # "spiral" "complex"
 
 dimension =2
 beta = 3

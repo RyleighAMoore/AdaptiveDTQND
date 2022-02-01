@@ -19,7 +19,7 @@ fontprops = {'fontweight': 'bold'}
 
 
 objects = []
-with (open("Output_Saved\\fileT20.pkl", "rb")) as openfile:
+with (open("Output_Saved\\fileT40_20220201-061325.pkl", "rb")) as openfile:
     while True:
         try:
             objects.append(pickle.load(openfile))
@@ -65,11 +65,11 @@ for buff in bufferVals:
             labelString = 'TR, buffer = %d%%' %(buff*100)
         plt.semilogx(np.asarray(Errors), np.asarray(timing)/unitTime, "-s", label= labelString)
 
-plt.ylim([0, 5])
+# plt.ylim([0, 5])
 plt.legend()
 plt.xlabel(r'$L_{2w}$ Error')
 plt.ylabel("Relative Running Time")
-plt.title(r"Error vs. Timing, Moving Hill, $T=20$")
+plt.title(r"Error vs. Timing, Moving Hill, $T=40$")
 
 
 
@@ -119,12 +119,12 @@ for buff in bufferVals:
             labelString = 'TR Oracle, buffer = %d%%' %(buff*100)
         else:
             labelString = 'TR, buffer = %d%%' %(buff*100)
-        plt.semilogx(np.asarray(Errors), np.asarray(numPoints), "-s", label= labelString)
+        plt.loglog(np.asarray(Errors), np.asarray(numPoints), "-s", label= labelString)
         count +=len(Errors)
 
 plt.legend()
 plt.xlabel(r'$L_{2w}$ Error')
 plt.ylabel(r'Number of Points')
-plt.ylim([0, 40000])
-plt.title(r"Error vs. # of Points, Moving Hill, $T=20$")
+plt.ylim([10**3, 10**5])
+plt.title(r"Error vs. # of Points, Moving Hill, $T=40$")
 
