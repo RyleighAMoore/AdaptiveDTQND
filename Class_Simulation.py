@@ -31,6 +31,8 @@ class Simulation():
         self.setIntegrator(sde, parameters)
         # self.setUpTransitionMatrix(self.pdf, sde, parameters)
         self.meshUpdater = MeshUpdater(parameters, self.pdf, sde.dimension)
+        self.LPReuseCount = []
+        self.AltMethodUseCount = []
 
     def removePoints(self, index):
         self.TransitionMatrix = np.delete(self.TransitionMatrix, index,0)
@@ -82,19 +84,24 @@ class Simulation():
 
     def setIntegrator(self, sde, parameters):
         if parameters.integratorType == "LQ":
-            self.integrator = IntegratorLejaQuadrature(sde.dimension, parameters)
+            self.integrator = IntegratorLejaQuadrature(sde.dimension, parameters, self.timeDiscretizationMethod)
         if parameters.integratorType == "TR":
             self.integrator = IntegratorTrapezoidal(sde.dimension, parameters)
 
 
     def StepForwardInTime(self, sde, parameters):
-        self.pdf.pdfVals = self.integrator.computeTimeStep(sde, parameters, self)
-        self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
-        self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
+        self.pdf.pdfVals, LPReuseCount, AltMethodUseCount = self.integrator.computeTimeStep(sde, parameters, self)
+        if parameters.saveHistory:
+            self.LPReuseCount.append(np.copy(LPReuseCount))
+            self.AltMethodUseCount.append(np.copy(AltMethodUseCount))
 
     def computeAllTimes(self, sde, parameters):
-        self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
-        self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
+        if parameters.integratorType == "LQ" and not parameters.saveHistory:
+            self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
+            self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
+        if parameters.saveHistory:
+            self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
+            self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
         self.times.append(parameters.h)
         numSteps = int(self.endTime/parameters.h)
         timing = []
@@ -108,6 +115,9 @@ class Simulation():
                     self.meshUpdater.removePointsFromMeshProcedure(self.pdf, self, parameters, sde)
             # self.meshUpdater.removeOutlierPoints(self.pdf, self, parameters, sde)
             self.StepForwardInTime(sde, parameters)
+            if i==numSteps-1 or parameters.saveHistory:
+                self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
+                self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
             self.times.append((i+1)*parameters.h)
             timing.append(time.time()- timeStart)
         return timing

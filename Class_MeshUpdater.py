@@ -42,8 +42,7 @@ class MeshUpdater:
                 right = np.argmax(pdf.meshCoordinates)
                 newPointsBool = False
                 newPoints = [] # Use as temporary mesh
-                numIters = int(parameters.h*10)
-                numIters = 2
+                numIters = int(parameters.h*10*20)
                 if pdf.pdfVals[left] > self.addPointsToBoundaryIfBiggerThanTolerance:
                     radius = parameters.minDistanceBetweenPoints/2 + parameters.maxDistanceBetweenPoints/2
                     mm = np.min(pdf.meshCoordinates)
@@ -76,7 +75,7 @@ class MeshUpdater:
                     iivals = np.expand_dims(np.arange(len(pdf.meshCoordinates)),1)
                     index = iivals[boundaryPointsToAddAround]
                     if len(index)>0:
-                        candPoints = fun.nDGridMeshCenteredAtOrigin(sde.dimension, parameters.maxDistanceBetweenPoints*2, parameters.maxDistanceBetweenPoints, useNoiseBool = False)
+                        candPoints = fun.nDGridMeshCenteredAtOrigin(sde.dimension, parameters.maxDistanceBetweenPoints, parameters.maxDistanceBetweenPoints, useNoiseBool = False, trimToCircle=True)
                         # candPoints = fun.NDGridMesh(sde.dimension,parameters.maxDistanceBetweenPoints*2, parameters.maxDistanceBetweenPoints*2.5, UseNoise = False)
                     for indx in index:
                         # newPoints = addPointsRadially(Mesh[indx,:], Mesh, 8, minDistanceBetweenPoints, maxDistanceBetweenPoints)
@@ -92,7 +91,7 @@ class MeshUpdater:
                                 nearestPoint,distToNearestPoint, idx = fun.findNearestPoint(newPoint, pdf.meshCoordinates)
 
                             # print(distToNearestPoint)
-                            if distToNearestPoint >= 0.99*parameters.minDistanceBetweenPoints and distToNearestPoint <= 1.1*parameters.maxDistanceBetweenPoints:
+                            if distToNearestPoint >= 0.99*parameters.minDistanceBetweenPoints and distToNearestPoint <= 1.01*parameters.maxDistanceBetweenPoints:
                                 points.append(newPoint)
 
                         newPoints = points

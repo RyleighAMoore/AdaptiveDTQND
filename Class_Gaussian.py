@@ -1,7 +1,5 @@
-
 import numpy as np
 from scipy.stats import multivariate_normal
-
 
 class GaussScale:
     def __init__(self, dimension):

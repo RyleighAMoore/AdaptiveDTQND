@@ -4,14 +4,22 @@ Created on Sat Jan 22 13:43:57 2022
 
 @author: Rylei
 """
+
+
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
 
+# Font styling
+rcParams['font.family'] = 'serif'
+rcParams['font.weight'] = 'bold'
+rcParams['font.size'] = '18'
+fontprops = {'fontweight': 'bold'}
 
 
 objects = []
-with (open("Output_Saved\\fileT20.pkl", "rb")) as openfile:
+with (open("Output_Saved\\fileT40_20220201-061325.pkl", "rb")) as openfile:
     while True:
         try:
             objects.append(pickle.load(openfile))
@@ -31,6 +39,10 @@ numPointsTR = objects[0][9]
 h=objects[0][10]
 radius = objects[0][11]
 endTime = objects[0][12]
+allTimingsArrayStorageLQ = objects[0][13]
+allErrorsTimingArrayStorageLQ=objects[0][14]
+allTimingsArrayStorageTR = objects[0][15]
+allErrorArrayStorageTR = objects[0][16]
 
 unitTime = np.asarray(betaDict_times[min(betaVals)])[0]
 unitError = np.asarray(betaDict_errors[min(betaVals)])[0]
@@ -53,11 +65,11 @@ for buff in bufferVals:
             labelString = 'TR, buffer = %d%%' %(buff*100)
         plt.semilogx(np.asarray(Errors), np.asarray(timing)/unitTime, "-s", label= labelString)
 
-plt.ylim([0, 5])
+# plt.ylim([0, 5])
 plt.legend()
 plt.xlabel(r'$L_{2w}$ Error')
-plt.ylabel("Relative Running Time (Seconds)")
-plt.title(r"Error vs. Timing, Moving Hill $T=20$")
+plt.ylabel("Relative Running Time")
+plt.title(r"Error vs. Timing, Moving Hill, $T=40$")
 
 
 
@@ -107,12 +119,12 @@ for buff in bufferVals:
             labelString = 'TR Oracle, buffer = %d%%' %(buff*100)
         else:
             labelString = 'TR, buffer = %d%%' %(buff*100)
-        plt.semilogx(np.asarray(Errors), np.asarray(numPoints), "-s", label= labelString)
+        plt.loglog(np.asarray(Errors), np.asarray(numPoints), "-s", label= labelString)
         count +=len(Errors)
 
 plt.legend()
 plt.xlabel(r'$L_{2w}$ Error')
 plt.ylabel(r'Number of Points')
-plt.ylim([0, 40000])
-plt.title(r"Error vs. Number of Points, Moving Hill $T=20$")
+plt.ylim([10**3, 10**5])
+plt.title(r"Error vs. # of Points, Moving Hill, $T=40$")
 

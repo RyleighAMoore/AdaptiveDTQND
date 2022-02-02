@@ -6,27 +6,27 @@ import numpy as np
 import matplotlib.pyplot as plt
 import DriftDiffusionFunctionBank as functionBank
 import time
-
+from PlottingResults import plotRowSixPlots
 #TODO: Update this and clean up
-dimension =2
+dimension =1
 if dimension ==1:
     beta = 4
-    radius = 5
+    radius = 6
     kstepMin= 0.06
     kstepMax = 0.07
-    h = 0.1
-    endTime =0
+    kstepMin= 0.25
+    kstepMax = 0.25
+    h = 0.05
+    endTime =5
 
 if dimension ==2:
     beta = 3
     radius =2
     # radius = 0.5
-    kstepMin= 0.08
-    kstepMax = 0.09
-    kstepMin= 0.4
-    kstepMax = 0.5
+    kstepMin= 0.2
+    kstepMax = 0.3
     h = 0.05
-    endTime = 4
+    endTime = 3
 
 if dimension ==3:
     beta = 3
@@ -130,6 +130,13 @@ if dimension ==2:
     ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
     plt.show()
 
+
+
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+# index = 20
+# ax.plot(Meshes[index][:,0], Meshes[index][:,1], PdfTraj[index], linestyle="", marker=".")
+
 # if dimension ==3:
 #     Meshes = simulation.meshTrajectory
 #     PdfTraj = simulation.pdfTrajectory
@@ -175,4 +182,6 @@ if dimension ==2:
 # from Errors import ErrorValsExact
 # LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsExact(simulation.meshTrajectory, simulation.pdfTrajectory, trueSoln, h, plot=False)
 
+
+# plotRowSixPlots(simulation.meshTrajectory, simulation.pdfTrajectory, h, [5, 10,20])
 
