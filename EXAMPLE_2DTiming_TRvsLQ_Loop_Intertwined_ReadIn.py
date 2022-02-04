@@ -19,7 +19,7 @@ fontprops = {'fontweight': 'bold'}
 
 
 objects = []
-with (open("Output/fileT40_20220203-185630_5.pkl", "rb")) as openfile:
+with (open("Output/fileT40_20220203-185827_1.pkl", "rb")) as openfile:
     while True:
         try:
             objects.append(pickle.load(openfile))

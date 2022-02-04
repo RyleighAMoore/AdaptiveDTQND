@@ -16,7 +16,7 @@ radius = 2
 h = 0.05
 betaVals = [3, 4]
 bufferVals = [0, 0.5]
-endTime =5
+endTime =40
 spacingLQVals = [0.38]
 spacingTRVals = [0.25, 0.2, 0.18]
 
@@ -127,7 +127,7 @@ def runTRDTQ(buffer, spacingTR, simulationLQ):
     return LinfError, L2Error, L1Error, L2wError, totalTimeTR , numPoints
 
 
-numIterations =3
+numIterations =1
 original_stdout = sys.stdout # Save a reference to the original standard output
 # with open('Output/outputInformationAllTimes.txt', 'w') as g:
     # sys.stdout = g
