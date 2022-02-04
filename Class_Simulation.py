@@ -27,10 +27,6 @@ class Simulation():
         self.pdfTrajectory = []
         self.meshTrajectory = []
         self.times = []
-        self.setTimeDiscretizationDriver(parameters, sde)
-        self.setIntegrator(sde, parameters)
-        # self.setUpTransitionMatrix(self.pdf, sde, parameters)
-        self.meshUpdater = MeshUpdater(parameters, self.pdf, sde.dimension)
         self.LPReuseCount = []
         self.AltMethodUseCount = []
 
@@ -71,6 +67,10 @@ class Simulation():
 
 
     def setUpTransitionMatrix(self, sde, parameters):
+        self.setTimeDiscretizationDriver(parameters, sde)
+        self.setIntegrator(sde, parameters)
+        self.meshUpdater = MeshUpdater(parameters, self.pdf, sde.dimension)
+
         self.TransitionMatrix = self.timeDiscretizationMethod.computeTransitionMatrix(self.pdf, sde, parameters)
         self.LejaPointIndicesMatrix = np.zeros((self.timeDiscretizationMethod.sizeTransitionMatrixIncludingEmpty, parameters.numLejas))
         self.LejaPointIndicesBoolVector = np.zeros((self.timeDiscretizationMethod.sizeTransitionMatrixIncludingEmpty,1))
@@ -87,7 +87,6 @@ class Simulation():
             self.integrator = IntegratorLejaQuadrature(sde.dimension, parameters, self.timeDiscretizationMethod)
         if parameters.integratorType == "TR":
             self.integrator = IntegratorTrapezoidal(sde.dimension, parameters)
-
 
     def StepForwardInTime(self, sde, parameters):
         self.pdf.pdfVals, LPReuseCount, AltMethodUseCount = self.integrator.computeTimeStep(sde, parameters, self)

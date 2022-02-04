@@ -32,7 +32,6 @@ class MeshUpdater:
         if not dimension == 1:
             self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)
 
-
     def addPointsToBoundary(self, pdf, sde, parameters, dimension, integrator):
             count = 0
             MeshOrig = np.copy(pdf.meshCoordinates)
@@ -173,7 +172,7 @@ class MeshUpdater:
                 self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)
 
 
-
+    #Adapted from code here: https://stackoverflow.com/questions/64271678/3d-alpha-shape-for-finding-the-boundary-of-points-cloud-in-python
     def ND_Alpha_Shape(self, alpha, pdf, sde):
         # Del = Delaunay(mesh) # Form triangulation
         radii = []
@@ -184,17 +183,24 @@ class MeshUpdater:
         r = np.asarray(radii)
         r = np.nan_to_num(r)
 
+        #List of all vertices associated to triangles where circumshpere r<alpha
         tetras = self.triangulation.vertices[r<alpha,:]
 
         vals = np.asarray(list(range(0,sde.dimension+1)))
+
         TriComb = np.asarray(list(combinations(vals, sde.dimension)))
 
+        #List of all combinatations of edges that can make up the triangle
         Triangles = tetras[:,TriComb].reshape(-1,sde.dimension)
         Triangles = np.sort(Triangles,axis=1)
+
         # Remove triangles that occurs twice, because they are within shapes
         TrianglesDict = defaultdict(int)
-        for tri in Triangles:TrianglesDict[tuple(tri)] += 1
+        for tri in Triangles:
+            TrianglesDict[tuple(tri)] += 1
+
         Triangles=np.array([tri for tri in TrianglesDict if TrianglesDict[tri] ==1])
+
         #edges
         vals = np.asarray(list(range(0,sde.dimension)))
         EdgeComb = np.asarray(list(combinations(vals, sde.dimension-1)))

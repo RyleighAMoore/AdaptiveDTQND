@@ -19,6 +19,7 @@ class Parameters:
         '''
 
         self.conditionNumForAltMethod = 8
+        self.conditionNumberForAcceptingLejaPointsAtNextTimeStep = 1.1
         self.h = h
         self.kstepMin = kstepMin
         self.minDistanceBetweenPoints = kstepMin
@@ -38,8 +39,8 @@ class Parameters:
         self.suppressOutput = suppressOutput
         self.saveHistory = saveHistory
 
-    def tuneOnSdeUnlessDefined(self, sde):
-        self.numberOfLejaPoints = self.getOptimalNumberOfLejaPoints(sde)
+    # def tuneOnSdeUnlessDefined(self, sde):
+    #     self.numberOfLejaPoints = self.getOptimalNumberOfLejaPoints(sde)
 
     def setNumLejas(self, sde):
         if sde.dimension == 1:

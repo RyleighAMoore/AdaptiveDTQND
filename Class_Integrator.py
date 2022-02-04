@@ -36,7 +36,7 @@ class IntegratorTrapezoidal(Integrator):
 class IntegratorLejaQuadrature(Integrator):
     def __init__(self, dimension, parameters, timeDiscretiazationMethod):
         self.lejaPoints = None
-        self.conditionNumberForAcceptingLejaPointsAtNextTimeStep = 1.1
+        # self.conditionNumberForAcceptingLejaPointsAtNextTimeStep = 1.1
         self.setIdentityScaling(dimension)
         self.setUpPolnomialFamily(dimension)
         self.altMethodLejaPoints, temp = getLejaPoints(parameters.numLejas, np.zeros((dimension,1)), self.poly, num_candidate_samples=5000, candidateSampleMesh = [], returnIndices = False)
@@ -189,11 +189,11 @@ class IntegratorLejaQuadrature(Integrator):
                 value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
             else: # Get Leja points, or compute them if they aren't set
                 self.setLejaPoints(simulation, index, parameters,sde)
-                if self.lejaSuccess == False: #Getting Leja points failed, use alt method
+                if self.lejaSuccess == False: #Computing Leja points failed, use alt method
                      value, condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
                 else: # Continue with integration, try to use Leja points from last step
                     value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index, sde)
-                    if condNumber < self.conditionNumberForAcceptingLejaPointsAtNextTimeStep: # Finished, set Leja values for next time step
+                    if condNumber < parameters.conditionNumberForAcceptingLejaPointsAtNextTimeStep: # Finished, set Leja values for next time step
                         if self.freshLejaPoints ==False:
                             LPReuseCount = LPReuseCount +1
                         simulation.LejaPointIndicesBoolVector[index] = True
@@ -207,7 +207,7 @@ class IntegratorLejaQuadrature(Integrator):
                         else:
                             counting +=1
                             value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index, sde)
-                            if condNumber < self.conditionNumberForAcceptingLejaPointsAtNextTimeStep: # Leja points worked really well, likely okay for next time step
+                            if condNumber < parameters.conditionNumberForAcceptingLejaPointsAtNextTimeStep: # Leja points worked really well, likely okay for next time step
                                 simulation.LejaPointIndicesBoolVector[index] = True
                                 simulation.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
                             if condNumber > parameters.conditionNumForAltMethod or value < 0: # Nothing worked, use alt method
