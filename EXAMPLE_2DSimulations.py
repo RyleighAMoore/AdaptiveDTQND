@@ -15,6 +15,17 @@ problem = "erf" # "spiral" "complex"
 dimension =2
 beta = 3
 radius = 2
+timeDiscretizationType = "EM"
+integratorType = "LQ"
+
+if problem == "hill":
+    driftFunction = functionBank.oneDrift
+    diffusionFunction = functionBank.oneDiffusion
+    spatialDiff = False
+    kstepMin = 0.25
+    kstepMax = 0.3
+    endTime = 0.5
+    h=0.1
 
 if problem == "erf":
     driftFunction = functionBank.erfDrift
@@ -22,7 +33,7 @@ if problem == "erf":
     spatialDiff = False
     kstepMin = 0.25
     kstepMax = 0.3
-    endTime = 4
+    endTime = 1#4
     h=0.05
 
 if problem == "spiral":
@@ -45,7 +56,7 @@ if problem == "complex":
 
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
-parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh =True, timeDiscretizationType = "EM", integratorType = "LQ")
+parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh =True, timeDiscretizationType = timeDiscretizationType, integratorType = integratorType)
 simulation = Simulation(sde, parameters, endTime)
 
 start = time.time()
@@ -76,7 +87,7 @@ if animate ==True:
     title = ax.set_title('3D Test')
 
     graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
-    ax.set_zlim(0,np.max(simulation.pdfTrajectory[10]))
+    ax.set_zlim(0,np.max(simulation.pdfTrajectory[2]))
     ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
     plt.show()
 
@@ -109,11 +120,12 @@ print("Average LEJA REUSE Percent: ", np.mean(percentLejaReuse))
 percentAltMethodUse = np.asarray(simulation.AltMethodUseCount)/np.asarray(lengths)*100
 print("Average ALT METHOD USE Percent: ", np.mean(percentAltMethodUse))
 
-
-
-
-
-
+from Errors import ErrorValsOneTime
+if problem == "hill":
+    meshTrueSoln = simulation.meshTrajectory[-1]
+    pdfTrueSoln = sde.exactSolution(simulation.meshTrajectory[-1], endTime)
+    LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], meshTrueSoln, pdfTrueSoln, interpolate=False)
+    print(L2wErrors)
 
 
 

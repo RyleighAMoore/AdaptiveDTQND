@@ -37,7 +37,7 @@ diffusionFunction = functionBank.ptSixDiffusion
 spatialDiff = False
 adaptive = True
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
-saveHistory = False
+saveHistory = True
 
 # Data Storage
 betaDict_L2werrors = {}
@@ -124,7 +124,7 @@ def runTRDTQ(buffer, spacingTR, simulationLQ):
     LinfError, L2Error, L1Error, L2wError = ErrorValsOneTime(simulationTR.meshTrajectory[-1], simulationTR.pdfTrajectory[-1], meshTrueSolnTR, pdfTrueSolnTR, interpolate=False)
     numPoints = len(simulationTR.pdfTrajectory[-1])
 
-    return LinfError, L2Error, L1Error, L2wError, totalTimeTR , numPoints
+    return LinfError, L2Error, L1Error, L2wError, totalTimeTR , numPoints, simulationTR
 
 
 numIterations =1
@@ -157,7 +157,7 @@ for count in range(numIterations):
 
     for buffer in bufferVals:
         for spacingTR in spacingTRVals:
-            LinfError, L2Error, L1Error, L2wError, totalTime , numPoints = runTRDTQ(buffer, spacingTR, simulationLQ)
+            LinfError, L2Error, L1Error, L2wError, totalTime , numPoints, simulationTR = runTRDTQ(buffer, spacingTR, simulationLQ)
 
             if (buffer, spacingTR) not in bufferDict_times:
                 bufferDict_times[(buffer, spacingTR)] =  list()
