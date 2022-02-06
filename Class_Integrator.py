@@ -132,7 +132,10 @@ class IntegratorLejaQuadrature(Integrator):
         self.AltMethodUseCount = self.AltMethodUseCount  + 1
         scaling = GaussScale(sde.dimension)
         scaling.setMu(np.asarray(pdf.meshCoordinates[index,:]+parameters.h*sde.driftFunction(pdf.meshCoordinates[index,:])).T)
-        scaling.setCov((parameters.h*sde.diffusionFunction(scaling.mu.T*sde.diffusionFunction(scaling.mu.T))))
+
+        cov = sde.diffusionFunction(scaling.mu.T)
+        scaling.setCov((parameters.h*cov@cov.T))
+        # scaling.setCov((parameters.h*sde.diffusionFunction(scaling.mu.T*sde.diffusionFunction(scaling.mu.T))))
         mesh12 = map_from_canonical_space(self.altMethodLejaPoints, scaling)
         meshNearest, distances, indx = findNearestKPoints(scaling.mu, pdf.meshCoordinates,parameters.numQuadFit, getIndices = True)
         pdfNew = pdf.pdfVals[indx]

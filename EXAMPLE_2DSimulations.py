@@ -33,7 +33,7 @@ if problem == "erf":
     spatialDiff = False
     kstepMin = 0.25
     kstepMax = 0.3
-    endTime = 1#4
+    endTime = 4#4
     h=0.05
 
 if problem == "spiral":

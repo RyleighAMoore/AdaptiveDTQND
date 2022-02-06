@@ -112,7 +112,7 @@ class Simulation():
                 # print(len(self.pdfTrajectory[-1]), "****************")
                 if i>=9 and i%25==1:
                     self.meshUpdater.removePointsFromMeshProcedure(self.pdf, self, parameters, sde)
-            # self.meshUpdater.removeOutlierPoints(self.pdf, self, parameters, sde)
+                    self.meshUpdater.removeOutlierPoints(self.pdf, self, parameters, sde)
             self.StepForwardInTime(sde, parameters)
             if i==numSteps-1 or parameters.saveHistory:
                 self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
