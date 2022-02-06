@@ -99,6 +99,9 @@ class Simulation():
             self.AltMethodUseCount.append(np.copy(AltMethodUseCount))
 
     def computeAllTimes(self, sde, parameters):
+        if parameters.integratorType == "LQ" and not parameters.saveHistory:
+            self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
+            self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
         if parameters.saveHistory:
             self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
             self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
@@ -113,7 +116,7 @@ class Simulation():
                     self.meshUpdater.addPointsToMeshProcedure(self.pdf, parameters, self, sde)
                 if i>=parameters.eligibleToRemovePointsTimeStep and i%parameters.removePointsEveryNSteps==0:
                     self.meshUpdater.removePointsFromMeshProcedure(self.pdf, self, parameters, sde)
-                    # self.meshUpdater.removeOutlierPoints(self.pdf, self, parameters, sde)
+                    self.meshUpdater.removeOutlierPoints(self.pdf, self, parameters, sde)
             self.StepForwardInTime(sde, parameters)
             if i==numSteps-1 or parameters.saveHistory:
                 self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))

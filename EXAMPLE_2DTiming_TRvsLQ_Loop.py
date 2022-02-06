@@ -26,9 +26,18 @@ spacingTRVals = [0.25, 0.2, 0.18]
 # h = 0.05
 # betaVals = [4]
 # bufferVals = [0.5]
-# endTime =20
+# endTime =10
 # spacingLQVals = [0.38]
 # spacingTRVals = [0.18]
+
+dimension = 2
+radius = 2
+h = 0.05
+betaVals = [3]
+bufferVals = []
+endTime = 40
+spacingLQVals = [0.38]
+spacingTRVals = []
 
 
 # SDE creation
@@ -275,8 +284,8 @@ if animate:
 
         graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
         ax.set_zlim(0, 0.5)
-        ax.set_xlim(-15, 15)
-        ax.set_ylim(-15, 15)
+        ax.set_xlim(-55, 55)
+        ax.set_ylim(-55, 55)
 
 
         ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=10, blit=False)
