@@ -99,9 +99,6 @@ class Simulation():
             self.AltMethodUseCount.append(np.copy(AltMethodUseCount))
 
     def computeAllTimes(self, sde, parameters):
-        # if parameters.integratorType == "LQ" and not parameters.saveHistory:
-        #     self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
-        #     self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
         if parameters.saveHistory:
             self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
             self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))

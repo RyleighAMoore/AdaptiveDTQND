@@ -20,7 +20,7 @@ spatialDiff = False
 
 
 betaVals = [1,2,3,4,5,6,7,8,9,10]
-betaVals = [1,3,6,10]
+# betaVals = [1,3,6,10]
 
 endTime = 1.15
 h=0.01

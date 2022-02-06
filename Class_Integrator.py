@@ -70,14 +70,14 @@ class IntegratorLejaQuadrature(Integrator):
 
         if np.min(pdf.integrandBeforeDividingOut)==0:
             pdf.integrandBeforeDividingOut[pdf.integrandBeforeDividingOut ==0] = 1.66886859e-315
-        if np.any(self.laplaceApproximation.constantOfGaussian)==None: # Fit failed
-            return False
+        if np.any(self.laplaceApproximation.constantOfGaussian)==None:
+            return False # Fit failed
         else:
-            return True
+            return True # Fit succeeded
 
     def divideOutGaussianAndSetIntegrand(self, pdf, sde, index):
         gaussianToDivideOut = self.laplaceApproximation.ComputeDividedOut(pdf, sde.dimension)
-        # print(np.min(gaussianToDivideOut))
+
         if np.min(gaussianToDivideOut)<=0:
             gaussianToDivideOut[gaussianToDivideOut <=0] = np.min(gaussianToDivideOut)
         try:
@@ -88,8 +88,6 @@ class IntegratorLejaQuadrature(Integrator):
             print(np.min(gaussianToDivideOut))
 
         pdf.setIntegrandAfterDividingOut(integrand)
-
-
 
     def setLejaPoints(self, simulation, index, parameters, sde):
         pdf = simulation.pdf
@@ -128,28 +126,27 @@ class IntegratorLejaQuadrature(Integrator):
 
 
     def computeUpdateWithAlternativeMethod(self, sde, parameters, pdf, index):
+        ## TDOD: Implement AM option
+
         self.AltMethodUseCount = self.AltMethodUseCount  + 1
         scaling = GaussScale(sde.dimension)
         scaling.setMu(np.asarray(pdf.meshCoordinates[index,:]+parameters.h*sde.driftFunction(pdf.meshCoordinates[index,:])).T)
-
         cov = sde.diffusionFunction(scaling.mu.T)
         scaling.setCov((parameters.h*cov@cov.T))
-        # scaling.setCov((parameters.h*sde.diffusionFunction(scaling.mu.T*sde.diffusionFunction(scaling.mu.T))))
+
         mesh12 = map_from_canonical_space(self.altMethodLejaPoints, scaling)
         meshNearest, distances, indx = findNearestKPoints(scaling.mu, pdf.meshCoordinates,parameters.numQuadFit, getIndices = True)
         pdfNew = pdf.pdfVals[indx]
 
         pdf12 = np.asarray(griddata(np.squeeze(meshNearest), np.log(pdfNew), np.squeeze(mesh12), method='linear', fill_value=np.log(np.min(pdf.pdfVals))))
         pdf12 = np.exp(pdf12)
-        # pdf12[pdf12 < 0] = np.min(pdf.pdfVals)
 
-        ## TDOD: Implement AM option
         transitionMatrixRow = np.expand_dims(self.timeDiscretiazationMethod.computeTransitionMatrixRow(0,mesh12, parameters.h, sde.driftFunction, sde.diffusionFunction, sde.spatialDiff),1)
         transitionMatrixRow = np.squeeze(transitionMatrixRow)
         if sde.dimension > 1:
             L = np.linalg.cholesky((scaling.cov))
             JacFactor = np.prod(np.diag(L))
-        if sde.dimension ==1:
+        elif sde.dimension ==1:
             L = np.sqrt(scaling.cov)
             JacFactor = np.squeeze(L)
 
@@ -157,12 +154,11 @@ class IntegratorLejaQuadrature(Integrator):
 
         testing = (pdf12*transitionMatrixRow)/g
         u = map_to_canonical_space(mesh12, scaling)
-        numSamples = len(u)
-        V = opolynd.opolynd_eval(u, self.poly.lambdas[:numSamples,:], self.poly.ab, self.poly)
+        V = opolynd.opolynd_eval(u, self.poly.lambdas[:parameters.numLejas,:], self.poly.ab, self.poly)
         vinv = np.linalg.inv(V)
-        c = np.matmul(vinv[0,:], testing)
-        # print("Use Alt Method")
-        return c, np.sum(np.abs(vinv[0,:]))
+        value = np.matmul(vinv[0,:], testing)
+        condNumber = np.sum(np.abs(vinv[0,:]))
+        return value, condNumber
 
 
     def weightExp(self, scaling, mesh):
@@ -178,19 +174,20 @@ class IntegratorLejaQuadrature(Integrator):
             soln_vals[j] = Gs
         return soln_vals
 
-    # @profile
+
     def computeTimeStep(self, sde, parameters, simulation):
         LPReuseCount = 0
         self.freshLejaPoints = True
         self.AltMethodUseCount = 0
         newPdf = np.zeros(simulation.pdf.meshLength)
         pdf = simulation.pdf
-        counting = 0
-        # self.logPdfVals = np.log(sde.pdf.pdfVals)
+
         for index, point in enumerate(pdf.meshCoordinates):
             useLejaIntegrationProcedure = self.findQuadraticFit(sde, simulation, parameters, index)
+
             if not useLejaIntegrationProcedure: # Failed Quadratic Fit
                 value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
+
             else: # Get Leja points, or compute them if they aren't set
                 self.setLejaPoints(simulation, index, parameters,sde)
                 if self.lejaSuccess == False: #Computing Leja points failed, use alt method
@@ -198,7 +195,7 @@ class IntegratorLejaQuadrature(Integrator):
                 else: # Continue with integration, try to use Leja points from last step
                     value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index, sde)
                     if condNumber < parameters.conditionNumberForAcceptingLejaPointsAtNextTimeStep: # Finished, set Leja values for next time step
-                        if self.freshLejaPoints ==False:
+                        if self.freshLejaPoints == False: # reused leja points
                             LPReuseCount = LPReuseCount +1
                         simulation.LejaPointIndicesBoolVector[index] = True
                         simulation.LejaPointIndicesMatrix[index,:] = self.indicesOfLejaPoints
@@ -209,7 +206,6 @@ class IntegratorLejaQuadrature(Integrator):
                         if self.lejaSuccess == False:
                             value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
                         else:
-                            counting +=1
                             value, condNumber = self.computeUpdateWithInterpolatoryQuadrature(parameters,pdf, index, sde)
                             if condNumber < parameters.conditionNumberForAcceptingLejaPointsAtNextTimeStep: # Leja points worked really well, likely okay for next time step
                                 simulation.LejaPointIndicesBoolVector[index] = True
@@ -223,7 +219,6 @@ class IntegratorLejaQuadrature(Integrator):
         # print(LPReuseCount/pdf.meshLength*100, "% Leja Reuse")
         # print(self.AltMethodUseCount/pdf.meshLength*100, "% Alt method Use")
         # assert self.AltMethodUseCount/pdf.meshLength*100 < 10, "WARNING: Alt method use is high*************"
-        # print(counting, "-----------------------------------")
         return newPdf, LPReuseCount, self.AltMethodUseCount
 
 

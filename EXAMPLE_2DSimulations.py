@@ -10,7 +10,7 @@ from PlottingResults import plotRowSixPlots
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-problem = "erf" # "spiral" "complex"
+problem = "hill" # "spiral" "complex"
 
 dimension =2
 beta = 3
@@ -24,7 +24,7 @@ if problem == "hill":
     spatialDiff = False
     kstepMin = 0.25
     kstepMax = 0.3
-    endTime = 10
+    endTime = 5
     h=0.1
 
 if problem == "erf":
