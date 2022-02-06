@@ -28,7 +28,7 @@ class MeshUpdater:
         '''
         self.changedBoolean = False
         self.addPointsToBoundaryIfBiggerThanTolerance = 10**(-parameters.beta)
-        self.removeZerosValuesIfLessThanTolerance = 10**(-parameters.beta)
+        self.removeZerosValuesIfLessThanTolerance = 10**(-parameters.beta-0.5)
         if not dimension == 1:
             self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)
 

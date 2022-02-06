@@ -12,11 +12,11 @@ import matplotlib.animation as animation
 from Errors import ErrorValsOneTime
 
 
-problem = "erf" # "spiral" "complex"
+problem = "hill" # "spiral" "complex"
 
 dimension =3
 beta = 3
-radius = 1.5
+radius = 1
 
 
 if problem == "hill":
@@ -27,6 +27,8 @@ if problem == "hill":
     kstepMax = 0.22
     endTime = 0.5
     h=0.02
+    vminVal = -5
+    vmaxVal = 1
 
 
 if problem == "erf":
