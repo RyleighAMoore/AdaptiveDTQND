@@ -20,11 +20,11 @@ integratorType = "LQ"
 
 if problem == "hill":
     driftFunction = functionBank.oneDrift
-    diffusionFunction = functionBank.oneDiffusion
+    diffusionFunction = functionBank.ptfiveDiffusion
     spatialDiff = False
     kstepMin = 0.25
     kstepMax = 0.3
-    endTime = 0.5
+    endTime = 10
     h=0.1
 
 if problem == "erf":
@@ -127,6 +127,15 @@ if problem == "hill":
     LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], meshTrueSoln, pdfTrueSoln, interpolate=False)
     print(L2wErrors)
 
+index = 69
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+title = ax.set_title('3D Test')
+graph, = ax.plot(Meshes[index][:,0], Meshes[index][:,1], PdfTraj[index], linestyle="", marker="o")
+graph, = ax.plot(Meshes[index+1][:,0], Meshes[index+1][:,1], PdfTraj[index+1], linestyle="", marker=".")
 
+ax.set_zlim(0,np.max(simulation.pdfTrajectory[2]))
+ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
+plt.show()
 
 

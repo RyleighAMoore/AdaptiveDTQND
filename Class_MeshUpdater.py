@@ -27,7 +27,7 @@ class MeshUpdater:
         dimension: dimension of the SDE
         '''
         self.addPointsToBoundaryIfBiggerThanTolerance = 10**(-parameters.beta)
-        self.removeZerosValuesIfLessThanTolerance = 10**(-parameters.beta-0.5)
+        self.removeZerosValuesIfLessThanTolerance = 10**(-parameters.beta)
         self.changedBoolean = False
         if not dimension == 1:
             self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)
@@ -100,8 +100,9 @@ class MeshUpdater:
                             numPointsAdded = numPointsAdded + len(newPoints)
                     if numPointsAdded > 0:
                         newPoints = pdf.meshCoordinates[-numPointsAdded:,:]
-                        interp = [griddata(MeshOrig, PdfOrig, newPoints, method='linear', fill_value=np.min(pdf.pdfVals)/2)][0]
-                        interp[interp<=0] = np.min(pdf.pdfVals)
+                        interp = [griddata(MeshOrig, np.log(PdfOrig), newPoints, method='linear', fill_value=np.log(np.min(pdf.pdfVals)))][0]
+                        interp = np.exp(interp)
+                        # interp[interp<=0] = np.min(pdf.pdfVals)/2
                         pdf.addPointsToPdf(interp)
                         self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)
 

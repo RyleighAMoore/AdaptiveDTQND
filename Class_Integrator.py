@@ -140,8 +140,9 @@ class IntegratorLejaQuadrature(Integrator):
         meshNearest, distances, indx = findNearestKPoints(scaling.mu, pdf.meshCoordinates,parameters.numQuadFit, getIndices = True)
         pdfNew = pdf.pdfVals[indx]
 
-        pdf12 = np.asarray(griddata(np.squeeze(meshNearest), pdfNew, np.squeeze(mesh12), method='linear', fill_value=np.min(pdf.pdfVals)))
-        pdf12[pdf12 < 0] = np.min(pdf.pdfVals)
+        pdf12 = np.asarray(griddata(np.squeeze(meshNearest), np.log(pdfNew), np.squeeze(mesh12), method='linear', fill_value=np.log(np.min(pdf.pdfVals))))
+        pdf12 = np.exp(pdf12)
+        # pdf12[pdf12 < 0] = np.min(pdf.pdfVals)
 
         ## TDOD: Implement AM option
         transitionMatrixRow = np.expand_dims(self.timeDiscretiazationMethod.computeTransitionMatrixRow(0,mesh12, parameters.h, sde.driftFunction, sde.diffusionFunction, sde.spatialDiff),1)

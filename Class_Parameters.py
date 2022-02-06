@@ -38,6 +38,11 @@ class Parameters:
         self.OverideMesh = OverideMesh
         self.suppressOutput = suppressOutput
         self.saveHistory = saveHistory
+        self.eligibleToAddPointsTimeStep = 3
+        self.eligibleToRemovePointsTimeStep = 9
+        self.addPointsEveryNSteps = 1
+        self.removePointsEveryNSteps = 25
+
 
     # def tuneOnSdeUnlessDefined(self, sde):
     #     self.numberOfLejaPoints = self.getOptimalNumberOfLejaPoints(sde)
