@@ -116,8 +116,7 @@ class Simulation():
                     self.meshUpdater.addPointsToMeshProcedure(self.pdf, parameters, self, sde)
                 if i>=parameters.eligibleToRemovePointsTimeStep and i%parameters.removePointsEveryNSteps==0:
                     self.meshUpdater.removePointsFromMeshProcedure(self.pdf, self, parameters, sde)
-                    self.meshUpdater.removeOutlierPoints(self.pdf, self, parameters, sde)
-                    print(i)
+                    # self.meshUpdater.removeOutlierPoints(self.pdf, self, parameters, sde)
             self.StepForwardInTime(sde, parameters)
             if i==numSteps-1 or parameters.saveHistory:
                 self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))

@@ -36,7 +36,6 @@ class IntegratorTrapezoidal(Integrator):
 class IntegratorLejaQuadrature(Integrator):
     def __init__(self, dimension, parameters, timeDiscretiazationMethod):
         self.lejaPoints = None
-        # self.conditionNumberForAcceptingLejaPointsAtNextTimeStep = 1.1
         self.setIdentityScaling(dimension)
         self.setUpPolnomialFamily(dimension)
         self.altMethodLejaPoints, temp = getLejaPoints(parameters.numLejas, np.zeros((dimension,1)), self.poly, num_candidate_samples=5000, candidateSampleMesh = [], returnIndices = False)
@@ -57,14 +56,14 @@ class IntegratorLejaQuadrature(Integrator):
 
     def findQuadraticFit(self, sde, simulation, parameters, index):
         pdf = simulation.pdf
-        ## TODO: Update this so I don't recompute drift and diff everytime
         pdf.setIntegrandBeforeDividingOut(simulation.TransitionMatrix[index,:pdf.meshLength]*pdf.pdfVals)
-        if not simulation.LejaPointIndicesBoolVector[index]: # Do not have good Leja points
+
+        if not simulation.LejaPointIndicesBoolVector[index]: # Do not have Leja points
             orderedPoints, distances, indicesOfOrderedPoints = findNearestKPoints(pdf.meshCoordinates[index], pdf.meshCoordinates, parameters.numQuadFit, getIndices=True)
             quadraticFitMeshPoints = orderedPoints[:parameters.numQuadFit]
             pdfValuesOfQuadraticFitPoints = pdf.integrandBeforeDividingOut[indicesOfOrderedPoints]
             self.laplaceApproximation.computeleastSquares(quadraticFitMeshPoints, pdfValuesOfQuadraticFitPoints, sde.dimension)
-        else:
+        else: # Have Leja points to use
             quadraticFitMeshPoints = pdf.meshCoordinates[simulation.LejaPointIndicesMatrix[index,:].astype(int)]
             pdfValuesOfQuadraticFitPoints = pdf.integrandBeforeDividingOut[simulation.LejaPointIndicesMatrix[index,:].astype(int)]
             self.laplaceApproximation.computeleastSquares(quadraticFitMeshPoints, pdfValuesOfQuadraticFitPoints,sde.dimension)
@@ -187,6 +186,7 @@ class IntegratorLejaQuadrature(Integrator):
         newPdf = np.zeros(simulation.pdf.meshLength)
         pdf = simulation.pdf
         counting = 0
+        # self.logPdfVals = np.log(sde.pdf.pdfVals)
         for index, point in enumerate(pdf.meshCoordinates):
             useLejaIntegrationProcedure = self.findQuadraticFit(sde, simulation, parameters, index)
             if not useLejaIntegrationProcedure: # Failed Quadratic Fit

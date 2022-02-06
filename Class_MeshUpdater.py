@@ -26,85 +26,65 @@ class MeshUpdater:
         pdf: manages the probability density function of the solution of the SDE (PDF class object)
         dimension: dimension of the SDE
         '''
+        self.changedBoolean = False
         self.addPointsToBoundaryIfBiggerThanTolerance = 10**(-parameters.beta)
         self.removeZerosValuesIfLessThanTolerance = 10**(-parameters.beta)
-        self.changedBoolean = False
         if not dimension == 1:
             self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)
 
+
     def addPointsToBoundary(self, pdf, sde, parameters, dimension, integrator):
-            count = 0
-            MeshOrig = np.copy(pdf.meshCoordinates)
-            PdfOrig = np.copy(pdf.pdfVals)
-            if sde.dimension == 1: # 1D
+            numPointsAdded = 0
+            if sde.dimension == 1: # 1D, add points to left and right is easy
                 left = np.argmin(pdf.meshCoordinates)
                 right = np.argmax(pdf.meshCoordinates)
-                newPointsBool = False
+
                 newPoints = [] # Use as temporary mesh
                 numIters = int(parameters.h*10*20)
                 if pdf.pdfVals[left] > self.addPointsToBoundaryIfBiggerThanTolerance:
-                    radius = parameters.minDistanceBetweenPoints/2 + parameters.maxDistanceBetweenPoints/2
-                    mm = np.min(pdf.meshCoordinates)
-                    MM = np.max(pdf.meshCoordinates)
-                    newPointsBool = True
-
+                    radius = parameters.maxDistanceBetweenPoints
                     for i in range(1,numIters):
-                        pdf.addPointsToMesh(np.asarray([[mm-i*radius]]))
-                        newPoints.append(np.asarray(mm-i*radius))
+                        pdf.addPointsToMesh(np.asarray([[left-i*radius]]))
+
                 if pdf.pdfVals[right] > self.addPointsToBoundaryIfBiggerThanTolerance:
-                    radius = parameters.minDistanceBetweenPoints/2 + parameters.maxDistanceBetweenPoints/2
-                    mm = np.min(pdf.meshCoordinates)
-                    MM = np.max(pdf.meshCoordinates)
-                    newPointsBool = True
+                    radius = parameters.maxDistanceBetweenPoints
 
                     for i in range(1,numIters):
-                        pdf.addPointsToMesh(np.asarray([[MM+i*radius]]))
-                        newPoints.append(np.asarray(MM+i*radius))
-                if newPointsBool:
-                    interp1 = [griddata(MeshOrig,PdfOrig, np.asarray(newPoints), method='linear', fill_value=np.min(pdf.pdfVals)/2)][0]
-                    interp1[interp1<=0] = 0.5*np.min(PdfOrig)
-                    pdf.addPointsToPdf(interp1)
-                    self.changedBoolean =1
+                        pdf.addPointsToMesh(np.asarray([[right+i*radius]]))
 
+                if numPointsAdded > 0:
+                    # pdflog = np.log(PdfOrig)
+                    # interp = [griddata(MeshOrig, pdflog, np.asarray(newPoints), method='linear', fill_value=np.min(pdflog))][0]
+                    # interp = np.exp(interp)
+                    #interp1[interp1<=0] = 0.5*np.min(PdfOrig)
+                    interp = np.ones((1,numPointsAdded))*np.min(pdf.pdfVals)
+                    pdf.addPointsToPdf(interp)
+                    self.changedBoolean = True
             else:
-                while count < 1:
-                    count = count + 1
-                    numPointsAdded = 0
-                    boundaryPointsToAddAround = self.checkIntegrandForAddingPointsAroundBoundaryPoints(pdf, dimension, parameters, sde)
-                    iivals = np.expand_dims(np.arange(len(pdf.meshCoordinates)),1)
-                    index = iivals[boundaryPointsToAddAround]
-                    if len(index)>0:
-                        candPoints = fun.nDGridMeshCenteredAtOrigin(sde.dimension, parameters.maxDistanceBetweenPoints, parameters.maxDistanceBetweenPoints, useNoiseBool = False, trimToCircle=True)
-                        # candPoints = fun.NDGridMesh(sde.dimension,parameters.maxDistanceBetweenPoints*2, parameters.maxDistanceBetweenPoints*2.5, UseNoise = False)
-                    for indx in index:
-                        # newPoints = addPointsRadially(Mesh[indx,:], Mesh, 8, minDistanceBetweenPoints, maxDistanceBetweenPoints)
-                        curr =  np.repeat(np.expand_dims(pdf.meshCoordinates[indx,:],1), np.size(candPoints,0), axis=1)
-                        newPoints = -candPoints  + curr.T
-                        points = []
-                        for i in range(len(newPoints)):
-                            newPoint = newPoints[i,:]
-                            if len(points)>0:
-                                mesh2 = np.vstack((pdf.meshCoordinates,points))
-                                nearestPoint,distToNearestPoint, idx = fun.findNearestPoint(newPoint, mesh2)
-                            else:
-                                nearestPoint,distToNearestPoint, idx = fun.findNearestPoint(newPoint, pdf.meshCoordinates)
+                boundaryPointsToAddAround = self.checkIntegrandForAddingPointsAroundBoundaryPoints(pdf, dimension, parameters, sde)
+                iivals = np.expand_dims(np.arange(len(pdf.meshCoordinates)),1)
+                index = iivals[boundaryPointsToAddAround]
+                if len(index)>0:
+                    candPoints = fun.nDGridMeshCenteredAtOrigin(sde.dimension, parameters.maxDistanceBetweenPoints, parameters.maxDistanceBetweenPoints, useNoiseBool = False, trimToCircle=True)
+                for indx in index:
+                    curr =  np.repeat(np.expand_dims(pdf.meshCoordinates[indx,:],1), np.size(candPoints,0), axis=1)
+                    candPointsForIndx = -candPoints + curr.T
+                    for i in range(len(candPointsForIndx)):
+                        candPoint = candPointsForIndx[i,:]
+                        nearestPoint,distToNearestPoint, idx = fun.findNearestPoint(candPoint, pdf.meshCoordinates)
+                        if distToNearestPoint >= 0.99*parameters.minDistanceBetweenPoints and distToNearestPoint <= 1.01*parameters.maxDistanceBetweenPoints:
+                            pdf.addPointsToMesh(np.expand_dims(candPoint,0))
+                            numPointsAdded +=1
 
-                            # print(distToNearestPoint)
-                            if distToNearestPoint >= 0.99*parameters.minDistanceBetweenPoints and distToNearestPoint <= 1.01*parameters.maxDistanceBetweenPoints:
-                                points.append(newPoint)
-
-                        newPoints = points
-                        if len(newPoints)>0:
-                            pdf.addPointsToMesh(newPoints)
-                            self.changedBoolean = 1
-                            numPointsAdded = numPointsAdded + len(newPoints)
-                    if numPointsAdded > 0:
-                        newPoints = pdf.meshCoordinates[-numPointsAdded:,:]
-                        interp = [griddata(MeshOrig, np.log(PdfOrig), newPoints, method='linear', fill_value=np.log(np.min(pdf.pdfVals)))][0]
-                        interp = np.exp(interp)
-                        # interp[interp<=0] = np.min(pdf.pdfVals)/2
-                        pdf.addPointsToPdf(interp)
-                        self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)
+                if numPointsAdded > 0:
+                    # newPoints = pdf.meshCoordinates[-numPointsAdded:,:]
+                    # interp = [griddata(MeshOrig, np.log(PdfOrig), pdf.meshCoordinates[-pointsAdded:], method='linear', fill_value=np.log(np.min(pdf.pdfVals)))][0]
+                    # interp = np.exp(interp)
+                    # interp[interp<=0] = np.min(pdf.pdfVals)/2
+                    interp = np.ones((1,numPointsAdded))*np.min(pdf.pdfVals)
+                    pdf.addPointsToPdf(interp)
+                    self.changedBoolean = True
+                    self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)
 
     def addPointsToMeshProcedure(self, pdf, parameters, simulation, sde):
         '''If the mesh is changed, these become 1 so we know to recompute the triangulation'''
@@ -119,7 +99,6 @@ class MeshUpdater:
             elif parameters.timeDiscretizationType == "AM":
                 indices = list(range(meshSizeBeforeUpdates, newMeshSize))
                 simulation.timeDiscretizationMethod.AddPointToG(simulation, indices, parameters, simulation.integrator, sde)
-
 
     def getBoundaryPoints(self, pdf, dimension, parameters, sde):
         if dimension ==1:
@@ -139,23 +118,23 @@ class MeshUpdater:
         return np.asarray(addingAround).T
 
 
-    def removeOutlierPoints(self, pdf, simulation, parameters, sde):
-        pointIndicesToRemove = []
-        for indx in reversed(range(len(pdf.meshCoordinates))):
-            point = pdf.meshCoordinates[indx]
-            nearestPoint,distToNearestPoint, idx = fun.findNearestPoint(point, pdf.meshCoordinates, CoordInAllPoints=True)
-            # print(distToNearestPoint)
-            if distToNearestPoint > 1.1*parameters.maxDistanceBetweenPoints:
-                pointIndicesToRemove.append(indx)
-                # print(distToNearestPoint)
-        if len(pointIndicesToRemove)>0:
-            pdf.removePointsFromMesh(pointIndicesToRemove)
-            pdf.removePointsFromPdf(pointIndicesToRemove)
-            simulation.removePoints(pointIndicesToRemove)
-            simulation.houseKeepingStorageMatrices(pointIndicesToRemove)
-            print("removed", len(pointIndicesToRemove), "outlier(s)")
-            if not sde.dimension ==1:
-                self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)
+    # def removeOutlierPoints(self, pdf, simulation, parameters, sde):
+    #     pointIndicesToRemove = []
+    #     for indx in reversed(range(len(pdf.meshCoordinates))):
+    #         point = pdf.meshCoordinates[indx]
+    #         nearestPoint,distToNearestPoint, idx = fun.findNearestPoint(point, pdf.meshCoordinates, CoordInAllPoints=True)
+    #         # print(distToNearestPoint)
+    #         if distToNearestPoint > 1.1*parameters.maxDistanceBetweenPoints:
+    #             pointIndicesToRemove.append(indx)
+    #             # print(distToNearestPoint)
+    #     if len(pointIndicesToRemove)>0:
+    #         pdf.removePointsFromMesh(pointIndicesToRemove)
+    #         pdf.removePointsFromPdf(pointIndicesToRemove)
+    #         simulation.removePoints(pointIndicesToRemove)
+    #         simulation.houseKeepingStorageMatrices(pointIndicesToRemove)
+    #         # print("removed", len(pointIndicesToRemove), "outlier(s)")
+    #         if not sde.dimension ==1:
+    #             self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)
 
 
     def removePointsFromMeshProcedure(self, pdf, simulation, parameters, sde):
