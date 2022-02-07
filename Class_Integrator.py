@@ -10,10 +10,7 @@ from families import HermitePolynomials
 import LejaPoints as LP
 import opolynd
 
-
-
-
-
+np.seterr(divide='ignore', invalid='ignore')
 
 class Integrator:
     def __init__(self, simulation, sde, parameters, pdf):

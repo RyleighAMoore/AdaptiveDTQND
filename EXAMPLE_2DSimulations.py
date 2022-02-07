@@ -14,8 +14,8 @@ from Class_Simulation import Simulation
 problem = "erf" # "spiral" "complex" "hill"
 
 dimension =2
-beta = 4
-radius = 3
+beta = 3
+radius = 2
 timeDiscretizationType = "EM"
 integratorType = "LQ"
 
