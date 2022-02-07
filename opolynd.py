@@ -1,6 +1,9 @@
+'''
+Credit: Akil Narayan - Pyopoly
+'''
+
 import numpy as np
 import opoly1d
-
 
 def opolynd_eval(x, lambdas, ab, poly1d):
     # Evaluates tensorial orthonormal polynomials associated with the

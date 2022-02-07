@@ -1,9 +1,11 @@
-import numpy as np
-from scipy.special import comb
-
 '''
 Credit: Akil Narayan - Pyopoly
 '''
+
+import numpy as np
+from scipy.special import comb
+
+
 def hyperbolic_cross_indices(d, k):
     """
     Returns indices associated with a d-dimensional (isotropic)

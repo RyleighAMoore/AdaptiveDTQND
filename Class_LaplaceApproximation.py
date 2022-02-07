@@ -1,10 +1,11 @@
-
 import numpy as np
 import math
-from Class_Gaussian import GaussScale
 from itertools import combinations
 import operator as op
 from functools import reduce
+
+from Class_Gaussian import GaussScale
+
 
 class LaplaceApproximation:
     def __init__(self, dimension):
@@ -24,10 +25,14 @@ class LaplaceApproximation:
         r = min(r, n-r)
         numer = reduce(op.mul, range(n, n-r, -1), 1)
         denom = reduce(op.mul, range(1, r+1), 1)
-        return numer // denom  # or / in Python 2
+        return numer // denom
 
-    # @profile
     def buildVMatForLinFit(self, dimension, QuadMesh, laplaceFitPdf):
+        self.scalingForGaussian = None
+        self.leastSqauresFit= None
+        self.constantOfGaussian= None
+        self.combinationOfBasisFunctionsList = None
+
         M = np.zeros((len(QuadMesh), self.numLSBasis))
         size = 0
         for i in range(dimension):
@@ -47,22 +52,14 @@ class LaplaceApproximation:
         M[:,size] = np.ones(np.size(QuadMesh,0))
         return M, comboList
 
-    # @profile
     def computeleastSquares(self, QuadMesh, laplaceFitPdf, dimension):
         M, comboList = self.buildVMatForLinFit(dimension, QuadMesh, laplaceFitPdf)
-
-        MT = M.T
+        # MT = M.T
         try:
             const, residuals, rank,s = np.linalg.lstsq(-M, np.log(laplaceFitPdf))
-            # if residuals > 1:
-            #     t=0
+            # const = -1*np.linalg.inv(MT@M)@(MT@np.log(laplaceFitPdf))
         except:
-            self.scalingForGaussian = None
-            self.leastSqauresFit= None
-            self.constantOfGaussian= None
-            self.combinationOfBasisFunctionsList = None
             return
-            const = -1*np.linalg.inv(MT@M)@(MT@np.log(laplaceFitPdf))
         c=const.T
 
         if dimension == 1:
@@ -76,13 +73,8 @@ class LaplaceApproximation:
                 self.scalingForGaussian = scaling
                 self.leastSqauresFit= c
                 self.constantOfGaussian= con
-                self.combinationOfBasisFunctionsList = None
                 return
             else:
-                self.scalingForGaussian = None
-                self.leastSqauresFit= None
-                self.constantOfGaussian= None
-                self.combinationOfBasisFunctionsList = None
                 return
 
         A = np.diag(c[:dimension])
@@ -92,21 +84,14 @@ class LaplaceApproximation:
             A[i[1],i[0]] = 1/2*c[dimension+ind]
 
         if np.linalg.det(A)<= 0:
-            self.scalingForGaussian = None
-            self.leastSqauresFit= None
-            self.constantOfGaussian= None
-            self.combinationOfBasisFunctionsList = None
             return
 
         B = np.expand_dims(c[dimension+ind+1:self.numLSBasis-1],1)
 
         sigma = np.linalg.inv(A)
         Lam, U = np.linalg.eigh(A)
+
         if np.min(Lam) <= 0:
-            self.scalingForGaussian = None
-            self.leastSqauresFit= None
-            self.constantOfGaussian= None
-            self.combinationOfBasisFunctionsList = None
             return
 
         La = np.diag(Lam)
@@ -118,10 +103,6 @@ class LaplaceApproximation:
             scaling.setMu(mu)
             scaling.setCov(sigma)
         else:
-            self.scalingForGaussian = None
-            self.leastSqauresFit= None
-            self.constantOfGaussian= None
-            self.combinationOfBasisFunctionsList = None
             return
 
         self.scalingForGaussian = scaling
@@ -136,8 +117,6 @@ class LaplaceApproximation:
         else:
             L = np.linalg.cholesky((self.scalingForGaussian.cov))
             JacFactor = np.prod(np.diag(L))
-            # vals = 1/(np.pi*JacFactor)*np.exp(-(cc[0]*x**2+ cc[1]*y**2 + cc[2]*x*y + cc[3]*x + cc[4]*y + cc[5]))/Const
-
             vals2 = np.zeros(np.size(pdf.meshCoordinates,0)).T
             count = 0
             for i in range(dimension):
@@ -151,9 +130,6 @@ class LaplaceApproximation:
                 count +=1
             vals2 += self.leastSqauresFit[count]*np.ones(np.shape(vals2))
             vals = 1/(np.sqrt(np.pi)**dimension*JacFactor)*np.exp(-(vals2))/self.constantOfGaussian
-
-        if np.min(np.squeeze(vals).T) <= 0:
-            t=0
         return np.squeeze(vals).T
 
 

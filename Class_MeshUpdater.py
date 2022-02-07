@@ -1,18 +1,13 @@
 import numpy as np
-import Functions as fun
 from scipy.spatial import Delaunay
-from itertools import chain
-from tqdm import tqdm, trange
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-import LejaPoints as LP
-import LejaPoints as LP
 from scipy.interpolate import griddata
 import random
-import Circumsphere as CS
 from itertools import combinations
 from collections import defaultdict
-import time
+
+import Circumsphere as CS
+import Functions as fun
+
 
 random.seed(10)
 
@@ -38,19 +33,23 @@ class MeshUpdater:
             if sde.dimension == 1: # 1D, add points to left and right is easy
                 left = np.argmin(pdf.meshCoordinates)
                 right = np.argmax(pdf.meshCoordinates)
+                leftVal = pdf.meshCoordinates[left][0]
+                rightVal = pdf.meshCoordinates[right][0]
 
-                newPoints = [] # Use as temporary mesh
                 numIters = int(parameters.h*10*20)
                 if pdf.pdfVals[left] > self.addPointsToBoundaryIfBiggerThanTolerance:
                     radius = parameters.maxDistanceBetweenPoints
                     for i in range(1,numIters):
-                        pdf.addPointsToMesh(np.asarray([[left-i*radius]]))
+                        pdf.addPointsToMesh(np.asarray([[leftVal-i*radius]]))
+                        numPointsAdded +=1
+
 
                 if pdf.pdfVals[right] > self.addPointsToBoundaryIfBiggerThanTolerance:
                     radius = parameters.maxDistanceBetweenPoints
 
                     for i in range(1,numIters):
-                        pdf.addPointsToMesh(np.asarray([[right+i*radius]]))
+                        pdf.addPointsToMesh(np.asarray([[rightVal+i*radius]]))
+                        numPointsAdded +=1
 
                 if numPointsAdded > 0:
                     # pdflog = np.log(PdfOrig)

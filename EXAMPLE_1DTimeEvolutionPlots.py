@@ -60,6 +60,8 @@ plt.figure()
 indices = [0,49,99,149,199]
 # indices = [199,149,99,49,0]
 
+
+
 for ind in indices:
     time = (ind+1)*h
     labelString = 't = %.2f' % time

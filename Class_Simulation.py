@@ -1,16 +1,16 @@
-# -*- coding: utf-8 -*-
 """
 Created on Tue Sep  7 22:07:18 2021
 
 @author: Rylei
 """
 import numpy as np
+from tqdm import trange
+import time
+
 from Class_TimeDiscretizationMethod import EulerMaruyamaTimeDiscretizationMethod, AndersonMattinglyTimeDiscretizationMethod
 from Class_PDF import PDF
 from Class_MeshUpdater import MeshUpdater
 from Class_Integrator import IntegratorLejaQuadrature, IntegratorTrapezoidal
-from tqdm import trange
-import time
 
 class Simulation():
     def __init__(self, sde, parameters, endTime):

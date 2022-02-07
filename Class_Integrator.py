@@ -1,15 +1,18 @@
-from Class_Gaussian import GaussScale
 import numpy as np
-from Class_LaplaceApproximation import LaplaceApproximation
-import math
-from variableTransformations import map_to_canonical_space, map_from_canonical_space
-from families import HermitePolynomials
 import indexing
-import LejaPoints as LP
-import opolynd
 from LejaPoints import getLejaPoints
 from scipy.interpolate import griddata
-import matplotlib.pyplot as plt
+
+from Class_Gaussian import GaussScale
+from Class_LaplaceApproximation import LaplaceApproximation
+from variableTransformations import map_to_canonical_space, map_from_canonical_space
+from families import HermitePolynomials
+import LejaPoints as LP
+import opolynd
+
+
+
+
 
 
 class Integrator:

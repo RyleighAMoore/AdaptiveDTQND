@@ -1,12 +1,9 @@
-import Class_PDF
 import numpy as np
 from tqdm import trange
-import matplotlib.pyplot as plt
-from matplotlib import pyplot
-from mpl_toolkits.mplot3d import Axes3D
-import LejaPoints as LP
-from tqdm import trange
 
+from Class_PDF import nDGridMeshCenteredAtOrigin
+from Class_Gaussian import GaussScale
+from Class_Integrator import IntegratorLejaQuadrature
 
 class TimeDiscretizationMethod():
     def __init__(self):
@@ -93,16 +90,6 @@ class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
 
 
 
-
-
-
-from Class_PDF import nDGridMeshCenteredAtOrigin
-from Class_Gaussian import GaussScale
-from Class_Integrator import IntegratorLejaQuadrature
-from variableTransformations import map_to_canonical_space, map_from_canonical_space
-import opolynd
-
-
 class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
     ## TODO: RECHECK THAT RHO ISNT NEEDED, Combine the N2 computations
     ##TODO: Finish this method
@@ -174,8 +161,6 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
 
 
     def computeN2Row(self, pdf, sde, h, yim1, meshAMr):
-        count1 = 0
-        s = np.size(self.meshAM,0)
         N2Complete2 = np.zeros((len(meshAMr), 1))
 
         scale2 = GaussScale(sde.dimension)
@@ -195,7 +180,6 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
             N2Complete2[count] = N2
         return N2Complete2
 
-    # @profile
     def computeN2Paritial(self, pdf, sde, h, yim1, meshNew):
         s = np.size(self.meshAM,0)
         N2Complete2 = np.zeros((len(meshNew),s))

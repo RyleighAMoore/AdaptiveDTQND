@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.stats import multivariate_normal
 
 class GaussScale:
     def __init__(self, dimension):
@@ -14,11 +13,9 @@ class GaussScale:
         return np.sqrt(np.diagonal(self.cov))
 
     def setMu(self, muVals):
-        # assert np.shape(muVals) == np.shape(self.mu), print(np.shape(muVals), 'Should be', np.shape(self.mu))
         self.mu = muVals
 
     def setCov(self, covMat):
-        # assert np.shape(covMat) == np.shape(self.cov)
         self.cov = covMat
         try:
             self.invCov = np.linalg.inv(covMat)
@@ -27,7 +24,6 @@ class GaussScale:
         self.invCovR = 1/np.sqrt(2)*np.linalg.cholesky(self.invCov).T
 
     def setSigma(self, sigmas):
-        # assert np.size(sigmas) == self.numVars
         for i in range(len(sigmas)):
             self.cov[i,i] = sigmas[i]**2
 
@@ -41,8 +37,6 @@ class GaussScale:
         step2and3 = -1 * self.normSpecialSquared(step1, axis=0)
         step4 = np.exp(step2and3)
         soln = self.const * step4
-        #soln = self.const * np.exp(-1*np.squeeze(np.sqrt(np.add.reduce(((self.invCovR @ diff).conj() * (self.invCovR @ diff)).real, axis=0, keepdims=True)))**2)
-        # soln = self.const * np.exp(-1*np.linalg.norm(self.invCovR @ diff, axis=0)**2)
         return soln
 
     def normSpecialSquared(self, x, axis):

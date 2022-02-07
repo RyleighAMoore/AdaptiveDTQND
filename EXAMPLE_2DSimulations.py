@@ -1,7 +1,3 @@
-from Class_Parameters import Parameters
-from Class_PDF import PDF
-from Class_SDE import SDE
-from Class_Simulation import Simulation
 import numpy as np
 import matplotlib.pyplot as plt
 import DriftDiffusionFunctionBank as functionBank
@@ -10,7 +6,12 @@ from PlottingResults import plotRowSixPlots
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-problem = "hill" # "spiral" "complex"
+from Class_Parameters import Parameters
+from Class_SDE import SDE
+from Class_Simulation import Simulation
+
+
+problem = "erf" # "spiral" "complex" "hill"
 
 dimension =2
 beta = 3
@@ -23,7 +24,7 @@ if problem == "hill":
     diffusionFunction = functionBank.ptfiveDiffusion
     spatialDiff = False
     kstepMin = 0.25
-    kstepMax = 0.3
+    kstepMax = 0.25
     endTime = 5
     h=0.1
 

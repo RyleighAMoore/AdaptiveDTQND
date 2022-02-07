@@ -1,14 +1,11 @@
 import numpy as np
-import NDFunctionBank
+from tqdm import trange
+
 from Class_Parameters import Parameters
 from Class_PDF import PDF
 from Class_Simulation import Simulation
-import matplotlib.pyplot as plt
-from tqdm import trange
-
 
 class SDE:
-
     def __init__(self, dimension, driftFunction, diffusionFunction, spatialDiff):
         '''
         Manages the stochastic differential equation we are solving.
