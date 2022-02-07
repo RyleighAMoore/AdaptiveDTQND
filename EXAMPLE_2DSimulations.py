@@ -14,8 +14,8 @@ from Class_Simulation import Simulation
 problem = "erf" # "spiral" "complex" "hill"
 
 dimension =2
-beta = 3
-radius = 2
+beta = 4
+radius = 3
 timeDiscretizationType = "EM"
 integratorType = "LQ"
 
@@ -88,7 +88,7 @@ if animate ==True:
     title = ax.set_title('3D Test')
 
     graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
-    ax.set_zlim(0,np.max(simulation.pdfTrajectory[2]))
+    ax.set_zlim(0,np.max(simulation.pdfTrajectory[-20]))
     ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
     plt.show()
 
@@ -96,7 +96,7 @@ from PlottingResults import plotRowSixPlots
 
 if problem == "erf":
     plottingMax = 0.3
-    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [5, 15,len(simulation.meshTrajectory)-1], [-10,10,-10,10])
+    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [5, 15,len(simulation.meshTrajectory)-1], [-12,12,-12,12])
 
 
 if problem == "spiral":
@@ -128,15 +128,15 @@ if problem == "hill":
     LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], meshTrueSoln, pdfTrueSoln, interpolate=False)
     print(L2wErrors)
 
-index = 69
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-title = ax.set_title('3D Test')
-graph, = ax.plot(Meshes[index][:,0], Meshes[index][:,1], PdfTraj[index], linestyle="", marker="o")
-graph, = ax.plot(Meshes[index+1][:,0], Meshes[index+1][:,1], PdfTraj[index+1], linestyle="", marker=".")
+# index = 69
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+# title = ax.set_title('3D Test')
+# graph, = ax.plot(Meshes[index][:,0], Meshes[index][:,1], PdfTraj[index], linestyle="", marker="o")
+# graph, = ax.plot(Meshes[index+1][:,0], Meshes[index+1][:,1], PdfTraj[index+1], linestyle="", marker=".")
 
-ax.set_zlim(0,np.max(simulation.pdfTrajectory[2]))
-ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
-plt.show()
+# ax.set_zlim(0,np.max(simulation.pdfTrajectory[2]))
+# ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
+# plt.show()
 
 

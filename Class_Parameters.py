@@ -18,7 +18,7 @@ class Parameters:
         OverideMesh = None: Used to overide default mesh with another mesh provided by the user, if None the proceudre will compute a mesh
         '''
 
-        self.conditionNumForAltMethod = 8
+        self.conditionNumForAltMethod = 5
         self.conditionNumberForAcceptingLejaPointsAtNextTimeStep = 1.1
         self.h = h
         self.kstepMin = kstepMin

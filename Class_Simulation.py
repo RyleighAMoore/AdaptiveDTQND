@@ -110,6 +110,7 @@ class Simulation():
         timing = []
         timeStart = time.time()
         for i in trange(1, numSteps):
+            '''Update mesh if using adaptive mesh'''
             if parameters.useAdaptiveMesh:
                 if i>=parameters.eligibleToAddPointsTimeStep and i%parameters.addPointsEveryNSteps==0:
                     self.checkIncreaseSizeStorageMatrices(parameters)
@@ -117,6 +118,7 @@ class Simulation():
                 if i>=parameters.eligibleToRemovePointsTimeStep and i%parameters.removePointsEveryNSteps==0:
                     self.meshUpdater.removePointsFromMeshProcedure(self.pdf, self, parameters, sde)
                     self.meshUpdater.removeOutlierPoints(self.pdf, self, parameters, sde)
+            '''Step forward solution one time step, save history if needed'''
             self.StepForwardInTime(sde, parameters)
             if i==numSteps-1 or parameters.saveHistory:
                 self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
