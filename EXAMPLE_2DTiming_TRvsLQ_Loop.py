@@ -193,6 +193,29 @@ for bufferVal in bufferVals:
     bufferDict_errors[bufferVal] = np.copy(ErrorsTR)
 
 
+timestr = time.strftime("%Y%m%d-%H%M%S")
+ListToSave = [betaDict_times, betaDict_errors, bufferDict_times, bufferDict_errors, betaVals, bufferVals, spacingLQVals, spacingTRVals, numPointsLQ, numPointsTR, h, radius, endTime, allTimingsArrayStorageLQ, allErrorsTimingArrayStorageLQ, allTimingsArrayStorageTR, allErrorArrayStorageTR]
+import pickle
+
+# define dictionary
+# create a binary pickle file
+f = open('Output/fileT40_'+str(timestr)+ "_" + str(endTime)+ '.pkl',"wb")
+pickle.dump(ListToSave,f)
+f.close()
+
+
+original_stdout = sys.stdout # Save a reference to the original standard output
+with open('Output/outputInformationSummaryT40_' +str(timestr)+ "_" +str(endTime)+ '.txt', 'w') as f:
+    sys.stdout = f # Change the standard output to the file we created.
+    print("dimension: ", dimension, " Iterations: ", numIterations, " initial radius: ", radius, "endTime: ", endTime, "time step: ", h, "\n")
+    print("Erorrs LQ", betaDict_errors)
+    print("Errors TR", bufferDict_errors)
+    print("LQ timing", betaDict_times)
+    print("TR timing", bufferDict_times)
+    print("# points LQ", numPointsLQ)
+    print("# points TR", numPointsTR)
+    sys.stdout = original_stdout # Reset the standard output to its original value
+
 
 unitTime = np.asarray(betaDict_times[min(betaVals)])[0]
 unitError = np.asarray(betaDict_errors[min(betaVals)])[0]
@@ -216,7 +239,6 @@ for buff in bufferVals:
         plt.semilogx(np.asarray(Errors), np.asarray(timing)/unitTime, "-s", label= labelString)
 
 
-timestr = time.strftime("%Y%m%d-%H%M%S")
 
 plt.legend()
 plt.xlabel(r'$L_{2w}$ Error')
@@ -225,27 +247,6 @@ plt.ylabel("Relative Running Time (Seconds)")
 plt.savefig('Output/timingFigureT40_'+ str(timestr)+ "_" + str(endTime)+ '.png')
 
 
-ListToSave = [betaDict_times, betaDict_errors, bufferDict_times, bufferDict_errors, betaVals, bufferVals, spacingLQVals, spacingTRVals, numPointsLQ, numPointsTR, h, radius, endTime, allTimingsArrayStorageLQ, allErrorsTimingArrayStorageLQ, allTimingsArrayStorageTR, allErrorArrayStorageTR]
-import pickle
-
-# define dictionary
-# create a binary pickle file
-f = open('Output/fileT40_'+str(timestr)+ "_" + str(endTime)+ '.pkl',"wb")
-pickle.dump(ListToSave,f)
-f.close()
-
-
-original_stdout = sys.stdout # Save a reference to the original standard output
-with open('Output/outputInformationSummaryT40_' +str(timestr)+ "_" +str(endTime)+ '.txt', 'w') as f:
-    sys.stdout = f # Change the standard output to the file we created.
-    print("dimension: ", dimension, " Iterations: ", numIterations, " initial radius: ", radius, "endTime: ", endTime, "time step: ", h, "\n")
-    print("Erorrs LQ", betaDict_errors)
-    print("Errors TR", bufferDict_errors)
-    print("LQ timing", betaDict_times)
-    print("TR timing", bufferDict_times)
-    print("# points LQ", numPointsLQ)
-    print("# points TR", numPointsTR)
-    sys.stdout = original_stdout # Reset the standard output to its original value
 
 
 animate = False
