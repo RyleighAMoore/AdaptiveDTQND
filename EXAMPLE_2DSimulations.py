@@ -13,7 +13,7 @@ from Class_Simulation import Simulation
 
 problem = "erf" # "spiral" "complex" "hill"
 
-dimension =2
+dimension = 2
 beta = 3
 radius = 2
 timeDiscretizationType = "EM"
@@ -21,12 +21,12 @@ integratorType = "LQ"
 
 if problem == "hill":
     driftFunction = functionBank.oneDrift
-    diffusionFunction = functionBank.ptfiveDiffusion
+    diffusionFunction = functionBank.ptSixDiffusion
     spatialDiff = False
     kstepMin = 0.25
     kstepMax = 0.25
-    endTime = 5
-    h=0.1
+    endTime =5
+    h=0.05
 
 if problem == "erf":
     driftFunction = functionBank.erfDrift
