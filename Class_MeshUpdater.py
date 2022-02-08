@@ -56,7 +56,7 @@ class MeshUpdater:
                     # interp = [griddata(MeshOrig, pdflog, np.asarray(newPoints), method='linear', fill_value=np.min(pdflog))][0]
                     # interp = np.exp(interp)
                     #interp1[interp1<=0] = 0.5*np.min(PdfOrig)
-                    interp = np.ones((1,numPointsAdded))*np.min(pdf.pdfVals)
+                    interp = np.ones((1,numPointsAdded))*pdf.minPdfValue
                     pdf.addPointsToPdf(interp)
                     self.changedBoolean = True
             else:
@@ -80,7 +80,7 @@ class MeshUpdater:
                     # interp = [griddata(MeshOrig, np.log(PdfOrig), pdf.meshCoordinates[-pointsAdded:], method='linear', fill_value=np.log(np.min(pdf.pdfVals)))][0]
                     # interp = np.exp(interp)
                     # interp[interp<=0] = np.min(pdf.pdfVals)/2
-                    interp = np.ones((1,numPointsAdded))*np.min(pdf.pdfVals)
+                    interp = np.ones((1,numPointsAdded))*pdf.minPdfValue
                     pdf.addPointsToPdf(interp)
                     self.changedBoolean = True
                     self.triangulation = Delaunay(pdf.meshCoordinates, incremental=True)

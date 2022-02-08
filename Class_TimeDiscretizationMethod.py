@@ -43,7 +43,7 @@ class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
         y = pdf.meshCoordinates[newPointindex,:]
         simulation.TransitionMatrix[:pdf.meshLength, newPointindex] = self.computeTransitionMatrixColumn(y, sde, parameters, pdf)
 
-        newRow = self.computeTransitionMatrixRow(newPointindex, meshPartial, parameters.h, sde.driftFunction, sde.diffusionFunction, sde.spatialDiff)
+        newRow = self.computeTransitionMatrixRow(meshPartial[newPointindex], meshPartial, parameters.h,sde)
         simulation.TransitionMatrix[newPointindex, :len(newRow)] = newRow
 
     def computeTransitionMatrixColumn(self, y, sde, parameters, pdf):
@@ -57,34 +57,33 @@ class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
         vals = scale1.ComputeGaussian(pdf.meshCoordinates, sde.dimension)
         return vals
 
-    def computeTransitionMatrixRow(self, indexOfMesh, mesh, h, drift, diff, SpatialDiff):
+    def computeTransitionMatrixRow(self, point, mesh, h, sde):
         '''Changing mu and cov over each column'''
-        x = mesh[indexOfMesh,:]
         D = mesh.shape[1]
-        mean = mesh+drift(mesh)*h
+        mean = mesh+sde.driftFunction(mesh)*h
         if D == 1:
-            newpointVect = x*np.ones(np.shape(mesh))
-            var = h*diff(mesh)**2
+            newpointVect = point*np.ones(np.shape(mesh))
+            var = h*sde.diffusionFunction(mesh)**2
             newVals = 1/(np.sqrt((2*np.pi*var)))*np.exp(-(newpointVect-mean)**2/(2*var))
             return np.squeeze(newVals)
 
-        if not SpatialDiff:
+        if not sde.spatialDiff:
             '''diff(y) = diff(x) since diffusion constant'''
-            diff = diff(x)
+            diff = sde.diffusionFunction(point)
             cov = diff@diff.T * h
             const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(cov))))
             invCov = np.linalg.inv(cov)
 
         soln_vals = np.empty(len(mesh))
         for j in range(len(mesh)):
-            if SpatialDiff:
+            if sde.spatialDiff:
                 y = mesh[j,:]
-                diff_y = diff(y)
+                diff_y = sde.diffusionFunction(y)
                 cov = diff_y@diff_y.T * h
                 const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(cov))))
                 invCov = np.linalg.inv(cov)
             mu = mean[j,:]
-            Gs = np.exp(-1/2*((x-mu).T@invCov@(x.T-mu.T)))
+            Gs = np.exp(-1/2*((point-mu).T@invCov@(point.T-mu.T)))
             soln_vals[j] = Gs
         return soln_vals*const
 
@@ -145,7 +144,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         scale2 = GaussScale(sde.dimension)
         if sde.spatialDiff == False:
             sig2 = np.sqrt(self.a1*sde.diffusionFunction(self.meshAM[0])**2 - self.a2*sde.diffusionFunction(self.meshAM[0])**2)*np.sqrt((1-self.theta)*h)
-            scale2.setCov(sig2**2)
+            scale2.setCov(sig2@sig2)
 
         mu2s = self.meshAM + (self.a1*sde.driftFunction(self.meshAM) - self.a2*sde.driftFunction(yim1))*(1-self.theta)*h
         for count, i in enumerate(self.meshAM):
@@ -153,7 +152,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
             scale2.setMu(mu2.T)
             if sde.spatialDiff == True:
                 sig2 = np.sqrt(self.a1*sde.diffusionFunction(i)**2 - self.a2*sde.diffusionFunction(yim1)**2)*np.sqrt((1-self.theta)*h)
-                scale2.setCov(sig2**2)
+                scale2.setCov(sig2@sig2)
             # N2 = Gaussian(scale2, pdf.meshCoordinates)
             N2 = scale2.ComputeGaussian(pdf.meshCoordinates, sde.dimension)
             N2Complete2[:,count] = N2
@@ -166,7 +165,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         scale2 = GaussScale(sde.dimension)
         if sde.spatialDiff == False:
             sig2 = np.sqrt(self.a1*sde.diffusionFunction(meshAMr[0])**2 - self.a2*sde.diffusionFunction(meshAMr)**2)*np.sqrt((1-self.theta)*h)
-            scale2.setCov(sig2**2)
+            scale2.setCov(sig2@sig2)
 
         mu2s = meshAMr + (self.a1*sde.driftFunction(meshAMr) - self.a2*sde.driftFunction(yim1))*(1-self.theta)*h
         for count, i in enumerate(meshAMr):
@@ -174,20 +173,20 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
             scale2.setMu(mu2.T)
             if sde.spatialDiff == True:
                 sig2 = np.sqrt(self.a1*sde.diffusionFunction(i)**2 - self.a2*sde.diffusionFunction(yim1)**2)*np.sqrt((1-self.theta)*h)
-                scale2.setCov(sig2**2)
+                scale2.setCov(sig2@sig2)
             # N2 = Gaussian(scale2, pdf.meshCoordinates)
             N2 = scale2.ComputeGaussian(yim1, sde.dimension)
             N2Complete2[count] = N2
         return N2Complete2
 
-    def computeN2Paritial(self, pdf, sde, h, yim1, meshNew):
+    def computeN2Paritial(self, sde, h, yim1, meshNew):
         s = np.size(self.meshAM,0)
         N2Complete2 = np.zeros((len(meshNew),s))
 
         scale2 = GaussScale(sde.dimension)
         if sde.spatialDiff == False:
             sig2 = np.sqrt(self.a1*sde.diffusionFunction(self.meshAM[0])**2 - self.a2*sde.diffusionFunction(self.meshAM[0])**2)*np.sqrt((1-self.theta)*h)
-            scale2.setCov(sig2**2)
+            scale2.setCov(sig2@sig2)
 
         mu2s = self.meshAM + (self.a1*sde.driftFunction(self.meshAM) - self.a2*sde.driftFunction(yim1))*(1-self.theta)*h
         for count, i in enumerate(self.meshAM):
@@ -195,7 +194,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
             scale2.setMu(mu2.T)
             if sde.spatialDiff == True:
                 sig2 = np.sqrt(self.a1*sde.diffusionFunction(i)**2 - self.a2*sde.diffusionFunction(yim1)**2)*np.sqrt((1-self.theta)*h)
-                scale2.setCov(sig2**2)
+                scale2.setCov(sig2@sig2)
             N2 = scale2.ComputeGaussian(meshNew, sde.dimension)
             N2Complete2[:,count] = N2
         return N2Complete2
@@ -205,7 +204,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         sig1 = abs(sde.diffusionFunction(np.asarray([yim1])))*np.sqrt(self.theta*h)
         scale = GaussScale(sde.dimension)
         scale.setMu(np.asarray(mu1.T))
-        scale.setCov(np.asarray(sig1**2))
+        scale.setCov(np.asarray(sig1@sig1))
         # N1 = Gaussian(scale, self.meshAM)
         N1 = scale.ComputeGaussian(self.meshAM, sde)
 
@@ -217,327 +216,6 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         transitionProb = np.sum(self.meshSpacingAM**sde.dimension*val)
         return transitionProb
 
-
-
-    # def computeTransitionMatrix(self, pdf, sde, parameters):
-    #     self.meshSpacingAM = 0.1
-    #     matrix = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
-    #     for j in trange(pdf.meshLength):
-    #         mu1= pdf.meshCoordinates[j]+sde.driftFunction(np.asarray([pdf.meshCoordinates[j]]))*self.theta*parameters.h
-    #         sig1 = abs(sde.diffusionFunction(np.asarray([pdf.meshCoordinates[j]]))*np.sqrt(self.theta*parameters.h))
-    #         scale1 = GaussScale(sde.dimension)
-    #         scale1.setMu(np.asarray(mu1.T))
-    #         scale1.setCov(np.asarray(sig1**2))
-
-    #         self.setAndersonMattinglyMeshAroundPoint(mu1, sde, np.max(sig1))
-    #         N1 = scale1.ComputeGaussian(self.meshAM, sde.dimension)
-    #         N2 = self.computeN2(pdf, sde, parameters.h, pdf.meshCoordinates[j])
-
-    #         product = N1
-
-    #         self.integrator.laplaceApproximation.computeleastSquares(self.meshAM, product, sde.dimension)
-    #         # print(self.integrator.laplaceApproximation.scalingForGaussian.cov)
-    #         if self.integrator.laplaceApproximation.scalingForGaussian == None:
-    #             value = 0
-    #             condNumber = 1
-    #         else:
-    #             self.meshAM = map_from_canonical_space(self.integrator.altMethodLejaPoints, self.integrator.laplaceApproximation.scalingForGaussian)
-    #             N1 = scale1.ComputeGaussian(self.meshAM, sde.dimension)
-    #             N2 = self.computeN2(pdf, sde, parameters.h, pdf.meshCoordinates[j])
-    #             # plt.scatter(self.meshAM, N2[i,:]*N1)
-    #             for i in range(pdf.meshLength):
-    #                 pdf.setIntegrandBeforeDividingOut(N2[i,:]*N1)
-
-    #                 vals = self.integrator.laplaceApproximation.ComputeDividedOutAM(pdf, sde.dimension, self.meshAM)
-    #                 pdf.integrandAfterDividingOut = pdf.integrandBeforeDividingOut/vals
-    #                 V = opolynd.opolynd_eval(self.integrator.altMethodLejaPoints, self.integrator.poly.lambdas[:parameters.numLejas,:], self.integrator.poly.ab, self.integrator.poly)
-    #                 vinv = np.linalg.inv(V)
-    #                 if sde.dimension > 1:
-    #                     L = np.linalg.cholesky((scale1.cov))
-    #                     JacFactor = np.prod(np.diag(L))
-    #                 if sde.dimension ==1:
-    #                     L = np.sqrt(scale1.cov)
-    #                     JacFactor = np.squeeze(L)
-
-    #                 value = np.matmul(vinv[0,:], pdf.integrandAfterDividingOut)
-    #                 condNumber = np.sum(np.abs(vinv[0,:]))
-    #                 # print(condNumber)
-    #                 matrix[i,j] = value
-    #     # matrix2 = self.computeTransitionMatrix2(pdf, sde, parameters)
-    #     return matrix
-
-    # def computeTransitionMatrix(self, pdf, sde, parameters):
-    #     self.meshSpacingAM = 0.2
-
-    #     matrix = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
-    #     for j in trange(pdf.meshLength):
-    #         mu1= pdf.meshCoordinates[j]+sde.driftFunction(np.asarray([pdf.meshCoordinates[j]]))*self.theta*parameters.h
-    #         sig1 = abs(sde.diffusionFunction(np.asarray([pdf.meshCoordinates[j]]))*np.sqrt(self.theta*parameters.h))
-    #         scale1 = GaussScale(sde.dimension)
-    #         scale1.setMu(np.asarray(mu1.T))
-    #         scale1.setCov(np.asarray(sig1**2))
-
-    #         self.setAndersonMattinglyMeshAroundPoint(mu1, sde, np.max(sig1))
-    #         N1 = scale1.ComputeGaussian(self.meshAM, sde.dimension)
-    #         N2 = self.computeN2(pdf, sde, parameters.h, pdf.meshCoordinates[j])
-
-    #         for i in range(pdf.meshLength):
-    #             # plt.scatter(self.meshAM, N2[i,:]*N1)
-    #             product = N2[i,:]*N1
-    #             self.integrator.laplaceApproximation.computeleastSquares(self.meshAM, product, sde.dimension)
-    #             # print(self.integrator.laplaceApproximation.scalingForGaussian.mu)
-    #             if self.integrator.laplaceApproximation.scalingForGaussian == None:
-    #                 value = 0
-    #                 condNumber = 1
-    #             else:
-    #                 meshAMr = map_from_canonical_space(self.integrator.altMethodLejaPoints, self.integrator.laplaceApproximation.scalingForGaussian)
-    #                 N1r = scale1.ComputeGaussian(meshAMr, sde.dimension)
-    #                 N2r = self.computeN2Row(pdf, sde, parameters.h, np.expand_dims(pdf.meshCoordinates[i],1).T, meshAMr)
-    #                 # N2 = self.computeN2(pdf, sde, parameters.h, pdf.meshCoordinates[j])
-
-    #                 # plt.scatter(self.meshAM, N2[i,:]*N1)
-
-    #                 pdf.setIntegrandBeforeDividingOut(N2r.T*N1r)
-
-    #                 vals = self.integrator.laplaceApproximation.ComputeDividedOutAM(pdf, sde.dimension, meshAMr)
-    #                 pdf.integrandAfterDividingOut = pdf.integrandBeforeDividingOut/vals
-    #                 V = opolynd.opolynd_eval(self.integrator.altMethodLejaPoints, self.integrator.poly.lambdas[:parameters.numLejas,:], self.integrator.poly.ab, self.integrator.poly)
-    #                 vinv = np.linalg.inv(V)
-    #                 if sde.dimension > 1:
-    #                     L = np.linalg.cholesky((scale1.cov))
-    #                     JacFactor = np.prod(np.diag(L))
-    #                 if sde.dimension ==1:
-    #                     L = np.sqrt(scale1.cov)
-    #                     JacFactor = np.squeeze(L)
-
-    #                 value = np.matmul(vinv[0,:], pdf.integrandAfterDividingOut.T)
-    #                 condNumber = np.sum(np.abs(vinv[0,:]))
-    #                 # print(condNumber)
-    #             matrix[i,j] = value
-    #     # matrix2 = self.computeTransitionMatrix2(pdf, sde, parameters)
-    #     return matrix
-
-
-    # def computeTransitionMatrix(self, pdf, sde, parameters):
-    #     matrix = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
-    #     for j in trange(pdf.meshLength):
-    #         mu1= pdf.meshCoordinates[j]+sde.driftFunction(np.asarray([pdf.meshCoordinates[j]]))*self.theta*parameters.h
-    #         sig1 = abs(sde.diffusionFunction(np.asarray([pdf.meshCoordinates[j]]))*np.sqrt(self.theta*parameters.h))
-    #         scale1 = GaussScale(sde.dimension)
-    #         scale1.setMu(np.asarray(mu1.T))
-    #         scale1.setCov(np.asarray(sig1**2))
-
-    #         self.setAndersonMattinglyMeshAroundPoint(mu1, sde, np.max(sig1))
-    #         N2 = self.computeN2(pdf, sde, parameters.h, pdf.meshCoordinates[j])
-    #         N1 = scale1.ComputeGaussian(self.meshAM, sde.dimension)
-
-    #         val = self.meshSpacingAM**sde.dimension*N2@np.expand_dims(N1,1)
-
-    #         # self.integrator.laplaceApproximation.copmuteleastSquares(self.meshCoordinates, val, sde.dimension)
-    #         # print(self.integrator.laplaceApproximation.scalingForGaussian)
-    #         # fig = pyplot.figure()
-    #         # ax = Axes3D(fig)
-    #         # ax.scatter(self.meshAM[:,0], self.meshAM[:,1], N1)
-    #         # # ax.scatter(pdf.meshCoordinates[:,0], pdf.meshCoordinates[:,1], val)
-
-    #         # pyplot.show()
-    #         matrix[:len(val),j] = np.squeeze(val)
-    #     return matrix
-
-    # # @profile
-    # def computeTransitionMatrix(self, pdf, sde, parameters):
-    #     self.meshSpacingAM = 0.1
-    #     matrix = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
-    #     meshDTQ = np.copy(pdf.meshCoordinates)
-    #     for j in trange(len(meshDTQ)):
-    #         pdf.meshCoordinates = meshDTQ
-    #         mu1= meshDTQ[j]+sde.driftFunction(np.asarray([meshDTQ[j]]))*self.theta*parameters.h
-    #         sig1 = abs(sde.diffusionFunction(np.asarray([meshDTQ[j]]))*np.sqrt(self.theta*parameters.h))
-    #         scale1 = GaussScale(sde.dimension)
-    #         scale1.setMu(np.asarray(mu1.T))
-    #         scale1.setCov(np.asarray(sig1**2))
-
-    #         self.setAndersonMattinglyMeshAroundPoint(mu1, sde, np.max(sig1))
-    #         N1 = scale1.ComputeGaussian(self.meshAM, sde.dimension)
-    #         N2 = self.computeN2(pdf, sde, parameters.h, meshDTQ[j])
-
-    #         for i in range(len(meshDTQ)):
-    #             # plt.scatter(self.meshAM, N2[i,:]*N1)
-    #             product = N2[i,:]*N1
-    #             self.integrator.laplaceApproximation.computeleastSquares(self.meshAM, product, sde.dimension)
-    #             # print(self.integrator.laplaceApproximation.scalingForGaussian.mu)
-    #             if self.integrator.laplaceApproximation.scalingForGaussian == None:
-    #                 value = 0
-    #                 condNumber = 1
-    #             else:
-
-    #                 mappedMesh = map_to_canonical_space(self.meshAM, self.integrator.laplaceApproximation.scalingForGaussian)
-    #                 self.lejaPoints, self.lejaPointsPdfVals, self.indicesOfLejaPoints,self.lejaSuccess = LP.getLejaSetFromPoints(self.integrator.identityScaling, mappedMesh, parameters.numLejas, self.integrator.poly, pdf.pdfVals, sde.diffusionFunction, parameters.numPointsForLejaCandidates)
-
-    #                 if self.lejaSuccess ==False: # Failed to get Leja points
-    #                     self.lejaPoints = None
-    #                     self.lejaPointsPdfVals = None
-    #                     self.idicesOfLejaPoints = None
-    #                     self.freshLejaPoints = True
-    #                     value = 0
-    #                     condNumber = 1
-    #                 else:
-    #                     mappedLejas = map_from_canonical_space(self.lejaPoints, self.integrator.laplaceApproximation.scalingForGaussian)
-
-
-    #                     N2LP = N2[i,self.indicesOfLejaPoints]
-    #                     N1LP = N1[self.indicesOfLejaPoints]
-    #                     pdf.setIntegrandBeforeDividingOut(N2LP.T*N1LP)
-
-    #                     pdf.meshCoordinates = mappedLejas
-    #                     vals = self.integrator.laplaceApproximation.ComputeDividedOut(pdf, sde.dimension)
-
-    #                     # values = self.integrator.laplaceApproximation.ComputeDividedOutAM(pdf, sde.dimension, self.lejaPoints)
-    #                     pdf.integrandAfterDividingOut = pdf.integrandBeforeDividingOut/vals
-    #                     V = opolynd.opolynd_eval(self.integrator.altMethodLejaPoints, self.integrator.poly.lambdas[:parameters.numLejas,:], self.integrator.poly.ab, self.integrator.poly)
-    #                     vinv = np.linalg.inv(V)
-    #                     if sde.dimension > 1:
-    #                         L = np.linalg.cholesky((scale1.cov))
-    #                         JacFactor = np.prod(np.diag(L))
-    #                     if sde.dimension ==1:
-    #                         L = np.sqrt(scale1.cov)
-    #                         JacFactor = np.squeeze(L)
-
-    #                     value = np.matmul(vinv[0,:], pdf.integrandAfterDividingOut.T)
-    #                     condNumber = np.sum(np.abs(vinv[0,:]))
-    #                     # print(condNumber)
-    #             matrix[i,j] = value
-    #     # matrix2 = self.computeTransitionMatrix2(pdf, sde, parameters)
-    #     pdf.meshCoordinates = meshDTQ
-    #     return matrix
-
-    # # @profile
-    # def computeTransitionMatrix(self, pdf, sde, parameters):
-    #     self.meshSpacingAM = 0.05
-    #     matrix = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
-    #     meshDTQ = np.copy(pdf.meshCoordinates)
-    #     for j in trange(len(meshDTQ)):
-    #         pdf.meshCoordinates = meshDTQ
-    #         mu1= meshDTQ[j]+sde.driftFunction(np.asarray([meshDTQ[j]]))*self.theta*parameters.h
-    #         sig1 = abs(sde.diffusionFunction(np.asarray([meshDTQ[j]]))*np.sqrt(self.theta*parameters.h))
-    #         scale1 = GaussScale(sde.dimension)
-    #         scale1.setMu(np.asarray(mu1.T))
-    #         scale1.setCov(np.asarray(sig1**2))
-
-    #         self.setAndersonMattinglyMeshAroundPoint(mu1, sde, np.max(sig1))
-    #         N1 = scale1.ComputeGaussian(self.meshAM, sde.dimension)
-    #         N2 = self.computeN2(pdf, sde, parameters.h, meshDTQ[j])
-
-    #         for i in range(len(meshDTQ)):
-    #             # plt.scatter(self.meshAM, N2[i,:]*N1)
-    #             product = N2[i,:]*N1
-    #             self.integrator.laplaceApproximation.computeleastSquares(self.meshAM, product, sde.dimension)
-    #             # print(self.integrator.laplaceApproximation.scalingForGaussian.mu)
-    #             if self.integrator.laplaceApproximation.scalingForGaussian == None:
-    #                 value = 0
-    #                 condNumber = 1
-    #             else:
-
-    #                 # mappedMesh = map_to_canonical_space(self.meshAM, self.integrator.laplaceApproximation.scalingForGaussian)
-    #                 # self.lejaPoints, self.lejaPointsPdfVals, self.indicesOfLejaPoints,self.lejaSuccess = LP.getLejaSetFromPoints(self.integrator.identityScaling, mappedMesh, parameters.numLejas, self.integrator.poly, pdf.pdfVals, sde.diffusionFunction, parameters.numPointsForLejaCandidates)
-
-
-    #                 # if self.lejaSuccess ==False: # Failed to get Leja points
-    #                 #     self.lejaPoints = None
-    #                 #     self.lejaPointsPdfVals = None
-    #                 #     self.idicesOfLejaPoints = None
-    #                 #     self.freshLejaPoints = True
-    #                 #     value = 0
-    #                 #     condNumber = 1
-    #                 # else:
-    #                 #     mappedLejas = map_from_canonical_space(self.lejaPoints, self.integrator.laplaceApproximation.scalingForGaussian)
-
-    #                     self.lejaPoints, distances, self.indicesOfLejaPoints = findNearestKPoints(self.integrator.laplaceApproximation.scalingForGaussian.mu, self.meshAM, parameters.numLejas, getIndices = True)
-
-
-    #                     N2LP = N2[i,self.indicesOfLejaPoints]
-    #                     N1LP = N1[self.indicesOfLejaPoints]
-    #                     pdf.setIntegrandBeforeDividingOut(N2LP.T*N1LP)
-
-    #                     pdf.meshCoordinates = self.lejaPoints
-    #                     vals = self.integrator.laplaceApproximation.ComputeDividedOut(pdf, sde.dimension)
-
-    #                     pdf.integrandAfterDividingOut = pdf.integrandBeforeDividingOut/vals
-    #                     V = opolynd.opolynd_eval(self.integrator.altMethodLejaPoints, self.integrator.poly.lambdas[:parameters.numLejas,:], self.integrator.poly.ab, self.integrator.poly)
-    #                     vinv = np.linalg.inv(V)
-    #                     if sde.dimension > 1:
-    #                         L = np.linalg.cholesky((scale1.cov))
-    #                         JacFactor = np.prod(np.diag(L))
-    #                     if sde.dimension ==1:
-    #                         L = np.sqrt(scale1.cov)
-    #                         JacFactor = np.squeeze(L)
-
-    #                     value = np.matmul(vinv[0,:], pdf.integrandAfterDividingOut.T)
-    #                     condNumber = np.sum(np.abs(vinv[0,:]))
-    #                     # print(condNumber)
-    #             matrix[i,j] = value
-    #     # matrix2 = self.computeTransitionMatrix2(pdf, sde, parameters)
-    #     pdf.meshCoordinates = meshDTQ
-    #     return matrix
-
-    # # @profile
-    # def computeTransitionMatrix(self, pdf, sde, parameters):
-    #     self.meshSpacingAM = 0.05
-    #     matrix = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
-    #     meshDTQ = np.copy(pdf.meshCoordinates)
-    #     for j in trange(len(meshDTQ)):
-    #         pdf.meshCoordinates = meshDTQ
-    #         mu1= meshDTQ[j]+sde.driftFunction(np.asarray([meshDTQ[j]]))*self.theta*parameters.h
-    #         sig1 = abs(sde.diffusionFunction(np.asarray([meshDTQ[j]]))*np.sqrt(self.theta*parameters.h))
-    #         scale1 = GaussScale(sde.dimension)
-    #         scale1.setMu(np.asarray(mu1.T))
-    #         scale1.setCov(np.asarray(sig1**2))
-
-    #         self.setAndersonMattinglyMeshAroundPoint(mu1, sde, np.max(sig1), Noise = True)
-    #         N1 = scale1.ComputeGaussian(self.meshAM, sde.dimension)
-    #         N2 = self.computeN2(pdf, sde, parameters.h, meshDTQ[j])
-
-    #         for i in range(len(meshDTQ)):
-    #             # plt.scatter(self.meshAM, N2[i,:]*N1)
-    #             product = N2[i,:]*N1
-    #             meanEst = meshDTQ[i,:]/2 + meshDTQ[j,:]/2
-    #             self.lejaPoints, distances, self.indicesOfLejaPoints = findNearestKPoints(meanEst, self.meshAM, parameters.numLejas, getIndices = True)
-
-    #             self.integrator.laplaceApproximation.computeleastSquares(self.lejaPoints, product[self.indicesOfLejaPoints], sde.dimension)
-    #             # print(self.integrator.laplaceApproximation.scalingForGaussian.mu)
-    #             if self.integrator.laplaceApproximation.scalingForGaussian == None:
-    #                 value = 0
-    #                 condNumber = 1
-    #             else:
-    #                 # self.lejaPoints, distances, self.indicesOfLejaPoints = findNearestKPoints(meanEst, self.meshAM, parameters.numLejas, getIndices = True)
-
-
-    #                 N2LP = N2[i,self.indicesOfLejaPoints]
-    #                 N1LP = N1[self.indicesOfLejaPoints]
-    #                 pdf.setIntegrandBeforeDividingOut(N2LP.T*N1LP)
-
-    #                 pdf.meshCoordinates = self.lejaPoints
-    #                 vals = self.integrator.laplaceApproximation.ComputeDividedOut(pdf, sde.dimension)
-
-    #                 pdf.integrandAfterDividingOut = pdf.integrandBeforeDividingOut/vals
-    #                 V = opolynd.opolynd_eval(self.lejaPoints, self.integrator.poly.lambdas[:parameters.numLejas,:], self.integrator.poly.ab, self.integrator.poly)
-    #                 vinv = np.linalg.inv(V)
-    #                 if sde.dimension > 1:
-    #                     L = np.linalg.cholesky((scale1.cov))
-    #                     JacFactor = np.prod(np.diag(L))
-    #                 if sde.dimension ==1:
-    #                     L = np.sqrt(scale1.cov)
-    #                     JacFactor = np.squeeze(L)
-
-    #                 value = np.matmul(vinv[0,:], pdf.integrandAfterDividingOut.T)
-    #                 condNumber = np.sum(np.abs(vinv[0,:]))
-    #                 # print(condNumber)
-    #             matrix[i,j] = value
-    #     # matrix2 = self.computeTransitionMatrix2(pdf, sde, parameters)
-    #     pdf.meshCoordinates = meshDTQ
-    #     return matrix
-
-
     def computeTransitionMatrix(self, pdf, sde, parameters):
         matrix = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
         for j in trange(pdf.meshLength):
@@ -545,25 +223,28 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
             sig1 = abs(sde.diffusionFunction(np.asarray([pdf.meshCoordinates[j]]))*np.sqrt(self.theta*parameters.h))
             scale1 = GaussScale(sde.dimension)
             scale1.setMu(np.asarray(mu1.T))
-            scale1.setCov(np.asarray(sig1**2))
+            scale1.setCov(np.asarray(sig1@sig1))
 
             self.setAndersonMattinglyMeshAroundPoint(mu1, sde, np.max(sig1))
             N2 = self.computeN2(pdf, sde, parameters.h, pdf.meshCoordinates[j])
             N1 = scale1.ComputeGaussian(self.meshAM, sde.dimension)
 
             val = self.meshSpacingAM**sde.dimension*N2@np.expand_dims(N1,1)
-
-            # self.integrator.laplaceApproximation.copmuteleastSquares(self.meshCoordinates, val, sde.dimension)
-            # print(self.integrator.laplaceApproximation.scalingForGaussian)
-            # fig = pyplot.figure()
-            # ax = Axes3D(fig)
-            # ax.scatter(self.meshAM[:,0], self.meshAM[:,1], N1)
-            # # ax.scatter(pdf.meshCoordinates[:,0], pdf.meshCoordinates[:,1], val)
-
-            # pyplot.show()
             matrix[:len(val),j] = np.squeeze(val)
         return matrix
 
+    def computeTransitionMatrixRow(self, point, mesh, h, sde, fullMesh = None, newPointIndices_AM = None):
+        mu1= point+sde.driftFunction(np.asarray([point]))*self.theta*h
+        sig1 = abs(sde.diffusionFunction(np.asarray([point]))*np.sqrt(self.theta*h))
+        scale1 = GaussScale(sde.dimension)
+        scale1.setMu(np.asarray(mu1.T))
+        scale1.setCov(np.asarray(sig1@sig1))
+
+        self.setAndersonMattinglyMeshAroundPoint(mu1, sde, np.max(sig1))
+        N22 = self.computeN2Paritial(sde, h, point,fullMesh[newPointIndices_AM])
+        N1 = scale1.ComputeGaussian(self.meshAM, sde.dimension)
+        vals = self.meshSpacingAM**sde.dimension*N22@np.expand_dims(N1,1)
+        return vals
 
     def AddPointToG(self, simulation, newPointindices, parameters, integrator, sde):
         pdf = simulation.pdf
@@ -572,7 +253,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
             sig1 = abs(sde.diffusionFunction(np.asarray([point]))*np.sqrt(self.theta*parameters.h))
             scale1 = GaussScale(sde.dimension)
             scale1.setMu(np.asarray(mu1.T))
-            scale1.setCov(np.asarray(sig1**2))
+            scale1.setCov(np.asarray(sig1@sig1))
             self.setAndersonMattinglyMeshAroundPoint(mu1, sde, np.max(sig1))
 
             # Add column
@@ -585,24 +266,21 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         count = 0
         for index in range(pdf.meshLength):
             point = pdf.meshCoordinates[count]
-            mu1= point+sde.driftFunction(np.asarray([point]))*self.theta*parameters.h
-            sig1 = abs(sde.diffusionFunction(np.asarray([point]))*np.sqrt(self.theta*parameters.h))
-            scale1 = GaussScale(sde.dimension)
-            scale1.setMu(np.asarray(mu1.T))
-            scale1.setCov(np.asarray(sig1**2))
+            # mu1= point+sde.driftFunction(np.asarray([point]))*self.theta*parameters.h
+            # sig1 = abs(sde.diffusionFunction(np.asarray([point]))*np.sqrt(self.theta*parameters.h))
+            # scale1 = GaussScale(sde.dimension)
+            # scale1.setMu(np.asarray(mu1.T))
+            # scale1.setCov(np.asarray(sig1@sig1))
 
-            self.setAndersonMattinglyMeshAroundPoint(mu1, sde, np.max(sig1))
-            N22 = self.computeN2Paritial(pdf, sde, parameters.h, pdf.meshCoordinates[count], pdf.meshCoordinates[newPointindices])
-            N1 = scale1.ComputeGaussian(self.meshAM, sde.dimension)
-            vals = self.meshSpacingAM**sde.dimension*N22@np.expand_dims(N1,1)
+            # self.setAndersonMattinglyMeshAroundPoint(mu1, sde, np.max(sig1))
+            # N22 = self.computeN2Paritial(sde, parameters.h, pdf.meshCoordinates[count], pdf.meshCoordinates[newPointindices])
+            # N1 = scale1.ComputeGaussian(self.meshAM, sde.dimension)
+            # vals = self.meshSpacingAM**sde.dimension*N22@np.expand_dims(N1,1)
+
+            vals = self.computeTransitionMatrixRow(point, pdf.meshCoordinates, parameters.h, sde, fullMesh = pdf.meshCoordinates, newPointIndices_AM = newPointindices)
 
             simulation.TransitionMatrix[pdf.meshLength-len(newPointindices):pdf.meshLength, count] = np.squeeze(vals)
             count = count +1
-        # matrix = self.computeTransitionMatrix(pdf, sde, parameters.h)
-        # print(np.nanmax(abs(matrix - integrator.TransitionMatrix[:pdf.meshLength,:pdf.meshLength])))
-
-        # assert np.isclose(10**(-16),np.max(abs(matrix - integrator.TransitionMatrix[:pdf.meshLength,:pdf.meshLength])))
-        t=0
 
 
 
