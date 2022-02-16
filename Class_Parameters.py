@@ -52,24 +52,36 @@ class Parameters:
             self.numLejas = 6
         elif sde.dimension == 2:
             self.numLejas = 10
-        else:
+        elif sde. dimension ==3:
             self.numLejas = 15
+        elif sde.dimension ==4:
+            self.numLejas = 15
+        elif sde.dimension ==5:
+            self.numLejas = 40
 
     def setNumPointsForLejaCandidates(self, sde):
         if sde.dimension == 1:
             self.numPointsForLejaCandidates = 50
         elif sde.dimension == 2:
             self.numPointsForLejaCandidates = 150
-        else:
+        elif sde.dimension == 3:
             self.numPointsForLejaCandidates = 150
+        elif sde.dimension==4:
+            self.numPointsForLejaCandidates = 250
+        elif sde.dimension ==5:
+            self.numPointsForLejaCandidates = 450
 
     def setNumQuadFit(self,sde):
         if sde.dimension == 1:
             self.numQuadFit = 20
         elif sde.dimension == 2:
             self.numQuadFit = 20
-        else:
+        elif sde.dimension==3:
             self.numQuadFit = 150
+        elif sde.dimension == 4:
+            self.numQuadFit = 200
+        elif sde.dimension == 5:
+            self.numQuadFit = 300
 
 
 

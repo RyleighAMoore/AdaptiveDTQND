@@ -1,0 +1,85 @@
+from Class_Parameters import Parameters
+from Class_PDF import PDF
+from Class_SDE import SDE
+from Class_Simulation import Simulation
+import numpy as np
+import matplotlib.pyplot as plt
+import DriftDiffusionFunctionBank as functionBank
+import time
+from PlottingResults import plotRowSixPlots
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from Errors import ErrorValsOneTime
+
+
+problem = "hill" # "spiral" "complex"
+
+dimension =5
+beta = 3
+driftFunction = functionBank.oneDrift
+diffusionFunction = functionBank.ptSixDiffusion
+spatialDiff = False
+
+if dimension == 1:
+    beta = 4
+    radius = 3
+    kstepMin= 0.2
+    kstepMax = kstepMin
+    h = 0.05
+    endTime =10
+    useAdaptiveMesh =True
+
+if dimension == 2:
+    kstepMin = 0.25
+    kstepMax = 0.25
+    endTime =5
+    radius = 2
+    h=0.05
+
+if dimension == 3:
+    kstepMin = 0.22
+    kstepMax = 0.22
+    endTime = 1
+    radius = 1
+    h=0.02
+
+if dimension == 4:
+    kstepMin = 0.18
+    kstepMax = 0.18
+    endTime = 0.2
+    radius = 0.8
+    h=0.02
+
+if dimension == 5:
+    kstepMin = 0.1
+    kstepMax = 0.1
+    endTime = 0.05
+    radius = 0.6
+    h=0.01
+
+
+
+sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
+parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh =True, timeDiscretizationType = "EM", integratorType = "LQ")
+simulation = Simulation(sde, parameters, endTime)
+
+start = time.time()
+simulation.setUpTransitionMatrix(sde, parameters)
+TMTime = time.time()-start
+
+start = time.time()
+simulation.computeAllTimes(sde, parameters)
+end = time.time()
+print("\n")
+print("Transition Matrix timing:", TMTime)
+print("\n")
+print("Stepping timing",end-start, '*****************************************')
+
+meshTrueSolnLQ = simulation.meshTrajectory[-1]
+pdfTrueSolnLQ = sde.exactSolution(simulation.meshTrajectory[-1], endTime)
+
+LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], meshTrueSolnLQ, pdfTrueSolnLQ, interpolate=False)
+
+print(L2wErrors)
+
+

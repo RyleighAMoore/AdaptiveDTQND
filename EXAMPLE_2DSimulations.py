@@ -11,7 +11,7 @@ from Class_SDE import SDE
 from Class_Simulation import Simulation
 
 
-problem = "complex" # "spiral" "complex" "hill"
+problem = "erf" # "spiral" "complex" "hill"
 
 dimension = 2
 beta = 3

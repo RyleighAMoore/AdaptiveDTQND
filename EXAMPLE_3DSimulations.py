@@ -12,20 +12,20 @@ import matplotlib.animation as animation
 from Errors import ErrorValsOneTime
 
 
-problem = "hill" # "spiral" "complex"
+problem = "erf" # "spiral" "complex"
 
 dimension =3
 beta = 3
 radius = 1
 
 
-if problem == "hill":
+if problem == "erf":
     driftFunction = functionBank.oneDrift
-    diffusionFunction = functionBank.ptfiveDiffusion
+    diffusionFunction = functionBank.ptSixDiffusion
     spatialDiff = False
     kstepMin = 0.22
     kstepMax = 0.22
-    endTime = 0.5
+    endTime = 1
     h=0.02
     vminVal = -5
     vmaxVal = 1

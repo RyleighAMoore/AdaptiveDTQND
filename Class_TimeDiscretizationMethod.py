@@ -123,7 +123,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
 
     def setAndersonMattinglyMeshAroundPoint(self, point, sde, radius, Noise = False):
         if sde.dimension ==1:
-            radius =6*radius
+            radius =20*radius
         else:
             radius = 6*radius
 

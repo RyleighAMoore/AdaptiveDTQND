@@ -21,11 +21,11 @@ fontprops = {'fontweight': 'bold'}
 
 dimension =1
 beta = 4
-radius = 2
+radius = 3
 kstepMin= 0.3
 kstepMax = kstepMin
 h = 0.05
-endTime =1
+endTime =10
 useAdaptiveMesh =True
 timeDiscretizationType = "AM"
 integratorType = "LQ"

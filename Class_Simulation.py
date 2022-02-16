@@ -6,11 +6,14 @@ Created on Tue Sep  7 22:07:18 2021
 import numpy as np
 from tqdm import trange
 import time
+import random
+
 
 from Class_TimeDiscretizationMethod import EulerMaruyamaTimeDiscretizationMethod, AndersonMattinglyTimeDiscretizationMethod
 from Class_PDF import PDF
 from Class_MeshUpdater import MeshUpdater
 from Class_Integrator import IntegratorLejaQuadrature, IntegratorTrapezoidal
+random.seed(10)
 
 class Simulation():
     def __init__(self, sde, parameters, endTime):
