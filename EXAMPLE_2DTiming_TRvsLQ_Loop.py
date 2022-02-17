@@ -30,14 +30,14 @@ spacingTRVals = [0.25, 0.2, 0.18]
 # spacingLQVals = [0.38]
 # spacingTRVals = [0.18]
 
-dimension = 2
-radius = 2
-h = 0.05
-betaVals = [3]
-bufferVals = []
-endTime = 40
-spacingLQVals = [0.38]
-spacingTRVals = []
+# dimension = 2
+# radius = 2
+# h = 0.05
+# betaVals = [3]
+# bufferVals = []
+# endTime = 40
+# spacingLQVals = [0.38]
+# spacingTRVals = []
 
 
 # SDE creation
