@@ -91,3 +91,4 @@ if Animate:
     ani = animation.FuncAnimation(fig, update_graph, frames=len(simulation.pdfTrajectory), interval=50, blit=False)
     plt.show()
 
+

@@ -136,6 +136,22 @@ class Simulation():
 
 
 
+    def computeLejaAndAlternativeUse(self):
+        '''Compute Leja reuse and Alt method use'''
+        assert len(self.meshTrajectory) > 3, "History doesn't seem to be saved."
+        lengths = []
+        for mesh in self.meshTrajectory[1:]:
+            lengths.append(len(mesh))
+
+        percentLejaReuse = np.asarray(self.LPReuseCount[1:])/np.asarray(lengths[1:])*100
+
+        print("Average LEJA REUSE Percent: ", np.mean(percentLejaReuse))
+
+        percentAltMethodUse = np.asarray(self.AltMethodUseCount)/np.asarray(lengths)*100
+        print("Average ALT METHOD USE Percent: ", np.mean(percentAltMethodUse))
+
+
+
 
 
 

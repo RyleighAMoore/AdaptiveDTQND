@@ -67,7 +67,10 @@ for ind in indices:
     labelString = 't = %.2f' % time
     plt.plot(simulation.meshTrajectory[ind], simulation.pdfTrajectory[ind], '.', label=labelString)
 
-plt.xlim([-5, 40])
+plt.xlim([-5, 35])
+plt.xlabel(r'$\mathbf{x}$')
+plt.ylabel(r'$\hat{p}(\mathbf{x}, t_n)$')
+
 plt.legend(markerscale=2)
 
 
@@ -90,3 +93,4 @@ if Animate:
     ani = animation.FuncAnimation(fig, update_graph, frames=len(simulation.pdfTrajectory), interval=50, blit=False)
     plt.show()
 
+simulation.computeLejaAndAlternativeUse()
