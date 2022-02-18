@@ -41,7 +41,9 @@ def spiralDrift_2D(mesh):
     x = mesh[:,0]
     y = mesh[:,1]
     r = np.sqrt(x ** 2 + y ** 2)
-    return np.asarray([2*(10*erf(10*x)+5*y)/(r+10), 5*(-2*x+y)/(r+10)]).T
+    # return np.asarray([4*(5*erf(2*x)+10*y)/(r+10), 5*(-2*x+y)/(r+10)]).T
+    return np.asarray([2*(10*erf(5*x)+5*y)/(r+10), 5*(-2*x+y)/(r+10)]).T
+
 
 def complextDrift_2D(mesh):
     if mesh.ndim ==1:

@@ -130,7 +130,7 @@ def plotRowThreePlots(Meshes, PdfTraj, h, indices, includeMeshPoints = False):
 
 
 def plotRowSixPlots(plottingMax, Meshes, PdfTraj, h, indices, limits):
-    minVal = 0.002
+    # minVal = 0.002
     maxVal = plottingMax
     # plt.figure()
     fig, axs = plt.subplots(2, 3)
@@ -145,8 +145,8 @@ def plotRowSixPlots(plottingMax, Meshes, PdfTraj, h, indices, limits):
             S.append(x)
         M = np.asarray(M)
         S = np.asarray(S)
-        levels = np.round(np.linspace(minVal, maxVal, 10),3)
-        cntr2 = axs[0,times].tricontourf(M[:,0], M[:,1], S, levels=levels, cmap="viridis")
+        levels = np.linspace(-2.5, np.round(np.log(maxVal)), 19)
+        cntr2 = axs[0,times].tricontourf(M[:,0], M[:,1], np.log10(S), levels=levels, cmap="viridis")
         axs[0,times].set(adjustable='box', aspect='equal')
         axs[1,times].set(adjustable='box', aspect='equal')
 
@@ -178,10 +178,15 @@ def plotRowSixPlots(plottingMax, Meshes, PdfTraj, h, indices, limits):
 
 
         times = times+1
+
+    # fig.text(0.52, 0.05, r'$\mathbf{x}^{(1)}$', ha='center')
+    fig.text(0.52, 0.23, r'$x^{(1)}$', ha='center')
+    fig.text(0.04, 0.6, r'$x^{(2)}$', va='center', rotation='vertical')
     cbar = plt.colorbar(cntr2, ax=axs[:3], location='bottom')
     cbar.ax.tick_params(labelsize=10)
-    fig.text(0.52, 0.05, r'$\mathbf{x}^{(1)}$', ha='center')
-    fig.text(0.04, 0.6, r'$\mathbf{x}^{(2)}$', va='center', rotation='vertical')
+    cbar.set_label(r'$\log_{10}(\hat{p}(\mathbf{x}, t_n))$')
+
+
 
 def plotRowThreePlotsMesh(Meshes, PdfTraj, h, indices, includeMeshPoints = False):
     minVal = 0.002

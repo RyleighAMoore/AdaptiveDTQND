@@ -14,11 +14,13 @@ import sys
 dimension = 2
 radius = 2
 h = 0.05
-betaVals = [2.5, 3, 4, 5]
+betaVals = [2.5, 3, 4, 5, 6, 7, 8, 9 ,10]
 bufferVals = [0, 0.5]
 endTime = 40
 spacingLQVals = [0.38]
+spacingTRValsShort = [0.25, 0.2, 0.18, 0.15]
 spacingTRVals = [0.25, 0.2, 0.18]
+
 
 
 # dimension = 2
@@ -149,9 +151,13 @@ for beta in betaVals:
 allTimingsArrayStorageTR = []
 allErrorArrayStorageTR = []
 for bufferVal in bufferVals:
+    if bufferVal == 0:
+        spacingTRValsToUse = spacingTRValsShort
+    else:
+        spacingTRValsToUse = spacingTRVals
     ErrorsTR = []
     timingArrayStorageTR = []
-    for spacingTR in spacingTRVals:
+    for spacingTR in spacingTRValsToUse:
         print("\nTR: buffer= ", bufferVal, ", spacing= ", spacingTR, ":\n")
         timingPerRunArrayTR = []
         errorsPerRunArrayTR = []

@@ -11,11 +11,9 @@ from Class_SDE import SDE
 from Class_Simulation import Simulation
 
 
-problem = "erf" # "spiral" "complex" "hill"
+problem = "spiral" # "spiral" "complex" "hill"
 
 dimension = 2
-beta = 3
-radius = 2
 timeDiscretizationType = "EM"
 integratorType = "LQ"
 
@@ -24,9 +22,11 @@ if problem == "hill":
     driftFunction = functionBank.oneDrift
     diffusionFunction = functionBank.ptSixDiffusion
     spatialDiff = False
-    kstepMin = 0.25
-    kstepMax = 0.25
-    endTime =5
+    kstepMin = 0.2
+    kstepMax = 0.2
+    endTime =2
+    radius = 2
+    beta = 4
     h=0.05
 
 if problem == "erf":
@@ -36,16 +36,20 @@ if problem == "erf":
     kstepMin = 0.25
     kstepMax = 0.3
     endTime = 4
-    h=0.05
+    radius = 3
+    beta = 3
+    h=0.04
 
 if problem == "spiral":
     driftFunction = functionBank.spiralDrift_2D
     diffusionFunction = functionBank.ptSixDiffusion
     spatialDiff = False
-    kstepMin = 0.15
-    kstepMax = 0.15
-    endTime = 2
-    h=0.05
+    kstepMin = 0.2
+    kstepMax = 0.2
+    endTime = 3
+    radius = 2
+    beta = 3
+    h=0.02
 
 if problem == "complex":
     driftFunction = functionBank.complextDrift_2D
@@ -54,6 +58,8 @@ if problem == "complex":
     kstepMin = 0.1
     kstepMax = 0.1
     endTime = 1.5
+    radius = 2
+    beta = 3
     h=0.01
 
 
@@ -93,21 +99,31 @@ if animate ==True:
     ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
     plt.show()
 
+plottingMax = 1
 from PlottingResults import plotRowSixPlots
-
-if problem == "erf":
-    plottingMax = 0.3
+if problem == "hill":
+    # plottingMax = 1
     plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [5, 15,len(simulation.meshTrajectory)-1], [-12,12,-12,12])
 
+if problem == "erf":
+    # plottingMax = 1
+    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [9, 25,len(simulation.meshTrajectory)-1], [-12,12,-12,12])
 
 if problem == "spiral":
-    plottingMax = 0.3
-    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [15, 35 ,len(simulation.meshTrajectory)-1], [-12,12,-12,12])
-
+    # plottingMax = 1
+    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [19, 59 , 120],[-10,10,-10,10])
+    # plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [50, 85 ,len(simulation.meshTrajectory)-1],[-10,10,-10,10])
 
 if problem == "complex":
-    plottingMax = 0.3
-    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [59, 99 ,len(simulation.meshTrajectory)-1], [-6,6,-6,6])
+    # plottingMax =1
+    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [29, 49 ,len(simulation.meshTrajectory)-1], [-6,6,-6,6])
+
+
+print("Number of starting points: " + str(len(simulation.pdfTrajectory[0])))
+print("Number of ending points: " + str(len(simulation.pdfTrajectory[-1])))
+print("Starting range: [" + str(min(simulation.meshTrajectory[0][:,0])) + ", " + str(max(simulation.meshTrajectory[0][:,1])) + "]")
+print("Ending range: [" + str(min(simulation.meshTrajectory[-1][:,0])) + ", " + str(max(simulation.meshTrajectory[-1][:,1])) + "]")
+
 
 
 '''Compute Leja reuse and Alt method use'''
@@ -141,3 +157,9 @@ if problem == "hill":
 # plt.show()
 
 
+if kstepMax == kstepMin:
+    volumes = []
+    count = 0
+    for pdf in simulation.pdfTrajectory:
+        volumes.append(kstepMin**2*np.sum(simulation.pdfTrajectory[count]))
+        count +=1

@@ -125,8 +125,9 @@ class IntegratorLejaQuadrature(Integrator):
 
 
     def computeUpdateWithAlternativeMethod(self, sde, parameters, pdf, index):
-        ## TDOD: Implement AM option
         return pdf.minPdfValue, 1
+
+        '''Old Alternative method, works but does more than necessary'''
         # scaling = GaussScale(sde.dimension)
         # scaling.setMu(np.asarray(pdf.meshCoordinates[index,:]+parameters.h*sde.driftFunction(pdf.meshCoordinates[index,:])).T)
         # cov = sde.diffusionFunction(scaling.mu.T)
