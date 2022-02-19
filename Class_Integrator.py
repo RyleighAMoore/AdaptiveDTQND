@@ -108,6 +108,7 @@ class IntegratorLejaQuadrature(Integrator):
             self.idicesOfLejaPoints = None
 
 
+
     def computeUpdateWithInterpolatoryQuadrature(self, parameters, pdf, index, sde):
         self.lejaPointsPdfVals = pdf.integrandAfterDividingOut[self.indicesOfLejaPoints]
         V = opolynd.opolynd_eval(self.lejaPoints, self.poly.lambdas[:parameters.numLejas,:], self.poly.ab, self.poly)
