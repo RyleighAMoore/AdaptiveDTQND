@@ -14,9 +14,8 @@ import sys
 dimension = 2
 radius = 2
 h = 0.05
-betaVals = [2.5, 3, 4, 5, 6, 7, 8, 9 ,10]
-betaVals = [3, 2.5]
-
+betaVals = [2.5, 3, 4, 5, 6]
+betaToUseForMeshSizeOfTrapezoidalRule = 4
 
 bufferVals = [0, 0.5]
 endTime = 40
@@ -68,7 +67,7 @@ bufferDict_errors = {}
 bufferDict_times = {}
 
 
-def get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, spacingTR, bufferVal = 0):
+def get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(meshTrajectory, spacingTR, bufferVal = 0):
     xmin = min(np.min(simulationLQ.meshTrajectory[-1][:,0]),np.min(simulationLQ.meshTrajectory[0][:,0]))
     xmax = max(np.max(simulationLQ.meshTrajectory[-1][:,0]),np.max(simulationLQ.meshTrajectory[0][:,0]))
     ymin = min(np.min(simulationLQ.meshTrajectory[-1][:,1]),np.min(simulationLQ.meshTrajectory[0][:,1]))
@@ -150,6 +149,9 @@ for beta in betaVals:
     betaDict_times[beta] = np.copy(timingArrayStorageLQ)
     betaDict_errors[beta] = np.copy(ErrorsLQ)
 
+    if beta == betaToUseForMeshSizeOfTrapezoidalRule:
+        meshTrajectoryToUseForTRMeshSize =np.copy(simulationLQ.meshTrajectory)
+
 
 allTimingsArrayStorageTR = []
 allErrorArrayStorageTR = []
@@ -166,7 +168,7 @@ for bufferVal in bufferVals:
         errorsPerRunArrayTR = []
         meshLengthsPerRunArrayTR = []
         for iteration in range(numIterations):
-            meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, spacingTR, bufferVal)
+            meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(meshTrajectoryToUseForTRMeshSize, spacingTR, bufferVal)
             parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR, saveHistory=saveHistory)
 
             simulationTR = Simulation(sde, parametersTR, endTime)
@@ -251,7 +253,7 @@ for buff in bufferVals:
 
 plt.legend()
 plt.xlabel(r'$L_{2w}$ Error')
-plt.ylabel("Relative Running Time (Seconds)")
+plt.ylabel("Relative Running Time")
 
 plt.savefig('Output/timingFigureT40_'+ str(timestr)+ "_" + str(endTime)+ '.png')
 

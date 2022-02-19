@@ -1,6 +1,7 @@
 import numpy as np
 
 class GaussScale:
+    '''Defines a Guassian object.'''
     def __init__(self, dimension):
         self.dimension = dimension
         self.mu = np.zeros((dimension,1))
@@ -21,6 +22,8 @@ class GaussScale:
             self.invCov = np.linalg.inv(covMat)
         except np.linalg.LinAlgError:
             self.invCov = np.linalg.inv(np.asarray(covMat))
+
+        '''We will also need the inverse covariance.'''
         self.invCovR = 1/np.sqrt(2)*np.linalg.cholesky(self.invCov).T
 
     def setSigma(self, sigmas):

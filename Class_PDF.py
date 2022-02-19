@@ -16,8 +16,8 @@ class PDF:
         self.meshCoordinates = None
         self.meshLength = None
         self.UseNoise = UseNoise
-        self.setInitialConditionMeshCoordinates(sde, parameters)
-        self.setInitialCondition(sde, parameters)
+        self.setInitialMeshCoordinates(sde, parameters)
+        self.computeFirstTimeStepFromDiracInitialCondition(sde, parameters)
 
 
     def addPointsToMesh(self, newPoints):
@@ -34,14 +34,13 @@ class PDF:
     def removePointsFromPdf(self, index):
         self.pdfVals = np.delete(self.pdfVals, index)
 
-
     def setIntegrandBeforeDividingOut(self, integrandBeforeDividingOut):
         self.integrandBeforeDividingOut = integrandBeforeDividingOut
 
     def setIntegrandAfterDividingOut(self, integrandAfterDividingOut):
         self.integrandAfterDividingOut = integrandAfterDividingOut
 
-    def setInitialConditionMeshCoordinates(self, sde, parameters):
+    def setInitialMeshCoordinates(self, sde, parameters):
         if parameters.integratorType == "LQ":
             self.meshCoordinates = nDGridMeshCenteredAtOrigin(sde.dimension, parameters.radius, parameters.kstepMin)
         if parameters.integratorType == "TR" and parameters.OverideMesh is not None:
@@ -51,8 +50,10 @@ class PDF:
 
         self.meshLength = len(self.meshCoordinates)
 
-
-    def setInitialCondition(self, sde, parameters):
+    def computeFirstTimeStepFromDiracInitialCondition(self, sde, parameters):
+        '''We use a dirac initial condition centered at the origin, so the first time step
+        can be computed exactly.
+        '''
         scale = GaussScale(sde.dimension)
         scale.setMu(parameters.h*sde.driftFunction(np.zeros(sde.dimension)).T)
         scale.setCov((parameters.h*sde.diffusionFunction(np.zeros(sde.dimension))*sde.diffusionFunction(np.zeros(sde.dimension)).T).T)

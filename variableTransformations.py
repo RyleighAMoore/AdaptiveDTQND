@@ -1,5 +1,7 @@
 import numpy as np
 
+'''Functions used to transform mesh points.'''
+
 def map_to_canonical_space(user_samples, scale_parameters):
     dimension = np.size(user_samples,1)
     if dimension == 1:

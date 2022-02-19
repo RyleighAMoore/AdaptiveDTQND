@@ -22,12 +22,14 @@ class LaplaceApproximation:
         self.numLSBasis = self.computeShapeOfMatrix(dimension+2, 2)
 
     def computeShapeOfMatrix(self, n, r):
+        '''Compute necessary shape for matrix in Laplace approximation given dimension of SDE'''
         r = min(r, n-r)
         numer = reduce(op.mul, range(n, n-r, -1), 1)
         denom = reduce(op.mul, range(1, r+1), 1)
         return numer // denom
 
     def buildVMatForLinFit(self, dimension, QuadMesh, laplaceFitPdf):
+        '''Fill out matrix for Laplace approximation'''
         self.scalingForGaussian = None
         self.leastSqauresFit= None
         self.constantOfGaussian= None
@@ -53,6 +55,7 @@ class LaplaceApproximation:
         return M, comboList
 
     def computeleastSquares(self, QuadMesh, laplaceFitPdf, dimension):
+        '''Compute least squares fit for Laplace approximation'''
         M, comboList = self.buildVMatForLinFit(dimension, QuadMesh, laplaceFitPdf)
         # MT = M.T
         try:
@@ -60,8 +63,14 @@ class LaplaceApproximation:
             # const = -1*np.linalg.inv(MT@M)@(MT@np.log(laplaceFitPdf))
         except:
             return
+
+        '''Result of leas squares fit'''
         c=const.T
 
+
+        '''For 1D: Compute corresponding mean, covariance, and constant for Gaussian
+        corresponding to the fit. Return without setting Gaussian if failure occurs.
+        '''
         if dimension == 1:
             cov = c[0]
             mean = -c[1]/(2*c[0])
@@ -77,8 +86,9 @@ class LaplaceApproximation:
             else:
                 return
 
+        '''For ND: Compute corresponding mean, covariance, and constant for Gaussian
+        corresponding to the fit. Return without setting Gaussian if failure occurs.'''
         A = np.diag(c[:dimension])
-
         for ind,i in enumerate(comboList):
             A[i[0],i[1]] = 1/2*c[dimension+ind]
             A[i[1],i[0]] = 1/2*c[dimension+ind]
@@ -102,19 +112,21 @@ class LaplaceApproximation:
         except:
             return
 
-        if math.isfinite(mu[0][0]) and math.isfinite(mu[1][0]) and math.isfinite(np.sqrt(sigma[0,0])) and math.isfinite(np.sqrt(sigma[1,1])):
+        if np.isfinite(mu).all() and np.isfinite(sigma).all():
+            '''Everything looks good. Set scaling and return values'''
             scaling = GaussScale(dimension)
             scaling.setMu(mu)
             scaling.setCov(sigma)
+            self.scalingForGaussian = scaling
+            self.leastSqauresFit= c
+            self.constantOfGaussian= Const
+            self.combinationOfBasisFunctionsList = comboList
         else:
             return
 
-        self.scalingForGaussian = scaling
-        self.leastSqauresFit= c
-        self.constantOfGaussian= Const
-        self.combinationOfBasisFunctionsList = comboList
 
     def ComputeDividedOut(self, meshCoordinates, dimension):
+        '''We use this to divide the weight function out of the Gaussian for the integration.'''
         if dimension == 1:
             vals = np.exp(-(self.leastSqauresFit[0]*meshCoordinates**2+self.leastSqauresFit[1]*meshCoordinates+self.leastSqauresFit[2])).T/self.constantOfGaussian
             vals = vals*1/(np.sqrt(np.pi)*np.sqrt(self.scalingForGaussian.cov))
@@ -136,11 +148,4 @@ class LaplaceApproximation:
             vals = 1/(np.sqrt(np.pi)**dimension*JacFactor)*np.exp(-(vals2))/self.constantOfGaussian
         return np.squeeze(vals).T
 
-
-    def ComputeDividedOutAM(self, pdf, dimension, mesh):
-       temp = pdf.meshCoordinates
-       pdf.meshCoordinates = mesh
-       vals = self.ComputeDividedOut(pdf, dimension)
-       pdf.meshCoordinates = temp
-       return vals
 

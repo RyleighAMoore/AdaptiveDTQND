@@ -17,7 +17,6 @@ dimension = 2
 timeDiscretizationType = "EM"
 integratorType = "LQ"
 
-
 if problem == "hill":
     driftFunction = functionBank.oneDrift
     diffusionFunction = functionBank.ptSixDiffusion
