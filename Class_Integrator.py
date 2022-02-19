@@ -82,7 +82,7 @@ class IntegratorLejaQuadrature(Integrator):
             gaussianToDivideOut[gaussianToDivideOut <=0] = min([x for x in gaussianToDivideOut if x !=0])
         try:
             integrand = pdf.integrandBeforeDividingOut/gaussianToDivideOut
-            if np.isnan(integrand):
+            if np.isnan(integrand).any():
                 integrand = np.nan_to_num(integrand, nan=np.nanmin(integrand))
         except:
             t=0
