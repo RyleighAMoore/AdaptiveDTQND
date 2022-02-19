@@ -84,7 +84,7 @@ for endTime in times:
             timesEM.append(np.copy(endEM-startEM))
 
             meshApprox = simulationEM.meshTrajectory[-1]
-            pdfApprox = sde.exactSolution(simulationEM.meshTrajectory[-1], endTime)
+            pdfApprox = sde.exactSolution(simulationEM.meshTrajectory[-1],  simulationEM.times[-1])
 
             LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationEM.meshTrajectory[-1], simulationEM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
             ErrorsEM.append(np.copy(L2wErrors))
@@ -136,7 +136,7 @@ for endTime in times:
 
             if not ApproxSolution:
                 meshApprox = simulationAM.meshTrajectory[-1]
-                pdfApprox = sde.exactSolution(simulationAM.meshTrajectory[-1], endTime)
+                pdfApprox = sde.exactSolution(simulationAM.meshTrajectory[-1],  simulationAM.times[-1])
             LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationAM.meshTrajectory[-1], simulationAM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
             ErrorsAM.append(np.copy(L2wErrors))
             numPointsAM.append(np.copy(simulationAM.pdf.meshLength))

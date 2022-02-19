@@ -26,12 +26,14 @@ class Simulation():
         endTime: ending time of simulation
         '''
         self.pdf = PDF(sde, parameters)
-        self.endTime = endTime
         self.pdfTrajectory = []
         self.meshTrajectory = []
         self.times = []
         self.LPReuseCount = []
         self.AltMethodUseCount = []
+        self.numSteps = int(np.ceil(endTime/parameters.h))
+        assert np.isclose((self.numSteps)*(parameters.h), endTime), "The time step doesn't evenly divide into the endTime."
+
 
     def removePoints(self, index):
         '''Remove point from Transition matrix (row and column)'''
@@ -102,17 +104,17 @@ class Simulation():
             self.AltMethodUseCount.append(np.copy(AltMethodUseCount))
 
     def computeAllTimes(self, sde, parameters):
-        if parameters.integratorType == "LQ" and not parameters.saveHistory:
+        '''We will save the first time step in case we need it for TR comparison'''
+        if (parameters.integratorType == "LQ" and not parameters.saveHistory) or parameters.saveHistory:
             self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
             self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
-        if parameters.saveHistory:
-            self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
-            self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
-        self.times.append(parameters.h)
-        numSteps = int(self.endTime/parameters.h)
+            self.times.append(parameters.h)
+
         timing = []
         timeStart = time.time()
-        for i in trange(1, numSteps):
+        for i in trange(1, self.numSteps):
+            currTime = round(parameters.h*(i+1),3)
+            self.times.append(currTime)
             self.pdf.minPdfValue = np.min(self.pdf.pdfVals)
 
             '''Update mesh if using adaptive mesh'''
@@ -124,17 +126,15 @@ class Simulation():
                 if i>=parameters.eligibleToRemovePointsTimeStep and i%parameters.removePointsEveryNSteps==0:
                     self.meshUpdater.removePointsFromMeshProcedure(self.pdf, self, parameters, sde)
                     self.meshUpdater.removeOutlierPoints(self.pdf, self, parameters, sde)
+
             '''Step forward solution one time step, save history if needed'''
             self.pdf.minPdfValue = np.min(self.pdf.pdfVals)
             self.StepForwardInTime(sde, parameters)
-            if i==numSteps-1 or parameters.saveHistory:
+            if i==self.numSteps-1 or parameters.saveHistory:
                 self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
                 self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
-            self.times.append((i+1)*parameters.h)
             timing.append(time.time()- timeStart)
         return timing
-
-
 
     def computeLejaAndAlternativeUse(self):
         '''Compute Leja reuse and Alt method use'''

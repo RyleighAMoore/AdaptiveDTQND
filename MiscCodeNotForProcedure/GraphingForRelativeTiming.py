@@ -19,7 +19,6 @@ from mpl_toolkits.mplot3d import Axes3D
 import Functions as fun
 from DriftDiffFunctionBank import MovingHillDrift, DiagDiffOne
 from DTQTensorized import MatrixMultiplyDTQ
-from exactSolutions import TwoDdiffusionEquation
 from Errors import ErrorValsExact
 from datetime import datetime
 
@@ -29,14 +28,14 @@ L2wErrorArray  = pickle.load( open("PickledData//L2wErrorArray115a.pickle", "rb"
 L2wErrorArrayT  = pickle.load( open( "PickledData//L2wErrorArrayT115a.pickle", "rb" ) )
 
 TimingArray  = pickle.load( open( "PickledData//TimingArray115a.pickle", "rb" ) )
-TimingArrayT  = pickle.load( open( "PickledData//TimingArrayT115a.pickle", "rb" ) ) 
+TimingArrayT  = pickle.load( open( "PickledData//TimingArrayT115a.pickle", "rb" ) )
 
 # L2wErrorArray  = np.load( open("L2wErrorArrayj.npy", "rb" ) )
 # L2wErrorArrayT  = np.load( open( "L2wErrorArrayTj.npy", "rb" ) )
 
 # TimingArray  = np.load( open( "TimingArrayj.npy", "rb" ) )
-# TimingArrayT  = np.load( open( "TimingArrayTj.npy", "rb" ) ) 
-    
+# TimingArrayT  = np.load( open( "TimingArrayTj.npy", "rb" ) )
+
 
 
 mm = min(min(TimingArrayT), min(TimingArray))
@@ -50,7 +49,7 @@ rcParams['font.weight'] = 'bold'
 rcParams['font.size'] = '18'
 fontprops = {'fontweight': 'bold'}
 
-m = np.max(np.asarray(TimingArrayT)/mm) 
+m = np.max(np.asarray(TimingArrayT)/mm)
 # nearest_multiple = int(5 * round(m/5))
 plt.figure()
 # plt.yticks(np.arange(0, nearest_multiple+10, 5))
@@ -66,4 +65,3 @@ plt.yticks([0,10,20,30,40,50,60, 70,80])
 
 
 plt.show()
-    

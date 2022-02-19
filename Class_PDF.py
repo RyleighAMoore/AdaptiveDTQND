@@ -10,7 +10,7 @@ class PDF:
         Parameters:
         sde: stochastic differential equation to solve (class object)
         parameters: parameters for the simulation (class object)
-        endTime: ending time of simulation
+        endTime: ending time of simulation (Or close to it depending on how h divides into it)
         '''
         self.pdfVals = None
         self.meshCoordinates = None

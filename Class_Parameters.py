@@ -1,5 +1,5 @@
 class Parameters:
-    def __init__(self, sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh, timeDiscretizationType = "EM", integratorType = "LQ", AMSpacing = 0.05, initialMeshCentering=None, OverideMesh = None, suppressOutput = False, saveHistory = True):
+    def __init__(self, sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh, timeDiscretizationType = "EM", integratorType = "LQ", AMSpacing = 0.05, initialMeshCentering=None, OverideMesh = None, saveHistory = True):
         '''
         Manages parameters for the simulation for approximating the solution of the stochastic differential equation
 
@@ -15,7 +15,8 @@ class Parameters:
         integratorType="LQ": Either TR for trapezoidal rule or LQ for Leja quadrature
         AMSpacing = 0.05: Spacing used for computing inegral in Anderson-Mattingly procedure
         initialMeshCentering=None: Used to adjust the mesh centering if not centered at origin
-        OverideMesh = None: Used to overide default mesh with another mesh provided by the user, if None the proceudre will compute a mesh
+        OverideMesh: Used to overide default mesh with another mesh provided by the user, if None the proceudre will compute a mesh
+        saveHistory: Determine if we should save all steps or only final (and possibly initial).
         '''
 
         self.conditionNumForAltMethod = 5
@@ -36,16 +37,15 @@ class Parameters:
         self.integratorType = integratorType
         self.AMMeshSpacing = AMSpacing
         self.OverideMesh = OverideMesh
-        self.suppressOutput = suppressOutput
         self.saveHistory = saveHistory
         self.eligibleToAddPointsTimeStep = 3
         self.eligibleToRemovePointsTimeStep = 9
         self.addPointsEveryNSteps = 1
         self.removePointsEveryNSteps = 25
 
+        if timeDiscretizationType == "AM":
+            print("Warning: The Anderson-Mattingly method is still under development and may not be ready for use. Please consider using Euler-Maruyama instead.")
 
-    # def tuneOnSdeUnlessDefined(self, sde):
-    #     self.numberOfLejaPoints = self.getOptimalNumberOfLejaPoints(sde)
 
     def setNumLejas(self, sde):
         if sde.dimension == 1:

@@ -93,7 +93,7 @@ for h in hvals:
 
     if not ApproxSolution:
         meshApprox = simulationEM.pdfTrajectory[-1]
-        pdfApprox = sde.exactSolution(simulationEM.meshTrajectory[-1], endTime)
+        pdfApprox = sde.exactSolution(simulationEM.meshTrajectory[-1],  simulationEM.times[-1])
 
     LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationEM.meshTrajectory[-1], simulationEM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
     ErrorsEM.append(np.copy(L2wErrors))
@@ -116,7 +116,7 @@ for h in hvalsAM:
 
     if not ApproxSolution:
         meshApprox = simulationAM.pdfTrajectory[-1]
-        pdfApprox = sde.exactSolution(simulationAM.meshTrajectory[-1], endTime)
+        pdfApprox = sde.exactSolution(simulationAM.meshTrajectory[-1],  simulationAM.times[-1])
     LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationAM.meshTrajectory[-1], simulationAM.pdfTrajectory[-1], meshApprox, pdfApprox, ApproxSolution)
     ErrorsAM.append(np.copy(L2wErrors))
     # del simulationAM

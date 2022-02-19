@@ -78,7 +78,7 @@ print("\n")
 print("Stepping timing",end-start, '*****************************************')
 
 meshTrueSolnLQ = simulation.meshTrajectory[-1]
-pdfTrueSolnLQ = sde.exactSolution(simulation.meshTrajectory[-1], endTime)
+pdfTrueSolnLQ = sde.exactSolution(simulation.meshTrajectory[-1],  simulation.times[-1])
 
 LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], meshTrueSolnLQ, pdfTrueSolnLQ, interpolate=False)
 

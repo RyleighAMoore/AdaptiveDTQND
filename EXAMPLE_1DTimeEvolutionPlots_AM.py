@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import DriftDiffusionFunctionBank as functionBank
 import time
 from PlottingResults import plotRowSixPlots
-from exactSolutions import Solution
 from Errors import ErrorValsExact
 from Errors import ErrorValsOneTime
 
@@ -53,7 +52,7 @@ print("\n")
 print("Stepping timing",end-start, '*****************************************')
 
 meshTrueSoln = simulation.meshTrajectory[-1]
-pdfTrueSoln = sde.exactSolution(simulation.meshTrajectory[-1], endTime)
+pdfTrueSoln = sde.exactSolution(simulation.meshTrajectory[-1],  simulation.times[-1])
 LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], meshTrueSoln, pdfTrueSoln, interpolate=False)
 print(L2wErrors)
 

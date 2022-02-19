@@ -42,13 +42,6 @@ class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
             GMat[:pdf.meshLength, indexOfMesh] = self.computeTransitionMatrixColumn(y, sde, parameters, pdf)
         return GMat
 
-    def AddPointToG(self, meshPartial, newPointindex, parameters,sde, pdf, integrator, simulation):
-        y = pdf.meshCoordinates[newPointindex,:]
-        simulation.TransitionMatrix[:pdf.meshLength, newPointindex] = self.computeTransitionMatrixColumn(y, sde, parameters, pdf)
-
-        newRow = self.computeTransitionMatrixRow(meshPartial[newPointindex], meshPartial, parameters.h,sde)
-        simulation.TransitionMatrix[newPointindex, :len(newRow)] = newRow
-
     def computeTransitionMatrixColumn(self, y, sde, parameters, pdf):
         scale1 = GaussScale(sde.dimension)
         mu = y+sde.driftFunction(y)*parameters.h
@@ -61,34 +54,41 @@ class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
         return vals
 
     def computeTransitionMatrixRow(self, point, mesh, h, sde):
-        '''Changing mu and cov over each column'''
-        D = mesh.shape[1]
         mean = mesh+sde.driftFunction(mesh)*h
-        if D == 1:
+        if sde.dimension == 1:
             newpointVect = point*np.ones(np.shape(mesh))
             var = h*sde.diffusionFunction(mesh)**2
             newVals = 1/(np.sqrt((2*np.pi*var)))*np.exp(-(newpointVect-mean)**2/(2*var))
             return np.squeeze(newVals)
 
         if not sde.spatialDiff:
-            '''diff(y) = diff(x) since diffusion constant'''
+            '''diff(y) = diff(x) since diffusion constant. So we can set it once beforehand.'''
             diff = sde.diffusionFunction(point)
             cov = diff@diff.T * h
-            const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(cov))))
+            const = 1/(np.sqrt((2*np.pi)**sde.dimension*abs(np.linalg.det(cov))))
             invCov = np.linalg.inv(cov)
 
         soln_vals = np.empty(len(mesh))
         for j in range(len(mesh)):
+            '''Changing mu and cov over each column as needed.'''
             if sde.spatialDiff:
                 y = mesh[j,:]
                 diff_y = sde.diffusionFunction(y)
                 cov = diff_y@diff_y.T * h
-                const = 1/(np.sqrt((2*np.pi)**D*abs(np.linalg.det(cov))))
+                const = 1/(np.sqrt((2*np.pi)**sde.dimension*abs(np.linalg.det(cov))))
                 invCov = np.linalg.inv(cov)
             mu = mean[j,:]
             Gs = np.exp(-1/2*((point-mu).T@invCov@(point.T-mu.T)))
             soln_vals[j] = Gs
         return soln_vals*const
+
+    def AddPointToG(self, meshPartial, newPointindex, parameters,sde, pdf, integrator, simulation):
+        y = pdf.meshCoordinates[newPointindex,:]
+        simulation.TransitionMatrix[:pdf.meshLength, newPointindex] = self.computeTransitionMatrixColumn(y, sde, parameters, pdf)
+
+        newRow = self.computeTransitionMatrixRow(meshPartial[newPointindex], meshPartial, parameters.h,sde)
+        simulation.TransitionMatrix[newPointindex, :len(newRow)] = newRow
+
 
 
 

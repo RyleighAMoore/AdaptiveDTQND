@@ -18,7 +18,7 @@ betaVals = [2.5, 3, 4, 5, 6]
 betaToUseForMeshSizeOfTrapezoidalRule = 4
 
 bufferVals = [0, 0.5]
-endTime = 40
+endTime = 5
 spacingLQVals = [0.38]
 spacingTRValsShort = [0.25, 0.2, 0.18]
 spacingTRVals = [0.25, 0.2, 0.18]
@@ -124,7 +124,7 @@ for beta in betaVals:
             stepByStepTimingLQ = simulationLQ.computeAllTimes(sde, parametersLQ)
             totalTimeLQ = time.time() - startTimeLQ
             meshTrueSolnLQ = simulationLQ.meshTrajectory[-1]
-            pdfTrueSolnLQ = sde.exactSolution(simulationLQ.meshTrajectory[-1], endTime)
+            pdfTrueSolnLQ = sde.exactSolution(simulationLQ.meshTrajectory[-1],  simulationLQ.times[-1])
 
             LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationLQ.meshTrajectory[-1], simulationLQ.pdfTrajectory[-1], meshTrueSolnLQ, pdfTrueSolnLQ, interpolate=False)
 
@@ -179,7 +179,7 @@ for bufferVal in bufferVals:
             totalTimeTR = time.time() - startTimeTR
 
             meshTrueSolnTR = simulationTR.meshTrajectory[-1]
-            pdfTrueSolnTR = sde.exactSolution(simulationTR.meshTrajectory[-1], endTime)
+            pdfTrueSolnTR = sde.exactSolution(simulationTR.meshTrajectory[-1],  simulationTR.times[-1])
             LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationTR.meshTrajectory[-1], simulationTR.pdfTrajectory[-1], meshTrueSolnTR, pdfTrueSolnTR, interpolate=False)
             allErrorArrayStorageTR.append(L2wErrors)
 

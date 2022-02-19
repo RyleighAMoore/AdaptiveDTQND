@@ -25,6 +25,7 @@ class SDE:
         self.spatialDiff = spatialDiff
 
     def ApproxExactSoln(self, endTime, radius, xStep):
+        print("Warning: Accuracy of the approximate solution may vary")
         '''
         Uses the Trapezoidal rule to approximate the solution of the SDE for error analysis.
 
@@ -45,10 +46,8 @@ class SDE:
 
         G = simulation.integrator.TransitionMatrix
         numSteps = int(endTime/parameters.h)
-        # plt.figure()
         for i in trange(numSteps):
             pdf.pdfVals = kstepMin**self.dimension*G[:len(pdf.pdfVals), :len(pdf.pdfVals)]@pdf.pdfVals
-            # plt.scatter(pdf.meshCoordinates, pdf.pdfVals)
         return pdf.meshCoordinates, pdf.pdfVals
 
     def exactSolution(self, mesh, endTime):

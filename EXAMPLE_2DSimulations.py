@@ -110,7 +110,7 @@ if problem == "erf":
 
 if problem == "spiral":
     # plottingMax = 1
-    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [19, 59 , 120],[-10,10,-10,10])
+    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [19, 59 , 119],[-10,10,-10,10])
     # plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [50, 85 ,len(simulation.meshTrajectory)-1],[-10,10,-10,10])
 
 if problem == "complex":
@@ -140,7 +140,7 @@ print("Average ALT METHOD USE Percent: ", np.mean(percentAltMethodUse))
 from Errors import ErrorValsOneTime
 if problem == "hill":
     meshTrueSoln = simulation.meshTrajectory[-1]
-    pdfTrueSoln = sde.exactSolution(simulation.meshTrajectory[-1], endTime)
+    pdfTrueSoln = sde.exactSolution(simulation.meshTrajectory[-1],  simulation.times[-1])
     LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], meshTrueSoln, pdfTrueSoln, interpolate=False)
     print(L2wErrors)
 

@@ -101,7 +101,7 @@ def runLQAdaptiveDTQ(beta, spacingLQ):
 
     '''Compute Errors'''
     meshTrueSolnLQ = simulationLQ.meshTrajectory[-1]
-    pdfTrueSolnLQ = sde.exactSolution(simulationLQ.meshTrajectory[-1], endTime)
+    pdfTrueSolnLQ = sde.exactSolution(simulationLQ.meshTrajectory[-1],  simulationLQ.times[-1])
     LinfError, L2Error, L1Error, L2wError = ErrorValsOneTime(simulationLQ.meshTrajectory[-1], simulationLQ.pdfTrajectory[-1], meshTrueSolnLQ, pdfTrueSolnLQ, interpolate=False)
 
     numPoints = len(simulationLQ.pdfTrajectory[-1])
@@ -120,7 +120,7 @@ def runTRDTQ(buffer, spacingTR, simulationLQ):
     totalTimeTR = time.time() - startTimeTR
 
     meshTrueSolnTR = simulationTR.meshTrajectory[-1]
-    pdfTrueSolnTR = sde.exactSolution(simulationTR.meshTrajectory[-1], endTime)
+    pdfTrueSolnTR = sde.exactSolution(simulationTR.meshTrajectory[-1],  simulationTR.times[-1])
     LinfError, L2Error, L1Error, L2wError = ErrorValsOneTime(simulationTR.meshTrajectory[-1], simulationTR.pdfTrajectory[-1], meshTrueSolnTR, pdfTrueSolnTR, interpolate=False)
     numPoints = len(simulationTR.pdfTrajectory[-1])
 
