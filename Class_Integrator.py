@@ -79,14 +79,14 @@ class IntegratorLejaQuadrature(Integrator):
         gaussianToDivideOut = self.laplaceApproximation.ComputeDividedOut(pdf, sde.dimension)
 
         if np.min(gaussianToDivideOut)<=0:
-            gaussianToDivideOut[gaussianToDivideOut <=0] = np.min(gaussianToDivideOut)
+            gaussianToDivideOut[gaussianToDivideOut <=0] = min([x for x in gaussianToDivideOut if x !=0])
         try:
             integrand = pdf.integrandBeforeDividingOut/gaussianToDivideOut
-            if np.isnan(np.min(integrand)):
+            if np.isnan(integrand):
                 integrand = np.nan_to_num(integrand, nan=np.nanmin(integrand))
         except:
-            print(np.min(gaussianToDivideOut))
-
+            t=0
+            # print(np.min(gaussianToDivideOut))
         pdf.setIntegrandAfterDividingOut(integrand)
 
     def reuseLejaPoints(self, simulation, index, parameters, sde):

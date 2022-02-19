@@ -34,7 +34,7 @@ if problem == "erf":
     diffusionFunction = functionBank.pt75Diffusion
     spatialDiff = False
     kstepMin = 0.25
-    kstepMax = 0.3
+    kstepMax = 0.25
     endTime = 4
     radius = 3
     beta = 3
@@ -145,16 +145,6 @@ if problem == "hill":
     LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], meshTrueSoln, pdfTrueSoln, interpolate=False)
     print(L2wErrors)
 
-# index = 69
-# fig = plt.figure()
-# ax = fig.add_subplot(111, projection='3d')
-# title = ax.set_title('3D Test')
-# graph, = ax.plot(Meshes[index][:,0], Meshes[index][:,1], PdfTraj[index], linestyle="", marker="o")
-# graph, = ax.plot(Meshes[index+1][:,0], Meshes[index+1][:,1], PdfTraj[index+1], linestyle="", marker=".")
-
-# ax.set_zlim(0,np.max(simulation.pdfTrajectory[2]))
-# ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
-# plt.show()
 
 
 if kstepMax == kstepMin:
@@ -163,3 +153,24 @@ if kstepMax == kstepMin:
     for pdf in simulation.pdfTrajectory:
         volumes.append(kstepMin**2*np.sum(simulation.pdfTrajectory[count]))
         count +=1
+
+
+index = 58
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+title = ax.set_title('3D Test')
+graph, = ax.plot(Meshes[index][:,0], Meshes[index][:,1], PdfTraj[index], linestyle="", marker="o")
+# graph, = ax.plot(Meshes[index+1][:,0], Meshes[index+1][:,1], PdfTraj[index+1], linestyle="", marker=".")
+
+ax.set_zlim(0,np.max(simulation.pdfTrajectory[2]))
+ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
+plt.show()
+
+index = 58
+fig = plt.figure()
+plt.plot(Meshes[index][:,0], Meshes[index][:,1], linestyle="", marker="o")
+# graph, = ax.plot(Meshes[index+1][:,0], Meshes[index+1][:,1], PdfTraj[index+1], linestyle="", marker=".")
+
+ax.set_zlim(0,np.max(simulation.pdfTrajectory[2]))
+ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
+plt.show()
