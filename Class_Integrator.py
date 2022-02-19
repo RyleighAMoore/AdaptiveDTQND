@@ -22,7 +22,7 @@ class Integrator:
 
 class IntegratorTrapezoidal(Integrator):
     def __init__(self, dimension, parameters):
-        print("Warning: Please make sure you have an equispaced mesh. Otherwise, this is not accurate.")
+        print("Warning: Please make sure you have an equispaced mesh. Otherwise, this equispaced trapezoidal rule is not accurate.")
         if parameters.useAdaptiveMesh == True:
             print("Warning: Mesh updates with the Trapezoidal rule are not currently supported.")
             parameters.useAdaptiveMesh = False

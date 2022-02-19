@@ -8,6 +8,8 @@ import DriftDiffusionFunctionBank as functionBank
 from Errors import ErrorValsOneTime
 import time
 import sys
+from Functions import get2DTrapezoidalMeshBasedOnLejaQuadratureSolution
+
 
 
 # startup parameters
@@ -66,37 +68,6 @@ betaDict_times = {}
 bufferDict_errors = {}
 bufferDict_times = {}
 
-
-def get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(meshTrajectory, spacingTR, bufferVal = 0):
-    xmin = min(np.min(simulationLQ.meshTrajectory[-1][:,0]),np.min(simulationLQ.meshTrajectory[0][:,0]))
-    xmax = max(np.max(simulationLQ.meshTrajectory[-1][:,0]),np.max(simulationLQ.meshTrajectory[0][:,0]))
-    ymin = min(np.min(simulationLQ.meshTrajectory[-1][:,1]),np.min(simulationLQ.meshTrajectory[0][:,1]))
-    ymax = max(np.max(simulationLQ.meshTrajectory[-1][:,1]),np.max(simulationLQ.meshTrajectory[0][:,1]))
-
-    bufferX =bufferVal*(xmax-xmin)/2
-    bufferY = bufferVal*(ymax-ymin)/2
-    xstart = np.floor(xmin) - bufferX
-    xs = []
-    xs.append(xstart)
-    while xstart< xmax + bufferX:
-        xs.append(xstart+spacingTR)
-        xstart += spacingTR
-
-    ystart = np.floor(ymin) - bufferY
-    ys = []
-    ys.append(ystart)
-
-    while ystart< ymax+ bufferY:
-        ys.append(ystart+spacingTR)
-        ystart += spacingTR
-
-    mesh = []
-    for i in xs:
-        for j in ys:
-            mesh.append([i,j])
-    mesh = np.asarray(mesh)
-
-    return mesh
 
 numIterations =1
 original_stdout = sys.stdout # Save a reference to the original standard output
@@ -168,7 +139,9 @@ for bufferVal in bufferVals:
         errorsPerRunArrayTR = []
         meshLengthsPerRunArrayTR = []
         for iteration in range(numIterations):
+            # meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(meshTrajectoryToUseForTRMeshSize, spacingTR, bufferVal)
             meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(meshTrajectoryToUseForTRMeshSize, spacingTR, bufferVal)
+
             parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR, saveHistory=saveHistory)
 
             simulationTR = Simulation(sde, parametersTR, endTime)

@@ -24,31 +24,7 @@ class SDE:
         self.diffusionFunction = diffusionFunction
         self.spatialDiff = spatialDiff
 
-    def ApproxExactSoln(self, endTime, radius, xStep):
-        print("Warning: Accuracy of the approximate solution may vary")
-        '''
-        Uses the Trapezoidal rule to approximate the solution of the SDE for error analysis.
 
-        Parameters:
-        endTime: The time we want to solve the SDE at
-        radius: Determines the points of the approximated solution
-        xStep: The spacing of the approximiated solution
-        '''
-        beta = 3 # Not really used
-        kstepMin = xStep
-        kstepMax = xStep # Not really used
-        h = 0.005 # Do not make less
-
-        parameters = Parameters(self, beta, radius, kstepMin, kstepMax, h, False, timeDiscretizationType = "EM")
-        pdf = PDF(self, parameters)
-        simulation= Simulation(self, parameters, endTime)
-        simulation.setUpTransitionMatrix(self, parameters)
-
-        G = simulation.integrator.TransitionMatrix
-        numSteps = int(endTime/parameters.h)
-        for i in trange(numSteps):
-            pdf.pdfVals = kstepMin**self.dimension*G[:len(pdf.pdfVals), :len(pdf.pdfVals)]@pdf.pdfVals
-        return pdf.meshCoordinates, pdf.pdfVals
 
     def exactSolution(self, mesh, endTime):
         '''
@@ -69,3 +45,27 @@ class SDE:
         vals = np.exp(-r/(4*D*endTime))*(1/(4*np.pi*D*endTime))**(self.dimension/2)
         return vals
 
+
+    # def ApproxExactSoln(self, endTime, radius, xStep, meshTrajectory):
+    #     print("Warning: Accuracy of the approximate solution may vary")
+    #     '''
+    #     Uses the Trapezoidal rule to approximate the solution of the SDE for error analysis.
+
+    #     Parameters:
+    #     endTime: The time we want to solve the SDE at
+    #     radius: Determines the points of the approximated solution
+    #     xStep: The spacing of the approximiated solution
+    #     '''
+
+    #     beta = 3 # Not really used
+    #     kstepMin = xStep
+    #     kstepMax = xStep # Not really used
+    #     h = 0.005 # Do not make less
+
+    #     radius =  get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(meshTrajectory, spacingTR, bufferVal = 0)
+    #     parameters = Parameters(self, beta, radius, kstepMin, kstepMax, h, False, timeDiscretizationType = "EM", saveHistory=False)
+    #     pdf = PDF(self, parameters)
+    #     simulationApproxSolution= Simulation(self, parameters, endTime)
+    #     simulationApproxSolution.setUpTransitionMatrix(self, parameters)
+    #     stepByStepTimingTR = simulationApproxSolution.computeAllTimes(self, parameters)
+    #     return simulationApproxSolution

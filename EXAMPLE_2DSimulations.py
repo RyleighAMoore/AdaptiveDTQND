@@ -9,7 +9,8 @@ import matplotlib.animation as animation
 from Class_Parameters import Parameters
 from Class_SDE import SDE
 from Class_Simulation import Simulation
-
+from Functions import get2DTrapezoidalMeshBasedOnLejaQuadratureSolution
+from Errors import ErrorValsOneTime
 
 problem = "spiral" # "spiral" "complex" "hill"
 
@@ -79,70 +80,91 @@ print("\n")
 print("Stepping timing",end-start, '*****************************************')
 
 
-animate = True
-if animate ==True:
-    Meshes = simulation.meshTrajectory
-    PdfTraj = simulation.pdfTrajectory
-    def update_graph(num):
-        graph.set_data (Meshes[num][:,0], Meshes[num][:,1])
-        graph.set_3d_properties(PdfTraj[num])
-        title.set_text('3D Test, time={}'.format(num))
-        return title, graph
+'''Approximate Errror'''
+spacingTR = 0.08
+h= 0.01
+buffer=0.3
+meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulation.meshTrajectory, spacingTR, bufferVal=buffer)
+parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR, saveHistory=False)
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    title = ax.set_title('3D Test')
+simulationTR = Simulation(sde, parametersTR, endTime)
+startTimeTR = time.time()
+simulationTR.setUpTransitionMatrix(sde, parametersTR)
 
-    graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
-    ax.set_zlim(0,np.max(simulation.pdfTrajectory[-20]))
-    ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
-    plt.show()
+stepByStepTimingTR = simulationTR.computeAllTimes(sde, parametersTR)
+totalTimeTR = time.time() - startTimeTR
 
-plottingMax = 1
-from PlottingResults import plotRowSixPlots
-if problem == "hill":
-    # plottingMax = 1
-    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [5, 15,len(simulation.meshTrajectory)-1], [-12,12,-12,12])
+meshTrueSolnTR = simulationTR.meshTrajectory[-1]
+pdfTrueSolnTR = simulationTR.pdfTrajectory[-1]
+LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], meshTrueSolnTR, pdfTrueSolnTR, interpolate=True)
 
-if problem == "erf":
-    # plottingMax = 1
-    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [9, 15,len(simulation.meshTrajectory)-1], [-12,12,-12,12])
+print(L2wErrors)
 
-if problem == "spiral":
-    # plottingMax = 1
-    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [19, 59 , 119],[-10,10,-10,10])
-    # plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [50, 85 ,len(simulation.meshTrajectory)-1],[-10,10,-10,10])
+Plot = False
+if Plot:
+    animate = True
+    if animate ==True:
+        Meshes = simulation.meshTrajectory
+        PdfTraj = simulation.pdfTrajectory
+        def update_graph(num):
+            graph.set_data (Meshes[num][:,0], Meshes[num][:,1])
+            graph.set_3d_properties(PdfTraj[num])
+            title.set_text('3D Test, time={}'.format(num))
+            return title, graph
 
-if problem == "complex":
-    # plottingMax =1
-    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [29, 49 ,len(simulation.meshTrajectory)-1], [-6,6,-6,6])
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        title = ax.set_title('3D Test')
+
+        graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
+        ax.set_zlim(0,np.max(simulation.pdfTrajectory[-20]))
+        ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
+        plt.show()
+
+    plottingMax = 1
+    from PlottingResults import plotRowSixPlots
+    if problem == "hill":
+        # plottingMax = 1
+        plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [5, 15,len(simulation.meshTrajectory)-1], [-12,12,-12,12])
+
+    if problem == "erf":
+        # plottingMax = 1
+        plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [9, 15,len(simulation.meshTrajectory)-1], [-12,12,-12,12])
+
+    if problem == "spiral":
+        # plottingMax = 1
+        plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [19, 59 , 119],[-10,10,-10,10])
+        # plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [50, 85 ,len(simulation.meshTrajectory)-1],[-10,10,-10,10])
+
+    if problem == "complex":
+        # plottingMax =1
+        plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [29, 49 ,len(simulation.meshTrajectory)-1], [-6,6,-6,6])
 
 
-print("Number of starting points: " + str(len(simulation.pdfTrajectory[0])))
-print("Number of ending points: " + str(len(simulation.pdfTrajectory[-1])))
-print("Starting range: [" + str(min(simulation.meshTrajectory[0][:,0])) + ", " + str(max(simulation.meshTrajectory[0][:,1])) + "]")
-print("Ending range: [" + str(min(simulation.meshTrajectory[-1][:,0])) + ", " + str(max(simulation.meshTrajectory[-1][:,1])) + "]")
+    print("Number of starting points: " + str(len(simulation.pdfTrajectory[0])))
+    print("Number of ending points: " + str(len(simulation.pdfTrajectory[-1])))
+    print("Starting range: [" + str(min(simulation.meshTrajectory[0][:,0])) + ", " + str(max(simulation.meshTrajectory[0][:,1])) + "]")
+    print("Ending range: [" + str(min(simulation.meshTrajectory[-1][:,0])) + ", " + str(max(simulation.meshTrajectory[-1][:,1])) + "]")
 
 
 
-'''Compute Leja reuse and Alt method use'''
-lengths = []
-for mesh in simulation.meshTrajectory[1:]:
-    lengths.append(len(mesh))
+    '''Compute Leja reuse and Alt method use'''
+    lengths = []
+    for mesh in simulation.meshTrajectory[1:]:
+        lengths.append(len(mesh))
 
-percentLejaReuse = np.asarray(simulation.LPReuseCount)/np.asarray(lengths)*100
+    percentLejaReuse = np.asarray(simulation.LPReuseCount)/np.asarray(lengths)*100
 
-print("Average LEJA REUSE Percent: ", np.mean(percentLejaReuse))
+    print("Average LEJA REUSE Percent: ", np.mean(percentLejaReuse))
 
-percentAltMethodUse = np.asarray(simulation.AltMethodUseCount)/np.asarray(lengths)*100
-print("Average ALT METHOD USE Percent: ", np.mean(percentAltMethodUse))
+    percentAltMethodUse = np.asarray(simulation.AltMethodUseCount)/np.asarray(lengths)*100
+    print("Average ALT METHOD USE Percent: ", np.mean(percentAltMethodUse))
 
-from Errors import ErrorValsOneTime
-if problem == "hill":
-    meshTrueSoln = simulation.meshTrajectory[-1]
-    pdfTrueSoln = sde.exactSolution(simulation.meshTrajectory[-1],  simulation.times[-1])
-    LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], meshTrueSoln, pdfTrueSoln, interpolate=False)
-    print(L2wErrors)
+    if problem == "hill":
+        meshTrueSoln = simulation.meshTrajectory[-1]
+        pdfTrueSoln = sde.exactSolution(simulation.meshTrajectory[-1],  simulation.times[-1])
+        LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], meshTrueSoln, pdfTrueSoln, interpolate=False)
+        print(L2wErrors)
 
 
 
@@ -154,15 +176,15 @@ if kstepMax == kstepMin:
         count +=1
 
 
-# index = 58
+
+# Meshes = simulationTR.meshTrajectory
+# PdfTraj = simulationTR.pdfTrajectory
+# index = -1
 # fig = plt.figure()
 # ax = fig.add_subplot(111, projection='3d')
 # title = ax.set_title('3D Test')
-# graph, = ax.plot(Meshes[index][:,0], Meshes[index][:,1], PdfTraj[index], linestyle="", marker="o")
+# graph, = ax.plot(Meshes[index][:,0], Meshes[index][:,1], PdfTraj[index], linestyle="", marker=".")
 # # graph, = ax.plot(Meshes[index+1][:,0], Meshes[index+1][:,1], PdfTraj[index+1], linestyle="", marker=".")
-
-# ax.set_zlim(0,np.max(simulation.pdfTrajectory[2]))
-# ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
 # plt.show()
 
 # index = 58
