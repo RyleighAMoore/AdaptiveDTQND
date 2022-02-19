@@ -101,7 +101,8 @@ class IntegratorLejaQuadrature(Integrator):
     def computeLejaPoints(self, simulation, index, parameters, sde):
         self.divideOutGaussianAndSetIntegrand(simulation.pdf, sde, index)
         mappedMesh = map_to_canonical_space(simulation.pdf.meshCoordinates, self.laplaceApproximation.scalingForGaussian)
-        self.lejaPoints, self.lejaPointsPdfVals,self.indicesOfLejaPoints,self.lejaSuccess = LP.getLejaSetFromPoints(self.identityScaling, mappedMesh, parameters.numLejas, self.poly, simulation.pdf.integrandAfterDividingOut, sde.diffusionFunction, parameters.numPointsForLejaCandidates)
+        self.lejaPoints,self.indicesOfLejaPoints, self.lejaSuccess = LP.getLejaSetFromPoints(self.identityScaling, mappedMesh, parameters.numLejas, self.poly, parameters.numPointsForLejaCandidates)
+        self.lejaPointsPdfVals = simulation.pdf.pdfVals[self.indicesOfLejaPoints]
         if self.lejaSuccess ==False: # Failed to get Leja points
             self.lejaPoints = None
             self.lejaPointsPdfVals = None

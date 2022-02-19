@@ -60,12 +60,12 @@ def getLejaPoints(num_leja_samples, initial_samples, poly, num_candidate_samples
 
 import Functions as fun
 
-def getLejaSetFromPoints(scale, Mesh, numLejaPointsToReturn, poly, Pdf, diff, numPointsForLejaCandidates):
+def getLejaSetFromPoints(scale, Mesh, numLejaPointsToReturn, poly, numPointsForLejaCandidates):
     candidatesFull = Mesh # don't need to transform since the scale is normal when this function is used.
     indices = [np.nan]
     candidates, distances, indik = fun.findNearestKPoints(scale.mu, candidatesFull,numPointsForLejaCandidates, getIndices = True)
     point = candidates[0]
-    pointPDF = Pdf[0]
+    # pointPDF = Pdf[0]
     candidates = candidates[1:]
 
     lejaPointsFinal, indices = getLejaPoints(numLejaPointsToReturn, np.asarray([point]).T, poly, num_candidate_samples = 0, candidateSampleMesh = candidates.T, returnIndices=True)
@@ -73,16 +73,16 @@ def getLejaSetFromPoints(scale, Mesh, numLejaPointsToReturn, poly, Pdf, diff, nu
     if math.isnan(indices[0]):
         return 0, 0, indices, False
 
-    plot= False
-    if plot:
-        plt.figure()
-        plt.plot(Mesh,Pdf, '*k', label='mesh', markersize=14)
-        plt.plot(point,pointPDF,  '*r',label='Main Point',markersize=14)
-        plt.plot(lejaPointsFinal, Pdf[indices], '.c', label='Leja Points',markersize=10)
-        plt.legend()
-        plt.show()
+    # plot= False
+    # if plot:
+    #     plt.figure()
+    #     plt.plot(Mesh,Pdf, '*k', label='mesh', markersize=14)
+    #     plt.plot(point,pointPDF,  '*r',label='Main Point',markersize=14)
+    #     plt.plot(lejaPointsFinal, Pdf[indices], '.c', label='Leja Points',markersize=10)
+    #     plt.legend()
+    #     plt.show()
 
     indicesNew = indik[indices]
-    return Mesh[indicesNew], Pdf[indicesNew], indicesNew, True
+    return Mesh[indicesNew], indicesNew, True
 
 
