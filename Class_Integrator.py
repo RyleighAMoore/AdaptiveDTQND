@@ -130,9 +130,6 @@ class IntegratorLejaQuadrature(Integrator):
 
 
     def computeUpdateWithAlternativeMethod(self, sde, parameters, pdf, index):
-        # return pdf.minPdfValue, 1
-
-        '''Old Alternative method, works but does more than necessary'''
         scaling = GaussScale(sde.dimension)
         scaling.setMu(np.asarray(pdf.meshCoordinates[index,:]+parameters.h*sde.driftFunction(pdf.meshCoordinates[index,:])).T)
         cov = sde.diffusionFunction(scaling.mu.T)
@@ -167,6 +164,8 @@ class IntegratorLejaQuadrature(Integrator):
         vinv = np.linalg.inv(V)
         value = np.matmul(vinv[0,:], testing)
         condNumber = np.sum(np.abs(vinv[0,:]))
+        if abs(pdf.minPdfValue - value) > 0.0001:
+            print(pdf.minPdfValue - value)
         return value, condNumber
 
 
