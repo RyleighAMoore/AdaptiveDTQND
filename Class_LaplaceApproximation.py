@@ -96,7 +96,11 @@ class LaplaceApproximation:
 
         La = np.diag(Lam)
         mu = -1/2*U @ np.linalg.inv(La) @ (B.T @ U).T
-        Const = np.exp(-c[-1]+1/4*B.T@U@np.linalg.inv(La)@U.T@B)
+
+        try:
+            Const = np.exp(-c[-1]+1/4*B.T@U@np.linalg.inv(La)@U.T@B)
+        except:
+            return
 
         if math.isfinite(mu[0][0]) and math.isfinite(mu[1][0]) and math.isfinite(np.sqrt(sigma[0,0])) and math.isfinite(np.sqrt(sigma[1,1])):
             scaling = GaussScale(dimension)
@@ -110,23 +114,23 @@ class LaplaceApproximation:
         self.constantOfGaussian= Const
         self.combinationOfBasisFunctionsList = comboList
 
-    def ComputeDividedOut(self, pdf, dimension):
+    def ComputeDividedOut(self, meshCoordinates, dimension):
         if dimension == 1:
-            vals = np.exp(-(self.leastSqauresFit[0]*pdf.meshCoordinates**2+self.leastSqauresFit[1]*pdf.meshCoordinates+self.leastSqauresFit[2])).T/self.constantOfGaussian
+            vals = np.exp(-(self.leastSqauresFit[0]*meshCoordinates**2+self.leastSqauresFit[1]*meshCoordinates+self.leastSqauresFit[2])).T/self.constantOfGaussian
             vals = vals*1/(np.sqrt(np.pi)*np.sqrt(self.scalingForGaussian.cov))
         else:
             L = np.linalg.cholesky((self.scalingForGaussian.cov))
             JacFactor = np.prod(np.diag(L))
-            vals2 = np.zeros(np.size(pdf.meshCoordinates,0)).T
+            vals2 = np.zeros(np.size(meshCoordinates,0)).T
             count = 0
             for i in range(dimension):
-                vals2 += self.leastSqauresFit[count]*pdf.meshCoordinates[:,i]**2
+                vals2 += self.leastSqauresFit[count]*meshCoordinates[:,i]**2
                 count +=1
             for i,k in self.combinationOfBasisFunctionsList:
-                vals2 += self.leastSqauresFit[count]*pdf.meshCoordinates[:,i]*pdf.meshCoordinates[:,k]
+                vals2 += self.leastSqauresFit[count]*meshCoordinates[:,i]*meshCoordinates[:,k]
                 count +=1
             for i in range(dimension):
-                vals2 += self.leastSqauresFit[count]*pdf.meshCoordinates[:,i]
+                vals2 += self.leastSqauresFit[count]*meshCoordinates[:,i]
                 count +=1
             vals2 += self.leastSqauresFit[count]*np.ones(np.shape(vals2))
             vals = 1/(np.sqrt(np.pi)**dimension*JacFactor)*np.exp(-(vals2))/self.constantOfGaussian

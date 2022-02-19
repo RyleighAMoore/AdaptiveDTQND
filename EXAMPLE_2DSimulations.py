@@ -11,7 +11,7 @@ from Class_SDE import SDE
 from Class_Simulation import Simulation
 
 
-problem = "hill" # "spiral" "complex" "hill"
+problem = "spiral" # "spiral" "complex" "hill"
 
 dimension = 2
 timeDiscretizationType = "EM"
@@ -34,10 +34,10 @@ if problem == "erf":
     diffusionFunction = functionBank.pt75Diffusion
     spatialDiff = False
     kstepMin = 0.25
-    kstepMax = 0.25
+    kstepMax = 0.3
     endTime = 4
     radius = 3
-    beta = 3
+    beta = 4
     h=0.04
 
 if problem == "spiral":
@@ -155,22 +155,22 @@ if kstepMax == kstepMin:
         count +=1
 
 
-index = 58
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-title = ax.set_title('3D Test')
-graph, = ax.plot(Meshes[index][:,0], Meshes[index][:,1], PdfTraj[index], linestyle="", marker="o")
-# graph, = ax.plot(Meshes[index+1][:,0], Meshes[index+1][:,1], PdfTraj[index+1], linestyle="", marker=".")
+# index = 58
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+# title = ax.set_title('3D Test')
+# graph, = ax.plot(Meshes[index][:,0], Meshes[index][:,1], PdfTraj[index], linestyle="", marker="o")
+# # graph, = ax.plot(Meshes[index+1][:,0], Meshes[index+1][:,1], PdfTraj[index+1], linestyle="", marker=".")
 
-ax.set_zlim(0,np.max(simulation.pdfTrajectory[2]))
-ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
-plt.show()
+# ax.set_zlim(0,np.max(simulation.pdfTrajectory[2]))
+# ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
+# plt.show()
 
-index = 58
-fig = plt.figure()
-plt.plot(Meshes[index][:,0], Meshes[index][:,1], linestyle="", marker="o")
-# graph, = ax.plot(Meshes[index+1][:,0], Meshes[index+1][:,1], PdfTraj[index+1], linestyle="", marker=".")
+# index = 58
+# fig = plt.figure()
+# plt.plot(Meshes[index][:,0], Meshes[index][:,1], linestyle="", marker="o")
+# # graph, = ax.plot(Meshes[index+1][:,0], Meshes[index+1][:,1], PdfTraj[index+1], linestyle="", marker=".")
 
-ax.set_zlim(0,np.max(simulation.pdfTrajectory[2]))
-ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
-plt.show()
+# ax.set_zlim(0,np.max(simulation.pdfTrajectory[2]))
+# ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
+# plt.show()

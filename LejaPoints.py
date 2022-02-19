@@ -71,7 +71,7 @@ def getLejaSetFromPoints(scale, Mesh, numLejaPointsToReturn, poly, numPointsForL
     lejaPointsFinal, indices = getLejaPoints(numLejaPointsToReturn, np.asarray([point]).T, poly, num_candidate_samples = 0, candidateSampleMesh = candidates.T, returnIndices=True)
 
     if math.isnan(indices[0]):
-        return 0, 0, indices, False
+        return 0, indices, False
 
     # plot= False
     # if plot:

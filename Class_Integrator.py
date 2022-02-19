@@ -76,42 +76,45 @@ class IntegratorLejaQuadrature(Integrator):
             return True # Fit succeeded
 
     def divideOutGaussianAndSetIntegrand(self, pdf, sde, index):
-        gaussianToDivideOut = self.laplaceApproximation.ComputeDividedOut(pdf, sde.dimension)
+        gaussianToDivideOut = self.laplaceApproximation.ComputeDividedOut(pdf.meshCoordinates[self.indicesOfLejaPoints], sde.dimension)
+        integrand = pdf.integrandBeforeDividingOut[self.indicesOfLejaPoints]/gaussianToDivideOut
 
-        if np.min(gaussianToDivideOut)<=0:
-            gaussianToDivideOut[gaussianToDivideOut <=0] = min([x for x in gaussianToDivideOut if x !=0])
-        try:
-            integrand = pdf.integrandBeforeDividingOut/gaussianToDivideOut
-            if np.isnan(integrand).any():
-                integrand = np.nan_to_num(integrand, nan=np.nanmin(integrand))
-        except:
-            t=0
-            # print(np.min(gaussianToDivideOut))
+        # if np.min(gaussianToDivideOut)<=0:
+        #     gaussianToDivideOut[gaussianToDivideOut <=0] = min([x for x in gaussianToDivideOut if x !=0])
+        #     print(0000)
+        # try:
+        #     integrand = pdf.integrandBeforeDividingOut[self.indicesOfLejaPoints]/gaussianToDivideOut
+        #     if np.isnan(integrand).any():
+        #         integrand = np.nan_to_num(integrand, nan=np.nanmin(integrand))
+        # except:
+        #     t=0
+        #     print(np.min(gaussianToDivideOut))
         pdf.setIntegrandAfterDividingOut(integrand)
 
     def reuseLejaPoints(self, simulation, index, parameters, sde):
-        self.divideOutGaussianAndSetIntegrand(simulation.pdf, sde, index)
+        # self.divideOutGaussianAndSetIntegrand(simulation.pdf, sde, index)
         assert simulation.LejaPointIndicesBoolVector[index] # Already have LejaPoints
         LejaIndices = simulation.LejaPointIndicesMatrix[index,:].astype(int)
         mesh2 = map_to_canonical_space(simulation.pdf.meshCoordinates[LejaIndices,:], self.laplaceApproximation.scalingForGaussian)
         self.lejaPoints = mesh2
-        self.lejaPointsPdfVals = simulation.pdf.integrandAfterDividingOut[LejaIndices]
+        # self.lejaPointsPdfVals = simulation.pdf.integrandAfterDividingOut
         self.indicesOfLejaPoints = LejaIndices
 
     def computeLejaPoints(self, simulation, index, parameters, sde):
-        self.divideOutGaussianAndSetIntegrand(simulation.pdf, sde, index)
+        # self.divideOutGaussianAndSetIntegrand(simulation.pdf, sde, index)
         mappedMesh = map_to_canonical_space(simulation.pdf.meshCoordinates, self.laplaceApproximation.scalingForGaussian)
         self.lejaPoints,self.indicesOfLejaPoints, self.lejaSuccess = LP.getLejaSetFromPoints(self.identityScaling, mappedMesh, parameters.numLejas, self.poly, parameters.numPointsForLejaCandidates)
-        self.lejaPointsPdfVals = simulation.pdf.pdfVals[self.indicesOfLejaPoints]
+        # self.lejaPointsPdfVals = simulation.pdf.pdfVals[self.indicesOfLejaPoints]
         if self.lejaSuccess ==False: # Failed to get Leja points
             self.lejaPoints = None
-            self.lejaPointsPdfVals = None
+            # self.lejaPointsPdfVals = None
             self.idicesOfLejaPoints = None
 
 
 
     def computeUpdateWithInterpolatoryQuadrature(self, parameters, pdf, index, sde):
-        self.lejaPointsPdfVals = pdf.integrandAfterDividingOut[self.indicesOfLejaPoints]
+        self.divideOutGaussianAndSetIntegrand(pdf, sde, index)
+        self.lejaPointsPdfVals = pdf.integrandAfterDividingOut
         V = opolynd.opolynd_eval(self.lejaPoints, self.poly.lambdas[:parameters.numLejas,:], self.poly.ab, self.poly)
         try:
             vinv = np.linalg.inv(V)
@@ -127,44 +130,44 @@ class IntegratorLejaQuadrature(Integrator):
 
 
     def computeUpdateWithAlternativeMethod(self, sde, parameters, pdf, index):
-        return pdf.minPdfValue, 1
+        # return pdf.minPdfValue, 1
 
         '''Old Alternative method, works but does more than necessary'''
-        # scaling = GaussScale(sde.dimension)
-        # scaling.setMu(np.asarray(pdf.meshCoordinates[index,:]+parameters.h*sde.driftFunction(pdf.meshCoordinates[index,:])).T)
-        # cov = sde.diffusionFunction(scaling.mu.T)
-        # scaling.setCov((parameters.h*cov@cov.T))
+        scaling = GaussScale(sde.dimension)
+        scaling.setMu(np.asarray(pdf.meshCoordinates[index,:]+parameters.h*sde.driftFunction(pdf.meshCoordinates[index,:])).T)
+        cov = sde.diffusionFunction(scaling.mu.T)
+        scaling.setCov((parameters.h*cov@cov.T))
 
-        # mesh12 = map_from_canonical_space(self.altMethodLejaPoints, scaling)
-        # meshNearest, distances, indx = findNearestKPoints(scaling.mu, pdf.meshCoordinates,parameters.numQuadFit, getIndices = True)
-        # pdfNew = pdf.pdfVals[indx]
+        mesh12 = map_from_canonical_space(self.altMethodLejaPoints, scaling)
+        meshNearest, distances, indx = findNearestKPoints(scaling.mu, pdf.meshCoordinates,parameters.numQuadFit, getIndices = True)
+        pdfNew = pdf.pdfVals[indx]
 
-        # pdf12 = np.asarray(griddata(np.squeeze(meshNearest), np.log(pdfNew), np.squeeze(mesh12), method='linear', fill_value=np.log(np.min(pdf.pdfVals))))
-        # pdf12 = np.exp(pdf12)
+        pdf12 = np.asarray(griddata(np.squeeze(meshNearest), np.log(pdfNew), np.squeeze(mesh12), method='linear', fill_value=np.log(pdf.minPdfValue)))
+        pdf12 = np.exp(pdf12)
 
-        # if parameters.timeDiscretizationType == "EM":
-        #     transitionMatrixRow = np.expand_dims(self.timeDiscretiazationMethod.computeTransitionMatrixRow(mesh12[0],mesh12, parameters.h, sde ),1)
-        # else:
-        #     indices = list(range(len(mesh12)))
-        #     transitionMatrixRow = self.timeDiscretiazationMethod.computeTransitionMatrixRow(mesh12[0],mesh12, parameters.h, sde, fullMesh =mesh12, newPointIndices_AM = indices)
+        if parameters.timeDiscretizationType == "EM":
+            transitionMatrixRow = np.expand_dims(self.timeDiscretiazationMethod.computeTransitionMatrixRow(mesh12[0],mesh12, parameters.h, sde ),1)
+        else:
+            indices = list(range(len(mesh12)))
+            transitionMatrixRow = self.timeDiscretiazationMethod.computeTransitionMatrixRow(mesh12[0],mesh12, parameters.h, sde, fullMesh =mesh12, newPointIndices_AM = indices)
 
-        # transitionMatrixRow = np.squeeze(transitionMatrixRow)
-        # if sde.dimension > 1:
-        #     L = np.linalg.cholesky((scaling.cov))
-        #     JacFactor = np.prod(np.diag(L))
-        # elif sde.dimension ==1:
-        #     L = np.sqrt(scaling.cov)
-        #     JacFactor = np.squeeze(L)
+        transitionMatrixRow = np.squeeze(transitionMatrixRow)
+        if sde.dimension > 1:
+            L = np.linalg.cholesky((scaling.cov))
+            JacFactor = np.prod(np.diag(L))
+        elif sde.dimension ==1:
+            L = np.sqrt(scaling.cov)
+            JacFactor = np.squeeze(L)
 
-        # g = self.weightExp(scaling,mesh12)*1/(np.pi*JacFactor)
+        g = self.weightExp(scaling,mesh12)*1/(np.pi*JacFactor)
 
-        # testing = (pdf12*transitionMatrixRow)/g
-        # u = map_to_canonical_space(mesh12, scaling)
-        # V = opolynd.opolynd_eval(u, self.poly.lambdas[:parameters.numLejas,:], self.poly.ab, self.poly)
-        # vinv = np.linalg.inv(V)
-        # value = np.matmul(vinv[0,:], testing)
-        # condNumber = np.sum(np.abs(vinv[0,:]))
-        # return value, condNumber
+        testing = (pdf12*transitionMatrixRow)/g
+        u = map_to_canonical_space(mesh12, scaling)
+        V = opolynd.opolynd_eval(u, self.poly.lambdas[:parameters.numLejas,:], self.poly.ab, self.poly)
+        vinv = np.linalg.inv(V)
+        value = np.matmul(vinv[0,:], testing)
+        condNumber = np.sum(np.abs(vinv[0,:]))
+        return value, condNumber
 
 
     def weightExp(self, scaling, mesh):
