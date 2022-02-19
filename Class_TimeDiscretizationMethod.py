@@ -4,6 +4,9 @@ from tqdm import trange
 from Class_PDF import nDGridMeshCenteredAtOrigin
 from Class_Gaussian import GaussScale
 from Class_Integrator import IntegratorLejaQuadrature
+from variableTransformations import map_to_canonical_space, map_from_canonical_space
+import opolynd
+
 
 class TimeDiscretizationMethod():
     def __init__(self):
@@ -94,6 +97,8 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
     ##TODO: Finish this method
     def __init__(self, pdf, parameters, dimension):
         '''
+        This class is still in development.
+
         Manages the time discretization for the Anderson-Mattingly method
 
         Parameters:
@@ -135,7 +140,6 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         self.meshAM = meshAM
 
 
-    # @profile
     def computeN2(self, pdf, sde, h, yim1):
         count1 = 0
         s = np.size(self.meshAM,0)
@@ -217,6 +221,7 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         return transitionProb
 
     def computeTransitionMatrix(self, pdf, sde, parameters):
+        '''See MiscCodeNotForProcedure/AMDiscretization.py for more drafts of code to compute the AM Kernel'''
         matrix = np.empty([self.sizeTransitionMatrixIncludingEmpty, self.sizeTransitionMatrixIncludingEmpty])*np.NaN
         for j in trange(pdf.meshLength):
             mu1= pdf.meshCoordinates[j]+sde.driftFunction(np.asarray([pdf.meshCoordinates[j]]))*self.theta*parameters.h
@@ -266,22 +271,9 @@ class AndersonMattinglyTimeDiscretizationMethod(TimeDiscretizationMethod):
         count = 0
         for index in range(pdf.meshLength):
             point = pdf.meshCoordinates[count]
-            # mu1= point+sde.driftFunction(np.asarray([point]))*self.theta*parameters.h
-            # sig1 = abs(sde.diffusionFunction(np.asarray([point]))*np.sqrt(self.theta*parameters.h))
-            # scale1 = GaussScale(sde.dimension)
-            # scale1.setMu(np.asarray(mu1.T))
-            # scale1.setCov(np.asarray(sig1@sig1))
-
-            # self.setAndersonMattinglyMeshAroundPoint(mu1, sde, np.max(sig1))
-            # N22 = self.computeN2Paritial(sde, parameters.h, pdf.meshCoordinates[count], pdf.meshCoordinates[newPointindices])
-            # N1 = scale1.ComputeGaussian(self.meshAM, sde.dimension)
-            # vals = self.meshSpacingAM**sde.dimension*N22@np.expand_dims(N1,1)
-
             vals = self.computeTransitionMatrixRow(point, pdf.meshCoordinates, parameters.h, sde, fullMesh = pdf.meshCoordinates, newPointIndices_AM = newPointindices)
-
             simulation.TransitionMatrix[pdf.meshLength-len(newPointindices):pdf.meshLength, count] = np.squeeze(vals)
             count = count +1
-
 
 
 
@@ -295,8 +287,6 @@ def findNearestKPoints(Coord, AllPoints, numNeighbors, getIndices = False):
         return AllPoints[idx[:numNeighbors]], normList[idx[:numNeighbors]], idx[:numNeighbors]
     else:
         return AllPoints[idx[:numNeighbors]], normList[idx[:numNeighbors]]
-
-
 
 
 

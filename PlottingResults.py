@@ -184,7 +184,7 @@ def plotRowSixPlots(plottingMax, Meshes, PdfTraj, h, indices, limits):
     fig.text(0.04, 0.6, r'$x^{(2)}$', va='center', rotation='vertical')
     cbar = plt.colorbar(cntr2, ax=axs[:3], location='bottom')
     cbar.ax.tick_params(labelsize=10)
-    cbar.set_label(r'$\log_{10}(\hat{p}(\mathbf{x}, t_n))$')
+    cbar.set_label(r'$\log_{10}(\hat{p}(\mathbf{x}, t))$')
 
 
 

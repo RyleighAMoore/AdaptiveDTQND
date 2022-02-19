@@ -11,7 +11,7 @@ from Class_SDE import SDE
 from Class_Simulation import Simulation
 
 
-problem = "spiral" # "spiral" "complex" "hill"
+problem = "erf" # "spiral" "complex" "hill"
 
 dimension = 2
 timeDiscretizationType = "EM"
@@ -107,7 +107,7 @@ if problem == "hill":
 
 if problem == "erf":
     # plottingMax = 1
-    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [9, 25,len(simulation.meshTrajectory)-1], [-12,12,-12,12])
+    plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [9, 15,len(simulation.meshTrajectory)-1], [-12,12,-12,12])
 
 if problem == "spiral":
     # plottingMax = 1
