@@ -11,7 +11,7 @@ from Class_SDE import SDE
 from Class_Simulation import Simulation
 
 
-problem = "erf" # "spiral" "complex" "hill"
+problem = "spiral" # "spiral" "complex" "hill"
 
 dimension = 2
 timeDiscretizationType = "EM"

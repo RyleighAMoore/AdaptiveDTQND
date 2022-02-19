@@ -15,7 +15,8 @@ dimension = 2
 radius = 2
 h = 0.05
 betaVals = [2.5, 3, 4, 5, 6, 7, 8, 9 ,10]
-betaVals = [2.5, 3, 4]
+betaVals = [3, 2.5]
+
 
 bufferVals = [0, 0.5]
 endTime = 40
@@ -253,9 +254,6 @@ plt.xlabel(r'$L_{2w}$ Error')
 plt.ylabel("Relative Running Time (Seconds)")
 
 plt.savefig('Output/timingFigureT40_'+ str(timestr)+ "_" + str(endTime)+ '.png')
-
-
-
 
 animate = False
 if animate:

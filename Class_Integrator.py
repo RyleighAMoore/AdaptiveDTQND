@@ -128,7 +128,6 @@ class IntegratorLejaQuadrature(Integrator):
         condNumber = np.sum(np.abs(vinv[0,:]))
         return value, condNumber
 
-
     def computeUpdateWithAlternativeMethod(self, sde, parameters, pdf, index):
         scaling = GaussScale(sde.dimension)
         scaling.setMu(np.asarray(pdf.meshCoordinates[index,:]+parameters.h*sde.driftFunction(pdf.meshCoordinates[index,:])).T)
