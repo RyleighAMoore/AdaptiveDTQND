@@ -1,8 +1,0 @@
-dimension:  2  Iterations:  1  initial radius:  2 endTime:  0.3 time step:  0.05 
-
-Erorrs LQ {2.5: array([0.14281832]), 3: array([0.14281832]), 4: array([0.14281832]), 5: array([0.14281832]), 6: array([0.14281832]), 7: array([0.14281885]), 8: array([0.14281887]), 9: array([0.14281887]), 10: array([0.14281251])}
-Errors TR {0: array([0.26439528, 0.15277222, 0.14738943, 0.14662346]), 0.5: array([0.23684881, 0.15072458, 0.14736292])}
-LQ timing {2.5: array([0.64928079]), 3: array([0.72012067]), 4: array([0.62493587]), 5: array([0.62527108]), 6: array([0.61598921]), 7: array([0.60936594]), 8: array([0.60935092]), 9: array([0.62492943]), 10: array([0.64121342])}
-TR timing {0: array([0.03129935, 0.06244135, 0.0781188 , 0.10936117]), 0.5: array([0.09373903, 0.14061022, 0.23451567])}
-# points LQ [array(89), array(89), array(89), array(89), array(89), array(91), array(93), array(100), array(104)]
-# points TR [array(323), array(483), array(575), array(840), array(675), array(990), array(1258)]
