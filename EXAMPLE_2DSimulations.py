@@ -12,7 +12,7 @@ from Class_Simulation import Simulation
 from Functions import get2DTrapezoidalMeshBasedOnLejaQuadratureSolution
 from Errors import ErrorValsOneTime
 
-problem = "spiral" # "spiral" "complex" "hill"
+problem = "hill" # "spiral" "complex" "hill"
 
 dimension = 2
 timeDiscretizationType = "EM"
@@ -28,6 +28,7 @@ if problem == "hill":
     radius = 2
     beta = 4
     h=0.05
+    endTime = 1
 
 if problem == "erf":
     driftFunction = functionBank.erfDrift
@@ -81,7 +82,7 @@ print("Stepping timing",end-start, '*****************************************')
 
 
 '''Approximate Errror'''
-spacingTR = 0.08
+spacingTR = 0.04
 h= 0.01
 buffer=0.3
 meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulation.meshTrajectory, spacingTR, bufferVal=buffer)
@@ -160,11 +161,11 @@ if Plot:
     percentAltMethodUse = np.asarray(simulation.AltMethodUseCount)/np.asarray(lengths)*100
     print("Average ALT METHOD USE Percent: ", np.mean(percentAltMethodUse))
 
-    if problem == "hill":
-        meshTrueSoln = simulation.meshTrajectory[-1]
-        pdfTrueSoln = sde.exactSolution(simulation.meshTrajectory[-1],  simulation.times[-1])
-        LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], meshTrueSoln, pdfTrueSoln, interpolate=False)
-        print(L2wErrors)
+if problem == "hill":
+    meshTrueSoln = simulation.meshTrajectory[-1]
+    pdfTrueSoln = sde.exactSolution(simulation.meshTrajectory[-1],  simulation.times[-1])
+    LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], meshTrueSoln, pdfTrueSoln, interpolate=False)
+    print(L2wErrors)
 
 
 
