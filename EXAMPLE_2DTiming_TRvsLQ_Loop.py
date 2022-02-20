@@ -18,13 +18,24 @@ radius = 2
 h = 0.05
 betaVals = [2.5, 3, 4, 5, 6]
 betaToUseForMeshSizeOfTrapezoidalRule = 4
-
 bufferVals = [0, 0.5]
 endTime = 40
 spacingLQVals = [0.38]
 spacingTRValsShort = [0.25, 0.2, 0.18, 0.15]
 spacingTRVals = [0.25, 0.2, 0.18]
 
+
+# startup parameters
+dimension = 2
+radius = 2
+h = 0.05
+betaVals = [2.5, 4]
+betaToUseForMeshSizeOfTrapezoidalRule = 4
+bufferVals = [0, 0.5]
+endTime = 40
+spacingLQVals = [0.38]
+spacingTRValsShort = [0.18]
+spacingTRVals = [0.18]
 
 
 # dimension = 2
