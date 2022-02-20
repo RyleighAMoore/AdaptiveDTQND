@@ -20,7 +20,7 @@ betaVals = [2.5, 3, 4, 5, 6]
 betaToUseForMeshSizeOfTrapezoidalRule = 4
 
 bufferVals = [0, 0.5]
-endTime = 40
+endTime = 1#40
 spacingLQVals = [0.38]
 spacingTRValsShort = [0.25, 0.2, 0.18, 0.15]
 spacingTRVals = [0.25, 0.2, 0.18]

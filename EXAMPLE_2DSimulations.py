@@ -82,7 +82,7 @@ print("Stepping timing",end-start, '*****************************************')
 
 
 '''Approximate Errror'''
-spacingTR = 0.04
+spacingTR = 0.05
 h= 0.01
 buffer=0.3
 meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulation.meshTrajectory, spacingTR, bufferVal=buffer)

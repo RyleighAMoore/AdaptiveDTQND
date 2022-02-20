@@ -134,6 +134,10 @@ class Simulation():
                 self.pdfTrajectory.append(np.copy(self.pdf.pdfVals))
                 self.meshTrajectory.append(np.copy(self.pdf.meshCoordinates))
             timing.append(time.time()- timeStart)
+
+        '''Clean final points by removing small ones in last time step.'''
+        self.meshUpdater.removePointsFromMeshProcedure(self.pdf, self, parameters, sde)
+        self.meshUpdater.removeOutlierPoints(self.pdf, self, parameters, sde)
         return timing
 
     def computeLejaAndAlternativeUse(self):
