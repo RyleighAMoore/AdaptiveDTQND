@@ -15,6 +15,15 @@ import pickle
 from Errors import ErrorVals
 from datetime import datetime
 from matplotlib import rcParams
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.colors as colors
+import matplotlib.cbook as cbook
+from matplotlib import cm
+import matplotlib.pyplot as plt
+import numpy as np
+from numpy import ma
+from matplotlib import ticker, cm
 
 # Font styling
 rcParams['font.family'] = 'serif'
@@ -145,8 +154,8 @@ def plotRowSixPlots(plottingMax, Meshes, PdfTraj, h, indices, limits):
             S.append(x)
         M = np.asarray(M)
         S = np.asarray(S)
-        levels = np.linspace(-2.5, np.round(np.log(maxVal)), 19)
-        cntr2 = axs[0,times].tricontourf(M[:,0], M[:,1], np.log10(S), levels=levels, cmap="viridis")
+        levels = np.linspace(np.log10(0.001), np.log10(1) , 19)
+        cntr2 = axs[0,times].tricontourf(M[:,0], M[:,1], np.log10(S),levels=levels, cmap="viridis")
         axs[0,times].set(adjustable='box', aspect='equal')
         axs[1,times].set(adjustable='box', aspect='equal')
 
@@ -179,12 +188,26 @@ def plotRowSixPlots(plottingMax, Meshes, PdfTraj, h, indices, limits):
 
         times = times+1
 
+    def fmt(x, pos):
+        isMultipleOf10 = x - np.floor(x) < 0.000000001
+        if isMultipleOf10:
+            # if you add new points, you can't use the int(x) in the formatted string
+            assert x - np.floor(x) < 0.000000001
+            return fr'$10^{{{int(x)}}}$'
+        return ""
+        # return
+        # b = int(b)
+        # return r'${} \times 10^{{{}}}$'.format(a, b)
+
+
     # fig.text(0.52, 0.05, r'$\mathbf{x}^{(1)}$', ha='center')
     fig.text(0.52, 0.23, r'$x^{(1)}$', ha='center')
     fig.text(0.04, 0.6, r'$x^{(2)}$', va='center', rotation='vertical')
-    cbar = plt.colorbar(cntr2, ax=axs[:3], location='bottom')
+    cbar = plt.colorbar(cntr2, ax=axs[:3], location='bottom', format=ticker.FuncFormatter(fmt))
     cbar.ax.tick_params(labelsize=10)
-    cbar.set_label(r'$\log_{10}(\hat{p}(\mathbf{x}, t))$')
+    cbar.set_label(r'$\hat{p}(\mathbf{x}, t)$')
+
+
 
 
 

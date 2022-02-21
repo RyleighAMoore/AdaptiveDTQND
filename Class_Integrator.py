@@ -215,7 +215,7 @@ class IntegratorLejaQuadrature(Integrator):
             '''Nothing worked, use alterative method'''
             value,condNumber = self.computeUpdateWithAlternativeMethod(sde, parameters, pdf, index)
             newPdf[index] =self.checkPdfValue(value, valueReplace)
-            AltMethodUseCount += 1
+            AltMethodUseCount = AltMethodUseCount+ 1
 
         return newPdf, LPReuseCount, AltMethodUseCount
 

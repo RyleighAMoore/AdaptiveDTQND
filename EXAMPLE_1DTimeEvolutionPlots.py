@@ -68,7 +68,7 @@ for ind in indices:
 
 plt.xlim([-5, 35])
 plt.xlabel(r'$\mathbf{x}$')
-plt.ylabel(r'$\hat{p}(\mathbf{x}, t_n)$')
+plt.ylabel(r'$\hat{p}(\mathbf{x}, t)$')
 
 plt.legend(markerscale=2)
 

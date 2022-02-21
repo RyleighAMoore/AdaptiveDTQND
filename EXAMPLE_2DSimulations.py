@@ -12,8 +12,8 @@ from Class_Simulation import Simulation
 from Functions import get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHill
 from Errors import ErrorValsOneTime
 
-problem = "hill" # "spiral" "complex" "hill"
-
+problem = "complex" # "spiral" "complex" "hill"
+approxError = False
 dimension = 2
 timeDiscretizationType = "EM"
 integratorType = "LQ"
@@ -82,26 +82,27 @@ print("Stepping timing",end-start, '*****************************************')
 
 
 '''Approximate Errror'''
-spacingTR = 0.05
-h= 0.01
-buffer=0.3
-meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHill(simulation.meshTrajectory, spacingTR, bufferVal=buffer)
-parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR, saveHistory=False)
+if approxError:
+    spacingTR = 0.05
+    h= 0.01
+    buffer=0.3
+    meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHill(simulation.meshTrajectory, spacingTR, bufferVal=buffer)
+    parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR, saveHistory=False)
 
-simulationTR = Simulation(sde, parametersTR, endTime)
-startTimeTR = time.time()
-simulationTR.setUpTransitionMatrix(sde, parametersTR)
+    simulationTR = Simulation(sde, parametersTR, endTime)
+    startTimeTR = time.time()
+    simulationTR.setUpTransitionMatrix(sde, parametersTR)
 
-stepByStepTimingTR = simulationTR.computeAllTimes(sde, parametersTR)
-totalTimeTR = time.time() - startTimeTR
+    stepByStepTimingTR = simulationTR.computeAllTimes(sde, parametersTR)
+    totalTimeTR = time.time() - startTimeTR
 
-meshTrueSolnTR = simulationTR.meshTrajectory[-1]
-pdfTrueSolnTR = simulationTR.pdfTrajectory[-1]
-LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], meshTrueSolnTR, pdfTrueSolnTR, interpolate=True)
+    meshTrueSolnTR = simulationTR.meshTrajectory[-1]
+    pdfTrueSolnTR = simulationTR.pdfTrajectory[-1]
+    LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], meshTrueSolnTR, pdfTrueSolnTR, interpolate=True)
 
-print(L2wErrors)
+    print(L2wErrors)
 
-Plot = False
+Plot = True
 if Plot:
     animate = True
     if animate ==True:
@@ -122,15 +123,17 @@ if Plot:
         ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
         plt.show()
 
-    plottingMax = 1
+    plottingMax = 5
     from PlottingResults import plotRowSixPlots
+    from PlottingResults import plotRowSixPlots
+
     if problem == "hill":
         # plottingMax = 1
         plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [5, 15,len(simulation.meshTrajectory)-1], [-12,12,-12,12])
 
     if problem == "erf":
         # plottingMax = 1
-        plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [9, 15,len(simulation.meshTrajectory)-1], [-12,12,-12,12])
+        plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [9, 15,len(simulation.meshTrajectory)-1], [-14,14,-14,14])
 
     if problem == "spiral":
         # plottingMax = 1

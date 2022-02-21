@@ -16,26 +16,15 @@ from Functions import get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHil
 dimension = 2
 radius = 2
 h = 0.05
-betaVals = [2.5, 3, 4, 5, 6]
+betaVals = [4]
 betaToUseForMeshSizeOfTrapezoidalRule = 4
-bufferVals = [0, 0.5]
-endTime = 40
+
+bufferVals = [0]
+endTime = 15
 spacingLQVals = [0.38]
-spacingTRValsShort = [0.25, 0.2, 0.18, 0.15]
-spacingTRVals = [0.25, 0.2, 0.18]
+spacingTRValsShort = [0.25]
+spacingTRVals = [0.25]
 
-
-# startup parameters
-# dimension = 2
-# radius = 2
-# h = 0.05
-# betaVals = [2.5,4]
-# betaToUseForMeshSizeOfTrapezoidalRule = 4
-# bufferVals = [0, 0.5]
-# endTime = 40
-# spacingLQVals = [0.38]
-# spacingTRValsShort = [0.18]
-# spacingTRVals = [0.18]
 
 
 # dimension = 2
@@ -63,7 +52,7 @@ diffusionFunction = functionBank.ptSixDiffusion
 spatialDiff = False
 adaptive = True
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
-saveHistory = False
+saveHistory = True
 
 # Data Storage
 ErrorsLQ = []
@@ -150,7 +139,7 @@ for bufferVal in bufferVals:
         errorsPerRunArrayTR = []
         meshLengthsPerRunArrayTR = []
         for iteration in range(numIterations):
-            # meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHill(meshTrajectoryToUseForTRMeshSize, spacingTR, bufferVal)
+            # meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(meshTrajectoryToUseForTRMeshSize, spacingTR, bufferVal)
             meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHill(meshTrajectoryToUseForTRMeshSize, spacingTR, bufferVal)
 
             parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR, saveHistory=saveHistory)
@@ -159,15 +148,15 @@ for bufferVal in bufferVals:
             startTimeTR = time.time()
             simulationTR.setUpTransitionMatrix(sde, parametersTR)
 
-            stepByStepTimingTR = simulationTR.computeAllTimes(sde, parametersTR)
-            totalTimeTR = time.time() - startTimeTR
+            # stepByStepTimingTR = simulationTR.computeAllTimes(sde, parametersTR)
+            # totalTimeTR = time.time() - startTimeTR
 
-            meshTrueSolnTR = simulationTR.meshTrajectory[-1]
-            pdfTrueSolnTR = sde.exactSolution(simulationTR.meshTrajectory[-1],  simulationTR.times[-1])
-            LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationTR.meshTrajectory[-1], simulationTR.pdfTrajectory[-1], meshTrueSolnTR, pdfTrueSolnTR, interpolate=False)
-            allErrorArrayStorageTR.append(L2wErrors)
+            # meshTrueSolnTR = simulationTR.meshTrajectory[-1]
+            # pdfTrueSolnTR = sde.exactSolution(simulationTR.meshTrajectory[-1],  simulationTR.times[-1])
+            # LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulationTR.meshTrajectory[-1], simulationTR.pdfTrajectory[-1], meshTrueSolnTR, pdfTrueSolnTR, interpolate=False)
+            # allErrorArrayStorageTR.append(L2wErrors)
 
-            timingPerRunArrayTR.append(np.copy(totalTimeTR))
+            # timingPerRunArrayTR.append(np.copy(totalTimeTR))
             errorsPerRunArrayTR.append(np.copy(L2wErrors))
             meshLengthsPerRunArrayTR.append(np.copy(simulationTR.pdf.meshLength))
 
@@ -216,23 +205,21 @@ unitTime = np.asarray(betaDict_times[min(betaVals)])[0]
 unitError = np.asarray(betaDict_errors[min(betaVals)])[0]
 plt.figure()
 plt.plot(unitError, unitTime/unitTime, "*k", markeredgewidth=1, markersize = "20",markerfacecolor="None", label = "Unit Time")
-
-plt.semilogx(np.asarray(list(betaDict_errors.values())), np.asarray(list(betaDict_times.values()))/unitTime, "o-", label= "Adaptive LQ")
-# for betaVal in betaVals:
-#     if betaVal in betaDict_errors:
-#         Errors = betaDict_errors[betaVal]
-#         timing = betaDict_times[betaVal]
-#         labelString = 'LQ, \u03B2 = %.2f' %betaVal
-#         plt.semilogx(np.asarray(Errors), np.asarray(timing)/unitTime, "o", label= labelString)
+for betaVal in betaVals:
+    if betaVal in betaDict_errors:
+        Errors = betaDict_errors[betaVal]
+        timing = betaDict_times[betaVal]
+        labelString = 'LQ, \u03B2 = %.2f' %betaVal
+        plt.semilogx(np.asarray(Errors), np.asarray(timing)/unitTime, "o", label= labelString)
 
 for buff in bufferVals:
     if buff in bufferDict_errors:
         Errors = bufferDict_errors[buff]
         timing = bufferDict_times[buff]
         if buff == 0:
-            labelString = 'Equispaced Trapezoidal Oracle, buffer = %d%%' %(buff*100)
+            labelString = 'TR Oracle, buffer = %d%%' %(buff*100)
         else:
-            labelString = 'Equispaced Trapezoidal, buffer = %d%%' %(buff*100)
+            labelString = 'TR, buffer = %d%%' %(buff*100)
         plt.semilogx(np.asarray(Errors), np.asarray(timing)/unitTime, "-s", label= labelString)
 
 
@@ -286,6 +273,13 @@ if animate:
         ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=10, blit=False)
         plt.show()
 
+
+plt.figure()
+plt.scatter(meshTrajectoryToUseForTRMeshSize[-1][:,0], meshTrajectoryToUseForTRMeshSize[-1][:,1])
+plt.scatter(meshTrajectoryToUseForTRMeshSize[0][:,0], meshTrajectoryToUseForTRMeshSize[0][:,1])
+# plt.scatter(meshTR[:,0], meshTR[:,1])
+
+plt.show()
 
 
 
