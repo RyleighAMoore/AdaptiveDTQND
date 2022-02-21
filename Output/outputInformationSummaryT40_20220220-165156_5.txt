@@ -1,8 +1,0 @@
-dimension:  2  Iterations:  1  initial radius:  2 endTime:  5 time step:  0.05 
-
-Erorrs LQ {4: array([0.00155609])}
-Errors TR {0: array([0.00155609])}
-LQ timing {4: array([26.89039063])}
-TR timing {0: array([nan])}
-# points LQ [array(600)]
-# points TR [array(2009)]
