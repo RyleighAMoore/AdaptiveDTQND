@@ -157,7 +157,13 @@ class Simulation():
         print("Average ALT METHOD USE Percent: ", np.mean(percentAltMethodUse))
 
 
-
+    def computeTotalPointsUsed(self):
+        assert len(self.meshTrajectory) > 3, "History doesn't seem to be saved."
+        totalCount = 0
+        for mesh in self.meshTrajectory:
+            totalCount = totalCount + len(mesh)
+        print("Number of Points Used: ", totalCount)
+        print("Average of Points Used Per Time Step: ", totalCount/len(self.pdfTrajectory))
 
 
 

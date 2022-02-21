@@ -13,7 +13,7 @@ from Functions import get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHil
 from Errors import ErrorValsOneTime
 
 problem = "complex" # "spiral" "complex" "hill"
-approxError = False
+approxError = True
 dimension = 2
 timeDiscretizationType = "EM"
 integratorType = "LQ"
@@ -47,7 +47,7 @@ if problem == "spiral":
     spatialDiff = False
     kstepMin = 0.2
     kstepMax = 0.2
-    endTime = 3
+    endTime = 2.4
     radius = 2
     beta = 3
     h=0.02
@@ -129,20 +129,20 @@ if Plot:
 
     if problem == "hill":
         # plottingMax = 1
-        plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [5, 15,len(simulation.meshTrajectory)-1], [-12,12,-12,12])
+        plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [5, 15,-1], [-12,12,-12,12], simulation.times)
 
     if problem == "erf":
         # plottingMax = 1
-        plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [9, 15,len(simulation.meshTrajectory)-1], [-14,14,-14,14])
+        plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [3, 15,-1], [-14,14,-14,14], simulation.times)
 
     if problem == "spiral":
         # plottingMax = 1
-        plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [19, 59 , 119],[-10,10,-10,10])
+        plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [19, 59 ,-1],[-10,10,-10,10], simulation.times)
         # plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [50, 85 ,len(simulation.meshTrajectory)-1],[-10,10,-10,10])
 
     if problem == "complex":
         # plottingMax =1
-        plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [29, 49 ,len(simulation.meshTrajectory)-1], [-6,6,-6,6])
+        plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [29, 49 ,-1], [-6,6,-6,6], simulation.times)
 
 
     print("Number of starting points: " + str(len(simulation.pdfTrajectory[0])))
@@ -153,16 +153,8 @@ if Plot:
 
 
     '''Compute Leja reuse and Alt method use'''
-    lengths = []
-    for mesh in simulation.meshTrajectory[1:]:
-        lengths.append(len(mesh))
-
-    percentLejaReuse = np.asarray(simulation.LPReuseCount)/np.asarray(lengths)*100
-
-    print("Average LEJA REUSE Percent: ", np.mean(percentLejaReuse))
-
-    percentAltMethodUse = np.asarray(simulation.AltMethodUseCount)/np.asarray(lengths)*100
-    print("Average ALT METHOD USE Percent: ", np.mean(percentAltMethodUse))
+    simulation.computeLejaAndAlternativeUse()
+    simulation.computeTotalPointsUsed()
 
 if problem == "hill":
     meshTrueSoln = simulation.meshTrajectory[-1]

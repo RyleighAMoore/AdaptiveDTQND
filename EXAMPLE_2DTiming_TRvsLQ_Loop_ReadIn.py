@@ -19,7 +19,7 @@ fontprops = {'fontweight': 'bold'}
 
 
 objects = []
-with (open("Output_Saved\\fileT40_20220201-061325.pkl", "rb")) as openfile:
+with (open("Output//fileT40_20220221-035619_40.pkl", "rb")) as openfile:
     while True:
         try:
             objects.append(pickle.load(openfile))
@@ -48,12 +48,16 @@ unitTime = np.asarray(betaDict_times[min(betaVals)])[0]
 unitError = np.asarray(betaDict_errors[min(betaVals)])[0]
 plt.figure()
 plt.plot(unitError, unitTime/unitTime, "*k", markeredgewidth=1, markersize = "20",markerfacecolor="None", label = "Unit Time")
-for betaVal in betaVals:
-    if betaVal in betaDict_errors:
-        Errors = betaDict_errors[betaVal]
-        timing = betaDict_times[betaVal]
-        labelString = 'LQ, \u03B2 = %.2f' %betaVal
-        plt.semilogx(np.asarray(Errors), np.asarray(timing)/unitTime, "o", label= labelString)
+plt.semilogx(np.asarray(list(betaDict_errors.values())), np.asarray(list(betaDict_times.values()))/unitTime, "o-", label= "LQ")
+plt.annotate(r'$\beta = 2.5$', (unitError+0.0015, 0.8), fontsize=14)
+plt.annotate(r'$\beta = 4$', (np.asarray(betaDict_errors[4])-0.00004, np.asarray(betaDict_times[4])/unitTime -1), fontsize=14)
+
+# for betaVal in betaVals:
+#     if betaVal in betaDict_errors:
+#         Errors = betaDict_errors[betaVal]
+#         timing = betaDict_times[betaVal]
+#         labelString = 'LQ, \u03B2 = %.2f' %betaVal
+#         plt.semilogx(np.asarray(Errors), np.asarray(timing)/unitTime, "o", label= labelString)
 
 for buff in bufferVals:
     if buff in bufferDict_errors:
@@ -65,11 +69,19 @@ for buff in bufferVals:
             labelString = 'TR, buffer = %d%%' %(buff*100)
         plt.semilogx(np.asarray(Errors), np.asarray(timing)/unitTime, "-s", label= labelString)
 
-# plt.ylim([0, 5])
+plt.annotate(r'$\kappa = 0.2$', (np.asarray(bufferDict_errors[0][1])-0.00004, np.asarray(bufferDict_times[0][1])/unitTime +0.5), fontsize=14)
+plt.annotate(r'$\kappa = 0.2$', (np.asarray(bufferDict_errors[0.5][1])-0.00004, np.asarray(bufferDict_times[0.5][1])/unitTime +0.5), fontsize=14)
+
+plt.annotate(r'$\kappa = 0.15$', (np.asarray(bufferDict_errors[0][-1])+0.000003, np.asarray(bufferDict_times[0][-1])/unitTime -0.1), fontsize=14)
+plt.annotate(r'$\kappa = 0.18$', (np.asarray(bufferDict_errors[0.5][-1])+0.0001, np.asarray(bufferDict_times[0.5][-1])/unitTime -0.1), fontsize=14)
+
+
+
 plt.legend()
-plt.xlabel(r'$L_{2w}$ Error')
+plt.ylim([0.1,17])
+plt.xlim([10**(-6), 10**2])
+plt.xlabel(r'Error')
 plt.ylabel("Relative Running Time")
-plt.title(r"Error vs. Timing, Moving Hill, $T=40$")
 
 
 
@@ -102,13 +114,16 @@ plt.title(r"Error vs. Timing, Moving Hill, $T=40$")
 
 plt.figure()
 count =0
-for betaVal in betaVals:
-    if betaVal in betaDict_errors:
-        Errors = np.asarray(betaDict_errors[betaVal])
-        numPoints = np.asarray(numPointsLQ[count])
-        labelString = 'LQ, \u03B2 = %.2f' %betaVal
-        plt.semilogx(Errors, numPoints, "o", label= labelString)
-        count +=1
+
+plt.loglog(np.asarray(list(betaDict_errors.values())), np.asarray(numPointsLQ), "-o", label= "LQ")
+
+# for betaVal in betaVals:
+#     if betaVal in betaDict_errors:
+#         Errors = np.asarray(betaDict_errors[betaVal])
+#         numPoints = np.asarray(numPointsLQ[count])
+#         labelString = 'LQ, \u03B2 = %.2f' %betaVal
+#         plt.loglog(Errors, numPoints, "o", label= labelString)
+#         count +=1
 
 count = 0
 for buff in bufferVals:
@@ -122,9 +137,20 @@ for buff in bufferVals:
         plt.loglog(np.asarray(Errors), np.asarray(numPoints), "-s", label= labelString)
         count +=len(Errors)
 
-plt.legend()
-plt.xlabel(r'$L_{2w}$ Error')
+plt.annotate(r'$\beta = 2.5$', (np.asarray(betaDict_errors[2.5])+0.0015, numPointsLQ[0]-100), fontsize=14)
+plt.annotate(r'$\beta = 4$', (np.asarray(betaDict_errors[4])-0.000035, numPointsLQ[4]-4400), fontsize=14)
+
+plt.annotate(r'$\kappa = 0.2$', (np.asarray(bufferDict_errors[0][1])-0.0008, numPointsTR[1]-6000), fontsize=14)
+plt.annotate(r'$\kappa = 0.2$', (np.asarray(bufferDict_errors[0.5][1])-0.0008, numPointsTR[5]+8000), fontsize=14)
+
+plt.annotate(r'$\kappa = 0.15$', (np.asarray(bufferDict_errors[0][-1])-0.000003, numPointsTR[2]-4000), fontsize=14)
+plt.annotate(r'$\kappa = 0.18$', (np.asarray(bufferDict_errors[0.5][-1])-0.0001, numPointsTR[-1]+8000), fontsize=14)
+
+
+plt.legend(loc=4)
+plt.xlabel(r'Error')
 plt.ylabel(r'Number of Points')
-plt.ylim([10**3, 10**5])
-plt.title(r"Error vs. # of Points, Moving Hill, $T=40$")
+plt.ylim([10, 10**5])
+plt.xlim([10**(-6), 10**2])
+# plt.title(r"Error vs. # of Points, Moving Hill, $T=40$")
 
