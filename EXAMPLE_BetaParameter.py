@@ -19,7 +19,6 @@ spatialDiff = False
 
 
 betaVals = [1,2,3,4,5,6,7,8,9,10]
-betaVals = [1,3,7,8]
 
 endTime = 1.15
 h=0.01
@@ -51,7 +50,7 @@ for beta in betaVals:
     LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(Meshes[-1], PdfTraj[-1], Meshes[-1], exactSolution, interpolate= True)
     print(L2wErrors)
 
-    table = table + str(beta) + "&" +str("{:2e}".format(L2wErrors))+ "&" +str("{:2e}".format(L2Errors)) + "&" +str("{:2e}".format(L1Errors)) + "&" +str("{:2e}".format(LinfErrors))  + "&" + str(len(Meshes[-1])) + "\\\ \hline "
+    table = table + str(beta) + "&" +str("{:.1e}".format(L2wErrors))+ "&" +str("{:.1e}".format(L2Errors)) + "&" +str("{:.1e}".format(L1Errors)) + "&" +str("{:.1e}".format(LinfErrors))  + "&" + str(len(Meshes[-1])) + "\\\ \hline "
 
 
 
