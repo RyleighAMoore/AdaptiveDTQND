@@ -8,7 +8,7 @@ import DriftDiffusionFunctionBank as functionBank
 from Errors import ErrorValsOneTime
 import time
 import sys
-
+from Functions import get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHill
 
 # startup parameters
 dimension = 2
@@ -56,37 +56,6 @@ bufferDict_NumPoints = {}
 
 
 
-def get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, spacingTR, bufferVal = 0):
-    xmin = min(np.min(simulationLQ.meshTrajectory[-1][:,0]),np.min(simulationLQ.meshTrajectory[0][:,0]))
-    xmax = max(np.max(simulationLQ.meshTrajectory[-1][:,0]),np.max(simulationLQ.meshTrajectory[0][:,0]))
-    ymin = min(np.min(simulationLQ.meshTrajectory[-1][:,1]),np.min(simulationLQ.meshTrajectory[0][:,1]))
-    ymax = max(np.max(simulationLQ.meshTrajectory[-1][:,1]),np.max(simulationLQ.meshTrajectory[0][:,1]))
-
-    bufferX =bufferVal*(xmax-xmin)/2
-    bufferY = bufferVal*(ymax-ymin)/2
-    xstart = np.floor(xmin) - bufferX
-    xs = []
-    xs.append(xstart)
-    while xstart< xmax + bufferX:
-        xs.append(xstart+spacingTR)
-        xstart += spacingTR
-
-    ystart = np.floor(ymin) - bufferY
-    ys = []
-    ys.append(ystart)
-
-    while ystart< ymax+ bufferY:
-        ys.append(ystart+spacingTR)
-        ystart += spacingTR
-
-    mesh = []
-    for i in xs:
-        for j in ys:
-            mesh.append([i,j])
-    mesh = np.asarray(mesh)
-
-    return mesh
-
 
 def runLQAdaptiveDTQ(beta, spacingLQ):
     '''setup'''
@@ -109,7 +78,7 @@ def runLQAdaptiveDTQ(beta, spacingLQ):
     return LinfError, L2Error, L1Error, L2wError, totalTimeLQ , numPoints, simulationLQ
 
 def runTRDTQ(buffer, spacingTR, simulationLQ):
-    meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulationLQ, spacingTR, buffer)
+    meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHill(simulationLQ, spacingTR, buffer)
     parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR, saveHistory=saveHistory)
 
     simulationTR = Simulation(sde, parametersTR, endTime)

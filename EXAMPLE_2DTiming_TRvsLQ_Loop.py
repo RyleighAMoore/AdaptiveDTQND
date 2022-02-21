@@ -8,7 +8,7 @@ import DriftDiffusionFunctionBank as functionBank
 from Errors import ErrorValsOneTime
 import time
 import sys
-from Functions import get2DTrapezoidalMeshBasedOnLejaQuadratureSolution
+from Functions import get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHill
 
 
 
@@ -32,7 +32,7 @@ h = 0.05
 betaVals = [2.5, 4]
 betaToUseForMeshSizeOfTrapezoidalRule = 4
 bufferVals = [0, 0.5]
-endTime = 40
+endTime = 1#40
 spacingLQVals = [0.38]
 spacingTRValsShort = [0.18]
 spacingTRVals = [0.18]
@@ -150,8 +150,8 @@ for bufferVal in bufferVals:
         errorsPerRunArrayTR = []
         meshLengthsPerRunArrayTR = []
         for iteration in range(numIterations):
-            # meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(meshTrajectoryToUseForTRMeshSize, spacingTR, bufferVal)
-            meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(meshTrajectoryToUseForTRMeshSize, spacingTR, bufferVal)
+            # meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHill(meshTrajectoryToUseForTRMeshSize, spacingTR, bufferVal)
+            meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHill(meshTrajectoryToUseForTRMeshSize, spacingTR, bufferVal)
 
             parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR, saveHistory=saveHistory)
 
@@ -216,21 +216,23 @@ unitTime = np.asarray(betaDict_times[min(betaVals)])[0]
 unitError = np.asarray(betaDict_errors[min(betaVals)])[0]
 plt.figure()
 plt.plot(unitError, unitTime/unitTime, "*k", markeredgewidth=1, markersize = "20",markerfacecolor="None", label = "Unit Time")
-for betaVal in betaVals:
-    if betaVal in betaDict_errors:
-        Errors = betaDict_errors[betaVal]
-        timing = betaDict_times[betaVal]
-        labelString = 'LQ, \u03B2 = %.2f' %betaVal
-        plt.semilogx(np.asarray(Errors), np.asarray(timing)/unitTime, "o", label= labelString)
+
+plt.semilogx(np.asarray(list(betaDict_errors.values())), np.asarray(list(betaDict_times.values()))/unitTime, "o-", label= "Adaptive LQ")
+# for betaVal in betaVals:
+#     if betaVal in betaDict_errors:
+#         Errors = betaDict_errors[betaVal]
+#         timing = betaDict_times[betaVal]
+#         labelString = 'LQ, \u03B2 = %.2f' %betaVal
+#         plt.semilogx(np.asarray(Errors), np.asarray(timing)/unitTime, "o", label= labelString)
 
 for buff in bufferVals:
     if buff in bufferDict_errors:
         Errors = bufferDict_errors[buff]
         timing = bufferDict_times[buff]
         if buff == 0:
-            labelString = 'TR Oracle, buffer = %d%%' %(buff*100)
+            labelString = 'Equispaced Trapezoidal Oracle, buffer = %d%%' %(buff*100)
         else:
-            labelString = 'TR, buffer = %d%%' %(buff*100)
+            labelString = 'Equispaced Trapezoidal, buffer = %d%%' %(buff*100)
         plt.semilogx(np.asarray(Errors), np.asarray(timing)/unitTime, "-s", label= labelString)
 
 

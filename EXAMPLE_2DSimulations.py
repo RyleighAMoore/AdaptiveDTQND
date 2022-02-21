@@ -9,7 +9,7 @@ import matplotlib.animation as animation
 from Class_Parameters import Parameters
 from Class_SDE import SDE
 from Class_Simulation import Simulation
-from Functions import get2DTrapezoidalMeshBasedOnLejaQuadratureSolution
+from Functions import get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHill
 from Errors import ErrorValsOneTime
 
 problem = "hill" # "spiral" "complex" "hill"
@@ -85,7 +85,7 @@ print("Stepping timing",end-start, '*****************************************')
 spacingTR = 0.05
 h= 0.01
 buffer=0.3
-meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolution(simulation.meshTrajectory, spacingTR, bufferVal=buffer)
+meshTR = get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHill(simulation.meshTrajectory, spacingTR, bufferVal=buffer)
 parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR, saveHistory=False)
 
 simulationTR = Simulation(sde, parametersTR, endTime)
