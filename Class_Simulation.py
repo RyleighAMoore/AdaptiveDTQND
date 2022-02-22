@@ -130,7 +130,7 @@ class Simulation():
             '''Step forward solution one time step, save history if needed'''
             self.pdf.minPdfValue = np.min(self.pdf.pdfVals)
             self.StepForwardInTime(sde, parameters)
-            if i ==self.numSteps -1:
+            if parameters.useAdaptiveMesh and i ==self.numSteps -1:
                 '''Clean up last time step'''
                 self.meshUpdater.removePointsFromMeshProcedure(self.pdf, self, parameters, sde)
                 self.meshUpdater.removeOutlierPoints(self.pdf, self, parameters, sde)

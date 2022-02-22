@@ -12,8 +12,8 @@ from Class_Simulation import Simulation
 from Functions import get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHill
 from Errors import ErrorValsOneTime
 
-problem = "complex" # "spiral" "complex" "hill"
-approxError = True
+problem = "hill" # "spiral" "complex" "hill"
+approxError = False
 dimension = 2
 timeDiscretizationType = "EM"
 integratorType = "LQ"
@@ -173,21 +173,17 @@ if kstepMax == kstepMin:
 
 
 
-# Meshes = simulationTR.meshTrajectory
-# PdfTraj = simulationTR.pdfTrajectory
-# index = -1
-# fig = plt.figure()
-# ax = fig.add_subplot(111, projection='3d')
-# title = ax.set_title('3D Test')
-# graph, = ax.plot(Meshes[index][:,0], Meshes[index][:,1], PdfTraj[index], linestyle="", marker=".")
-# # graph, = ax.plot(Meshes[index+1][:,0], Meshes[index+1][:,1], PdfTraj[index+1], linestyle="", marker=".")
-# plt.show()
 
-# index = 58
-# fig = plt.figure()
-# plt.plot(Meshes[index][:,0], Meshes[index][:,1], linestyle="", marker="o")
-# # graph, = ax.plot(Meshes[index+1][:,0], Meshes[index+1][:,1], PdfTraj[index+1], linestyle="", marker=".")
+'''Spiral
+Number of starting points: 325
+Number of ending points: 2356
+Starting range: [-2.0, 2.0]
+Ending range: [-5.0000000000000036, 7.0000000000000036]
+Average LEJA REUSE Percent:  83.03200089720583
+Average ALT METHOD USE Percent:  0.11721058387151188
+Number of Points Used:  134184
+Average of Points Used Per Time Step:  1118.2
+'''
 
-# ax.set_zlim(0,np.max(simulation.pdfTrajectory[2]))
-# ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
-# plt.show()
+
+

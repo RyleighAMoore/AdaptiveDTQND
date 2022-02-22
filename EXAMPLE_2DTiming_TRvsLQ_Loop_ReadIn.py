@@ -48,7 +48,7 @@ unitTime = np.asarray(betaDict_times[min(betaVals)])[0]
 unitError = np.asarray(betaDict_errors[min(betaVals)])[0]
 plt.figure()
 plt.plot(unitError, unitTime/unitTime, "*k", markeredgewidth=1, markersize = "20",markerfacecolor="None", label = "Unit Time")
-plt.semilogx(np.asarray(list(betaDict_errors.values())), np.asarray(list(betaDict_times.values()))/unitTime, "o-", label= "LQ")
+plt.semilogx(np.asarray(list(betaDict_errors.values())), np.asarray(list(betaDict_times.values()))/unitTime, "o-", label= r"$DTQ_{LQ}$")
 plt.annotate(r'$\beta = 2.5$', (unitError+0.0015, 0.8), fontsize=14)
 plt.annotate(r'$\beta = 4$', (np.asarray(betaDict_errors[4])-0.00004, np.asarray(betaDict_times[4])/unitTime -1), fontsize=14)
 
@@ -64,9 +64,9 @@ for buff in bufferVals:
         Errors = bufferDict_errors[buff]
         timing = bufferDict_times[buff]
         if buff == 0:
-            labelString = 'TR Oracle, buffer = %d%%' %(buff*100)
+            labelString = r'$DTQ_{TR}$, buffer = %d%%, Oracle' %(buff*100)
         else:
-            labelString = 'TR, buffer = %d%%' %(buff*100)
+            labelString = r'$DTQ_{TR}$, buffer = %d%%' %(buff*100)
         plt.semilogx(np.asarray(Errors), np.asarray(timing)/unitTime, "-s", label= labelString)
 
 plt.annotate(r'$\kappa = 0.2$', (np.asarray(bufferDict_errors[0][1])-0.00004, np.asarray(bufferDict_times[0][1])/unitTime +0.5), fontsize=14)
@@ -115,7 +115,7 @@ plt.ylabel("Relative Running Time")
 plt.figure()
 count =0
 
-plt.loglog(np.asarray(list(betaDict_errors.values())), np.asarray(numPointsLQ), "-o", label= "LQ")
+plt.loglog(np.asarray(list(betaDict_errors.values())), np.asarray(numPointsLQ), "-o", label= r"$DTQ_{LQ}$")
 
 # for betaVal in betaVals:
 #     if betaVal in betaDict_errors:
@@ -131,9 +131,9 @@ for buff in bufferVals:
         Errors = bufferDict_errors[buff]
         numPoints = numPointsTR[count:count + len(Errors)]
         if buff == 0:
-            labelString = 'TR Oracle, buffer = %d%%' %(buff*100)
+            labelString = r'$DTQ_{TR}$, buffer = %d%%, Oracle' %(buff*100)
         else:
-            labelString = 'TR, buffer = %d%%' %(buff*100)
+            labelString = r'$DTQ_{TR}$, buffer = %d%%' %(buff*100)
         plt.loglog(np.asarray(Errors), np.asarray(numPoints), "-s", label= labelString)
         count +=len(Errors)
 
