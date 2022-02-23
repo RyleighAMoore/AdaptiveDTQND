@@ -123,7 +123,6 @@ for i in range(len(simulationTR.pdfTrajectory)):
         pdfTR.append(simulationTR.pdfTrajectory[i])
         timesTR.append(simulationTR.times[i])
 
-assert timesTR == simulation.times
 
 plottingMax = 5
 if problem == "hill":
@@ -139,4 +138,5 @@ if problem == "complex":
     plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [29, 49 ,-1], [-8,8,-8,8], simulation.times)
 
 
+assert timesTR == simulation.times
 
