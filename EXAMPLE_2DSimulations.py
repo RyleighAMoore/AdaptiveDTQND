@@ -47,7 +47,7 @@ if problem == "spiral":
     spatialDiff = False
     kstepMin = 0.25
     kstepMax = 0.3
-    endTime = 2.4
+    endTime = 2.5
     radius = 2
     beta = 4
     h=0.05
