@@ -257,7 +257,8 @@ def plotRowNinePlots(plottingMax, Meshes, PdfTraj, MeshesTR, PdfTrajTR, h, indic
 
 
 
-        point_maskTR = np.isfinite(np.log10(PdfTrajTR[index]))  # Points to keep.
+        #Get rid of points that are inf or -inf
+        point_maskTR = np.isfinite(np.log10(PdfTrajTR[index]))
         maskedMeshTR = MeshesTR[index][point_maskTR,:]
         maskedPdfTR = PdfTrajTR[index][point_maskTR]
         M= []
