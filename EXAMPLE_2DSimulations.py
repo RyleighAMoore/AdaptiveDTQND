@@ -13,7 +13,7 @@ from Functions import get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHil
 from Errors import ErrorValsOneTime
 
 
-problem = "spiral" # "spiral" "complex" "hill"
+problem = "erf" # "spiral" "complex" "hill"
 approxError = False
 dimension = 2
 timeDiscretizationType = "EM"
@@ -175,7 +175,9 @@ if kstepMax == kstepMin:
 
 spacingTR = 0.1
 endTime = simulation.times[-1]
-meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-8,8,-8,8, spacingTR, 0)
+meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-14,14,-14,14, spacingTR, 0)# '''erf'''
+
+# meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-8,8,-8,8, spacingTR, 0)# '''erf'''
 # meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-2,2,-2,2, spacingTR, 0)
 
 parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR, saveHistory=True)
