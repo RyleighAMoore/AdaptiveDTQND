@@ -128,7 +128,7 @@ if problem == "spiral":
     plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [19, 49 ,-1],[-10,10,-10,10], simulation.times)
 
 if problem == "complex":
-    plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [29, 49 ,-1], [-6,6,-6,6], simulation.times)
+    plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [29, 49 ,-1], [-8,8,-8,8], simulation.times)
 
 
 
