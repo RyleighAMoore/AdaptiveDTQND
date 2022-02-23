@@ -35,11 +35,11 @@ if problem == "erf":
     diffusionFunction = functionBank.pt75Diffusion
     spatialDiff = False
     kstepMin = 0.2
-    kstepMax = 0.25
+    kstepMax = 0.22
     endTime = 4
     radius = 3
     beta = 4
-    h=0.02
+    h=0.04
 
 if problem == "spiral":
     driftFunction = functionBank.spiralDrift_2D
@@ -50,7 +50,7 @@ if problem == "spiral":
     endTime = 2.5
     radius = 2
     beta = 4
-    h=0.02
+    h=0.04
 
 if problem == "complex":
     driftFunction = functionBank.complextDrift_2D
@@ -88,8 +88,10 @@ simulation.computeTotalPointsUsed()
 
 endTime = simulation.times[-1]
 
-h=0.01
-hfactor = 5
+hnew=0.01
+hfactor = int(h/hnew)
+assert hnew*hfactor == h
+h = hnew
 spacingTR = 0.1
 if problem =="hill":
     meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-3,3,-3, 3, spacingTR, 0)# '''erf'''
