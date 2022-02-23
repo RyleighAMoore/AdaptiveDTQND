@@ -24,6 +24,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy import ma
 from matplotlib import ticker, cm
+import time
+
 
 # Font styling
 rcParams['font.family'] = 'serif'
@@ -348,6 +350,9 @@ def plotRowNinePlots(plottingMax, Meshes, PdfTraj, MeshesTR, PdfTrajTR, h, indic
     cbar.ax.tick_params(labelsize=10)
     cbar.set_label(r'$\hat{p}(\mathbf{x}, t)$')
     plt.show()
+    timestr = time.strftime("%Y%m%d-%H%M%S")
+
+    plt.savefig('Updates/Plot' + timestr +'.pdf')
 
 
 
