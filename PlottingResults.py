@@ -352,7 +352,7 @@ def plotRowNinePlots(plottingMax, Meshes, PdfTraj, MeshesTR, PdfTrajTR, h, indic
     plt.show()
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
-    plt.savefig('Output/Plot' + timestr +'.pdf')
+    fig2.savefig('Output/Plot' + timestr +'.pdf')
 
 
 
