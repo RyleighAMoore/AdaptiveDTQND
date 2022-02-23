@@ -123,7 +123,7 @@ print("Stepping timing",end-start, '*****************************************')
 #         ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
 #         plt.show()
 
-#     plottingMax = 5
+    # plottingMax = 5
 #     from PlottingResults import plotRowSixPlots
 #     from PlottingResults import plotRowSixPlots
 
@@ -206,8 +206,9 @@ Average ALT METHOD USE Percent:  0.11721058387151188
 Number of Points Used:  134184
 Average of Points Used Per Time Step:  1118.2
 '''
+plottingMax = 5
 if problem == "hill":
-       # plottingMax = 1
+        # plottingMax = 1
        plotRowNinePlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory,simulationTR.meshTrajectory, simulationTR.pdfTrajectory, h, [5, 15,-1], [-12,12,-12,12], simulation.times)
 
 if problem == "erf":
