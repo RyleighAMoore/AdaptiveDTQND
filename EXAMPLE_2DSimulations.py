@@ -39,7 +39,7 @@ if problem == "erf":
     endTime = 4
     radius = 3
     beta = 4
-    h=0.04
+    h=0.02
 
 if problem == "spiral":
     driftFunction = functionBank.spiralDrift_2D
