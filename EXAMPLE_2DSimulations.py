@@ -206,24 +206,6 @@ Average ALT METHOD USE Percent:  0.11721058387151188
 Number of Points Used:  134184
 Average of Points Used Per Time Step:  1118.2
 '''
-plottingMax = 5
-if problem == "hill":
-        # plottingMax = 1
-       plotRowNinePlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory,simulationTR.meshTrajectory, simulationTR.pdfTrajectory, h, [5, 15,-1], [-12,12,-12,12], simulation.times)
-
-if problem == "erf":
-    # plottingMax = 1
-    plotRowNinePlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory,simulationTR.meshTrajectory, simulationTR.pdfTrajectory, h, [3, 15,-1], [-14,14,-14,14], simulation.times)
-
-if problem == "spiral":
-    # plottingMax = 1
-    plotRowNinePlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory,simulationTR.meshTrajectory, simulationTR.pdfTrajectory, h, [19, 49 ,-1],[-10,10,-10,10], simulation.times)
-    # plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [50, 85 ,len(simulation.meshTrajectory)-1],[-10,10,-10,10])
-
-if problem == "complex":
-    # plottingMax =1
-    plotRowNinePlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory,simulationTR.meshTrajectory, simulationTR.pdfTrajectory, h, [29, 49 ,-1], [-6,6,-6,6], simulation.times)
-
 
 Meshes = simulationTR.meshTrajectory
 PdfTraj = simulationTR.pdfTrajectory
@@ -253,3 +235,22 @@ import pickle
 f = open('Output/TwoDSimulation_'+str(timestr)+ "_" + str(problem)+ '.pkl',"wb")
 pickle.dump(ListToSave,f)
 f.close()
+
+
+plottingMax = 5
+if problem == "hill":
+        # plottingMax = 1
+       plotRowNinePlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory,simulationTR.meshTrajectory, simulationTR.pdfTrajectory, h, [5, 15,-1], [-12,12,-12,12], simulation.times)
+
+if problem == "erf":
+    # plottingMax = 1
+    plotRowNinePlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory,simulationTR.meshTrajectory, simulationTR.pdfTrajectory, h, [3, 15,-1], [-14,14,-14,14], simulation.times)
+
+if problem == "spiral":
+    # plottingMax = 1
+    plotRowNinePlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory,simulationTR.meshTrajectory, simulationTR.pdfTrajectory, h, [19, 49 ,-1],[-10,10,-10,10], simulation.times)
+    # plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [50, 85 ,len(simulation.meshTrajectory)-1],[-10,10,-10,10])
+
+if problem == "complex":
+    # plottingMax =1
+    plotRowNinePlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory,simulationTR.meshTrajectory, simulationTR.pdfTrajectory, h, [29, 49 ,-1], [-6,6,-6,6], simulation.times)
