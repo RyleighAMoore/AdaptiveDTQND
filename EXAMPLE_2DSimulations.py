@@ -186,10 +186,11 @@ simulationTR = Simulation(sde, parametersTR, endTime)
 simulationTR.setUpTransitionMatrix(sde, parametersTR)
 
 stepByStepTimingTR = simulationTR.computeAllTimes(sde, parametersTR)
-simulationTR.meshUpdater.removePointsFromMeshProcedure(simulationTR.pdf, simulationTR, parameters, sde)
-simulationTR.meshUpdater.removeOutlierPoints(simulationTR.pdf, simulationTR, parameters, sde)
-simulationTR.pdfTrajectory[-1] =simulationTR.pdf.pdfVals
-simulationTR.meshTrajectory[-1] = simulationTR.pdf.meshCoordinates
+# simulationTR.meshUpdater.removePointsFromMeshProcedure(simulationTR.pdf, simulationTR, parameters, sde)
+# simulationTR.meshUpdater.removeOutlierPoints(simulationTR.pdf, simulationTR, parameters, sde)
+# simulationTR.pdfTrajectory[-1] =simulationTR.pdf.pdfVals
+# simulationTR.meshTrajectory[-1] = simulationTR.pdf.meshCoordinates
+
 
 # meshTrueSolnTR = simulationTR.meshTrajectory[-1]
 # pdfTrueSolnTR = simulationTR.pdfTrajectory[-1]
@@ -256,6 +257,8 @@ Average of Points Used Per Time Step:  1118.2
 #     pdfTR =  objects[0][3]
 
 # else:
+
+
 meshTrajectoryLQ =  simulation.meshTrajectory
 pdfLQ =  simulation.pdfTrajectory
 meshTrajectoryTR =  simulationTR.meshTrajectory
@@ -278,3 +281,9 @@ if problem == "spiral":
 if problem == "complex":
     # plottingMax =1
     plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [29, 49 ,-1], [-6,6,-6,6], simulation.times)
+
+
+
+
+
+'''sprial'''

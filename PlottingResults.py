@@ -256,7 +256,9 @@ def plotRowNinePlots(plottingMax, Meshes, PdfTraj, MeshesTR, PdfTrajTR, h, indic
 
 
 
-
+        point_maskTR = np.isfinite(PdfTrajTR[index])  # Points to keep.
+        maskedMeshTR = MeshesTR[index][point_maskTR,:]
+        maskedPdfTR = PdfTrajTR[index][point_maskTR]
         M= []
         S = []
         index = ij
