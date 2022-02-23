@@ -347,7 +347,7 @@ def plotRowNinePlots(plottingMax, Meshes, PdfTraj, MeshesTR, PdfTrajTR, h, indic
     cbar = fig2.colorbar(cntr2, ax =axs,location='bottom', format=ticker.FuncFormatter(fmt))
     cbar.ax.tick_params(labelsize=10)
     cbar.set_label(r'$\hat{p}(\mathbf{x}, t)$')
-    fig2.show()
+    plt.show()
 
 
 
