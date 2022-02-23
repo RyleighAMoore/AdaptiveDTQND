@@ -13,7 +13,7 @@ from Functions import get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHil
 from Errors import ErrorValsOneTime
 
 
-problem = "complex" # "spiral" "complex" "hill"
+problem = "spiral" # "spiral" "complex" "hill"
 approxError = False
 dimension = 2
 timeDiscretizationType = "EM"
@@ -45,11 +45,11 @@ if problem == "spiral":
     driftFunction = functionBank.spiralDrift_2D
     diffusionFunction = functionBank.ptSixDiffusion
     spatialDiff = False
-    kstepMin = 0.2
+    kstepMin = 0.15
     kstepMax = 0.2
     endTime = 2.4
     radius = 2
-    beta = 3
+    beta = 4
     h=0.02
 
 if problem == "complex":
