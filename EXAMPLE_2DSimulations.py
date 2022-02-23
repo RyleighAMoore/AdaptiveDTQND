@@ -175,8 +175,9 @@ if kstepMax == kstepMin:
 
 spacingTR = 0.1
 endTime = simulation.times[-1]
-range = [-10,10,-10,10]
-meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-8,8,-8,8, spacingTR, 0)
+# meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-8,8,-8,8, spacingTR, 0)
+meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-2,2,-2,2, spacingTR, 0)
+
 parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR, saveHistory=True)
 
 simulationTR = Simulation(sde, parametersTR, endTime)
@@ -207,23 +208,23 @@ Number of Points Used:  134184
 Average of Points Used Per Time Step:  1118.2
 '''
 
-Meshes = simulationTR.meshTrajectory
-PdfTraj = simulationTR.pdfTrajectory
-def update_graph(num):
-    graph.set_data (Meshes[num][:,0], Meshes[num][:,1])
-    graph.set_3d_properties(PdfTraj[num])
-    title.set_text('3D Test, time={}'.format(num))
-    return title, graph
+# Meshes = simulationTR.meshTrajectory
+# PdfTraj = simulationTR.pdfTrajectory
+# def update_graph(num):
+#     graph.set_data (Meshes[num][:,0], Meshes[num][:,1])
+#     graph.set_3d_properties(PdfTraj[num])
+#     title.set_text('3D Test, time={}'.format(num))
+#     return title, graph
 
 
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-title = ax.set_title('3D Test')
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+# title = ax.set_title('3D Test')
 
-graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
-ax.set_zlim(0,np.max(simulation.pdfTrajectory[20]))
-ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
-plt.show()
+# graph, = ax.plot(Meshes[-1][:,0], Meshes[-1][:,1], PdfTraj[-1], linestyle="", marker=".")
+# ax.set_zlim(0,np.max(simulation.pdfTrajectory[20]))
+# ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=100, blit=False)
+# plt.show()
 
 
 # timestr = time.strftime("%Y%m%d-%H%M%S")
@@ -256,7 +257,7 @@ plt.show()
 meshTrajectoryLQ =  simulation.meshTrajectory
 pdfLQ =  simulation.pdfTrajectory
 meshTrajectoryTR =  simulationTR.meshTrajectory
-pdfTR =  simulation.pdfTrajectory
+pdfTR =  simulationTR.pdfTrajectory
 
 plottingMax = 5
 if problem == "hill":
