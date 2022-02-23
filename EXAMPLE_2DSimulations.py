@@ -47,7 +47,7 @@ if problem == "spiral":
     spatialDiff = False
     kstepMin = 0.2
     kstepMax = 0.25
-    endTime = 2.5
+    endTime = 2.4
     radius = 2
     beta = 4
     h=0.04
@@ -134,7 +134,7 @@ if problem == "erf":
     plotRowNinePlots(plottingMax, meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [3, 29,-1], [-14,14,-14,14], simulation.times)
 
 if problem == "spiral":
-    plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [19, 49 ,-1],[-10,10,-10,10], simulation.times)
+    plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [19, 39 ,-1],[-10,10,-10,10], simulation.times)
 
 if problem == "complex":
     plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [29, 49 ,-1], [-8,8,-8,8], simulation.times)
