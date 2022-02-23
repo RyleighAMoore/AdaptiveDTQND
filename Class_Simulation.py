@@ -100,8 +100,8 @@ class Simulation():
         '''Iterates solution one time step and saves history if needed.'''
         self.pdf.pdfVals, LPReuseCount, AltMethodUseCount = self.integrator.computeTimeStep(sde, parameters, self)
         if parameters.saveHistory:
-            self.LPReuseCount.append(np.copy(LPReuseCount))
-            self.AltMethodUseCount.append(np.copy(AltMethodUseCount))
+            self.LPReuseCount.append(np.copy(LPReuseCount)/len(self.pdf.pdfVals))
+            self.AltMethodUseCount.append(np.copy(AltMethodUseCount)/len(self.pdf.pdfVals))
 
     def computeAllTimes(self, sde, parameters):
         '''We will save the first time step in case we need it for TR comparison'''
@@ -130,6 +130,7 @@ class Simulation():
             '''Step forward solution one time step, save history if needed'''
             self.pdf.minPdfValue = np.min(self.pdf.pdfVals)
             self.StepForwardInTime(sde, parameters)
+
             if parameters.useAdaptiveMesh and i ==self.numSteps -1:
                 '''Clean up last time step'''
                 self.meshUpdater.removePointsFromMeshProcedure(self.pdf, self, parameters, sde)
@@ -149,11 +150,11 @@ class Simulation():
         for mesh in self.meshTrajectory[1:]:
             lengths.append(len(mesh))
 
-        percentLejaReuse = np.asarray(self.LPReuseCount[1:])/np.asarray(lengths[1:])*100
+        percentLejaReuse = np.asarray(self.LPReuseCount[1:])*100
 
         print("Average LEJA REUSE Percent: ", np.mean(percentLejaReuse))
 
-        percentAltMethodUse = np.asarray(self.AltMethodUseCount)/np.asarray(lengths)*100
+        percentAltMethodUse = np.asarray(self.AltMethodUseCount)*100
         print("Average ALT METHOD USE Percent: ", np.mean(percentAltMethodUse))
 
 

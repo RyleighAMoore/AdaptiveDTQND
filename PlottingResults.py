@@ -210,6 +210,144 @@ def plotRowSixPlots(plottingMax, Meshes, PdfTraj, h, indices, limits, timeLabels
     cbar.set_label(r'$\hat{p}(\mathbf{x}, t)$')
 
 
+import matplotlib.gridspec as gridspec
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
+def plotRowNinePlots(plottingMax, Meshes, PdfTraj, MeshesTR, PdfTrajTR, h, indices, limits, timeLabels):
+    # minVal = 0.002
+    maxVal = plottingMax
+    # plt.figure()
+    fig2 = plt.figure(figsize=(8,8)) # Notice the equal aspect ratio
+    axs = [fig2.add_subplot(3,3,i+1) for i in range(9)]
+    fig2.subplots_adjust(wspace=0.2, hspace=0.2)
+
+    count = 0
+    for a in axs:
+        a.set_xlim([limits[0], limits[1]])
+        a.set_ylim([limits[2], limits[3]])
+        if count != 0 and count != 3  and count!=6:
+            a.set_yticklabels([])
+        if count != 6 and count != 7 and count !=8:
+            a.set_xticklabels([])
+
+        a.set_aspect('equal')
+        count +=1
+
+    times = 0
+    for ij in indices:
+        if times < 4:
+            axs[times].set_title('t = %s' %timeLabels[ij])
+        M= []
+        S = []
+        index = ij
+        for x in Meshes[index]:
+            M.append(x)
+        for x in PdfTraj[index]:
+            S.append(x)
+        M = np.asarray(M)
+        S = np.asarray(S)
+        levels = np.linspace(np.log10(0.001), np.log10(1) , 19)
+
+        cntr2 = axs[times].tricontourf(M[:,0], M[:,1], np.log10(S),levels=levels, cmap="viridis")
+
+        axs[times+3].scatter(Meshes[ij][:,0], Meshes[ij][:,1],marker=".", color="k", s=0.005)
+
+
+
+
+        M= []
+        S = []
+        index = ij
+        for x in MeshesTR[index]:
+            M.append(x)
+        for x in PdfTrajTR[index]:
+            S.append(x)
+        M = np.asarray(M)
+        S = np.asarray(S)
+        levels = np.linspace(np.log10(0.001), np.log10(1) , 19)
+        cntr2 = axs[times+6].tricontourf(M[:,0], M[:,1], np.log10(S),levels=levels, cmap="viridis")
+
+        times +=1
+
+
+    #     axs[0,times].set_xlim([limits[0], limits[1]])
+    #     axs[0,times].set_ylim([limits[2], limits[3]])
+
+    #     axs[1,times].set_xlim([limits[0], limits[1]])
+    #     axs[1,times].set_ylim([limits[2], limits[3]])
+
+    #     axs[2,times].set_xlim([limits[0], limits[1]])
+    #     axs[2,times].set_ylim([limits[2], limits[3]])
+
+
+        # for tick in axs[2,times].xaxis.get_major_ticks():
+        #     tick.label.set_fontsize(14)
+        # for tick in axs[2,times].yaxis.get_major_ticks():
+        #     tick.label.set_fontsize(14)
+        # for tick in axs[1,times].xaxis.get_major_ticks():
+        #     tick.label.set_fontsize(14)
+        # for tick in axs[1,times].yaxis.get_major_ticks():
+        #     tick.label.set_fontsize(14)
+        # for tick in axs[0,times].xaxis.get_major_ticks():
+        #     tick.label.set_fontsize(14)
+        # for tick in axs[0,times].yaxis.get_major_ticks():
+        #     tick.label.set_fontsize(14)
+    #     if times > 0:
+    #         axs[0,times].set_yticklabels([])
+    #         # axs[0,times].set_yticks([])
+    #         axs[1,times].set_yticklabels([])
+    #         # axs[1,times].set_yticks([])
+    #         axs[2,times].set_yticklabels([])
+
+    #     if times > -1:
+    #         axs[0,times].set_xticklabels([])
+    #         axs[1,times].set_xticklabels([])
+
+    #         # axs[0,times].set_xticks([])
+
+
+    #     times = times+1
+
+    def fmt(x, pos):
+        isMultipleOf10 = x - np.floor(x) < 0.000000001
+        if isMultipleOf10:
+            # if you add new points, you can't use the int(x) in the formatted string
+            assert x - np.floor(x) < 0.000000001
+            return fr'$10^{{{int(x)}}}$'
+        return ""
+        # return
+        # b = int(b)
+        # return r'${} \times 10^{{{}}}$'.format(a, b)
+
+    # plt.yaxis.set_label_position("right")
+    # plt.ylabel(r"$DTQ_{LQ}$", rotation=0)
+    # plt.yaxis.set_label_coords(1.5,0.3)
+#
+    # axs[1,2].yaxis.set_label_position("right")
+    # axs[1,2].set_ylabel(r"$DTQ_{LQ}$ Mesh", rotation=0)
+    # axs[2,2].yaxis.set_label_position("right")
+    # axs[2,2].set_ylabel(r"$DTQ_{TR}$", rotation=0)
+
+    # # fig.text(0.52, 0.05, r'$\mathbf{x}^{(1)}$', ha='center')
+    # fig.text(0.52, 0.23, r'$x^{(1)}$', ha='center')
+    # fig.text(0.04, 0.6, r'$x^{(2)}$', va='center', rotation='vertical')
+    # # plt.tight_layout()
+    # fig.subplots_adjust(hspace=0.2, wspace=0.2)
+    fig2.text(0.47, 0.26, r'$x^{(1)}$', ha='center')
+    fig2.text(0.05, 0.61, r'$x^{(2)}$', va='center', rotation='vertical')
+
+    fig2.text(0.8, 0.8, r'$DTQ_{LQ}$', va='center')
+    fig2.text(0.8, 0.62, r'$DTQ_{LQ}$', va='center')
+    fig2.text(0.8, 0.58, 'Mesh', va='center')
+    fig2.text(0.8, 0.4, r'$DTQ_{TR}$', va='center')
+    fig2.subplots_adjust(right=0.8) # or whatever
+
+
+
+    cbar = fig2.colorbar(cntr2, ax =axs, orientation="horizontal", location='bottom', format=ticker.FuncFormatter(fmt))
+    cbar.ax.tick_params(labelsize=10)
+    cbar.set_label(r'$\hat{p}(\mathbf{x}, t)$')
+
 
 
 

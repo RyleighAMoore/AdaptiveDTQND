@@ -19,7 +19,7 @@ fontprops = {'fontweight': 'bold'}
 
 
 objects = []
-with (open("Output//fileT40_20220221-035619_40.pkl", "rb")) as openfile:
+with (open("Output//fileT40_20220222-181014_40.pkl", "rb")) as openfile:
     while True:
         try:
             objects.append(pickle.load(openfile))
@@ -140,17 +140,17 @@ for buff in bufferVals:
 plt.annotate(r'$\beta = 2.5$', (np.asarray(betaDict_errors[2.5])+0.0015, numPointsLQ[0]-100), fontsize=14)
 plt.annotate(r'$\beta = 4$', (np.asarray(betaDict_errors[4])-0.000035, numPointsLQ[4]-4400), fontsize=14)
 
-plt.annotate(r'$\kappa = 0.2$', (np.asarray(bufferDict_errors[0][1])-0.0008, numPointsTR[1]-6000), fontsize=14)
-plt.annotate(r'$\kappa = 0.2$', (np.asarray(bufferDict_errors[0.5][1])-0.0008, numPointsTR[5]+8000), fontsize=14)
+plt.annotate(r'$\kappa = 0.2$', (np.asarray(bufferDict_errors[0][1])-0.0008, numPointsTR[1]-13000), fontsize=14)
+plt.annotate(r'$\kappa = 0.2$', (np.asarray(bufferDict_errors[0.5][1])-0.0008, numPointsTR[5]+18000), fontsize=14)
 
-plt.annotate(r'$\kappa = 0.15$', (np.asarray(bufferDict_errors[0][-1])-0.000003, numPointsTR[2]-4000), fontsize=14)
-plt.annotate(r'$\kappa = 0.18$', (np.asarray(bufferDict_errors[0.5][-1])-0.0001, numPointsTR[-1]+8000), fontsize=14)
+plt.annotate(r'$\kappa = 0.15$', (np.asarray(bufferDict_errors[0][-1])-0.000003, numPointsTR[2]-8000), fontsize=14)
+plt.annotate(r'$\kappa = 0.18$', (np.asarray(bufferDict_errors[0.5][-1])-0.0001, numPointsTR[-1]+17000), fontsize=14)
 
 
 plt.legend(loc=4)
 plt.xlabel(r'Error')
 plt.ylabel(r'Number of Points')
-plt.ylim([10, 10**5])
+plt.ylim([10, 10**6])
 plt.xlim([10**(-6), 10**2])
 # plt.title(r"Error vs. # of Points, Moving Hill, $T=40$")
 

@@ -85,4 +85,31 @@ def get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHill(meshTrajectory, 
     return mesh
 
 
+def get2DTrapezoidalMeshBasedOnDefinedRange(xmin, xmax, ymin, ymax, spacingTR, bufferVal = 0):
+    bufferX =bufferVal*(xmax-xmin)/2
+    bufferY = bufferVal*(ymax-ymin)/2
+    xstart = xmin - bufferX
+    xs = []
+    xs.append(xstart)
+    while xstart< xmax + bufferX:
+        xs.append(xstart+spacingTR)
+        xstart += spacingTR
+
+    ystart = ymin - bufferY
+    ys = []
+    ys.append(ystart)
+
+    while ystart< ymax+ bufferY:
+        ys.append(ystart+spacingTR)
+        ystart += spacingTR
+
+    mesh = []
+    for i in xs:
+        for j in ys:
+            mesh.append([i,j])
+    mesh = np.asarray(mesh)
+
+    return mesh
+
+
 
