@@ -39,29 +39,29 @@ if problem == "erf":
     endTime = 4
     radius = 3
     beta = 4
-    h=0.04
+    h=0.05
 
 if problem == "spiral":
     driftFunction = functionBank.spiralDrift_2D
     diffusionFunction = functionBank.ptSixDiffusion
     spatialDiff = False
-    kstepMin = 0.15
-    kstepMax = 0.2
+    kstepMin = 0.25
+    kstepMax = 0.3
     endTime = 2.4
     radius = 2
     beta = 4
-    h=0.02
+    h=0.05
 
 if problem == "complex":
     driftFunction = functionBank.complextDrift_2D
     diffusionFunction = functionBank.complexDiff
     spatialDiff = True
-    kstepMin = 0.1
-    kstepMax = 0.1
+    kstepMin = 0.25
+    kstepMax = 0.3
     endTime = 1.5
     radius = 2
-    beta = 3
-    h=0.01
+    beta = 4
+    h=0.05
 
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
