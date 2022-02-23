@@ -262,9 +262,9 @@ def plotRowNinePlots(plottingMax, Meshes, PdfTraj, MeshesTR, PdfTrajTR, h, indic
         M= []
         S = []
         index = ij
-        for x in MeshesTR[index]:
+        for x in maskedMeshTR:
             M.append(x)
-        for x in PdfTrajTR[index]:
+        for x in maskedPdfTR[index]:
             S.append(x)
         M = np.asarray(M)
         S = np.asarray(S)
