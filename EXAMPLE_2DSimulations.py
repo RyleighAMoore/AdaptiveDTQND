@@ -172,10 +172,10 @@ if kstepMax == kstepMin:
         count +=1
 
 
+endTime = simulation.times[-1]
 
 spacingTR = 0.1
-endTime = simulation.times[-1]
-meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-14,14,-14,14, spacingTR, 0)# '''erf'''
+meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-14,14,-14, 14, spacingTR, 0)# '''erf'''
 
 # meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-8,8,-8,8, spacingTR, 0)# '''erf'''
 # meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-2,2,-2,2, spacingTR, 0)
@@ -196,7 +196,7 @@ stepByStepTimingTR = simulationTR.computeAllTimes(sde, parametersTR)
 # pdfTrueSolnTR = simulationTR.pdfTrajectory[-1]
 # LinfErrors, L2Errors, L1Errors, L2wErrors = ErrorValsOneTime(simulation.meshTrajectory[-1], simulation.pdfTrajectory[-1], meshTrueSolnTR, pdfTrueSolnTR, interpolate=True)
 # print(L2wErrors)
-assert simulationTR.times[-1] == simulation.times[-1]
+# assert simulationTR.times[-1] == simulation.times[-1]
 
 # plotRowNinePlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory,simulationTR.meshTrajectory, simulationTR.pdfTrajectory, h, [5, 15,-1], [-12,12,-12,12], simulation.times)
 

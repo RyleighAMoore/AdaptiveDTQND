@@ -214,6 +214,7 @@ def plotRowSixPlots(plottingMax, Meshes, PdfTraj, h, indices, limits, timeLabels
 
 import matplotlib.gridspec as gridspec
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+import matplotlib.tri as tr
 
 def plotRowNinePlots(plottingMax, Meshes, PdfTraj, MeshesTR, PdfTrajTR, h, indices, limits, timeLabels):
     # minVal = 0.002
@@ -256,7 +257,7 @@ def plotRowNinePlots(plottingMax, Meshes, PdfTraj, MeshesTR, PdfTrajTR, h, indic
 
 
 
-        point_maskTR = np.isfinite(PdfTrajTR[index])  # Points to keep.
+        point_maskTR = np.isfinite(np.log10(PdfTrajTR[index]))  # Points to keep.
         maskedMeshTR = MeshesTR[index][point_maskTR,:]
         maskedPdfTR = PdfTrajTR[index][point_maskTR]
         M= []
@@ -269,6 +270,18 @@ def plotRowNinePlots(plottingMax, Meshes, PdfTraj, MeshesTR, PdfTrajTR, h, indic
         M = np.asarray(M)
         S = np.asarray(S)
         levels = np.linspace(np.log10(0.001), np.log10(1) , 19)
+
+        # min_radius = 0.1
+        # triang = tr.Triangulation(M[:,0], M[:,1])
+        # # Mask off unwanted triangles.
+        # xmid = M[:,0][triang.triangles].mean(axis=1)
+        # ymid = M[:,1][triang.triangles].mean(axis=1)
+        # mask = np.where(xmid*xmid + ymid*ymid < min_radius*min_radius, 1, 0)
+        # triang.set_mask(mask)
+
+        # print(np.min(np.log10(S)))
+        # print(np.max(np.log10(S)))
+
         cntr2 = axs[times+6].tricontourf(M[:,0], M[:,1], np.log10(S),levels=levels, cmap="viridis")
 
         times +=1
