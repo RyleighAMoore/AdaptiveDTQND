@@ -45,8 +45,8 @@ if problem == "spiral":
     driftFunction = functionBank.spiralDrift_2D
     diffusionFunction = functionBank.ptSixDiffusion
     spatialDiff = False
-    kstepMin = 0.25
-    kstepMax = 0.3
+    kstepMin = 0.2
+    kstepMax = 0.25
     endTime = 2.5
     radius = 2
     beta = 4
@@ -88,6 +88,8 @@ simulation.computeTotalPointsUsed()
 
 endTime = simulation.times[-1]
 
+h=0.01
+hfactor = 5
 spacingTR = 0.1
 if problem =="hill":
     meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-3,3,-3, 3, spacingTR, 0)# '''erf'''
@@ -102,8 +104,6 @@ if problem =="complex":
     meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-8,8,-8, 8, spacingTR, 0)# '''erf'''
 
 
-
-
 parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR, saveHistory=True)
 
 simulationTR = Simulation(sde, parametersTR, endTime)
@@ -114,8 +114,16 @@ stepByStepTimingTR = simulationTR.computeAllTimes(sde, parametersTR)
 
 meshTrajectoryLQ =  simulation.meshTrajectory
 pdfLQ =  simulation.pdfTrajectory
-meshTrajectoryTR =  simulationTR.meshTrajectory
-pdfTR =  simulationTR.pdfTrajectory
+meshTrajectoryTR = []
+pdfTR = []
+timesTR = []
+for i in range(len(simulationTR.pdfTrajectory)):
+    if (i+1)% hfactor ==0:
+        meshTrajectoryTR.append(simulationTR.meshTrajectory[i])
+        pdfTR.append(simulationTR.pdfTrajectory[i])
+        timesTR.append(simulationTR.times[i])
+
+assert timesTR == simulation.times
 
 plottingMax = 5
 if problem == "hill":
