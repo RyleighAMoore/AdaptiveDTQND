@@ -226,31 +226,52 @@ ani = animation.FuncAnimation(fig, update_graph, frames=len(PdfTraj), interval=1
 plt.show()
 
 
-timestr = time.strftime("%Y%m%d-%H%M%S")
-ListToSave = [simulation.meshTrajectory, simulation.pdfTrajectory,simulationTR.meshTrajectory, simulationTR.pdfTrajectory]
-import pickle
+# timestr = time.strftime("%Y%m%d-%H%M%S")
+# ListToSave = [simulation.meshTrajectory, simulation.pdfTrajectory,simulationTR.meshTrajectory, simulationTR.pdfTrajectory]
+# import pickle
 
-# define dictionary
-# create a binary pickle file
-f = open('Output/TwoDSimulation_'+str(timestr)+ "_" + str(problem)+ '.pkl',"wb")
-pickle.dump(ListToSave,f)
-f.close()
+# # define dictionary
+# # create a binary pickle file
+# f = open('Output/TwoDSimulation_'+str(timestr)+ "_" + str(problem)+ '.pkl',"wb")
+# pickle.dump(ListToSave,f)
+# f.close()
 
+# readIn = True
+
+# if readIn:
+#     objects = []
+#     with (open("Output//TwoDSimulation_20220223-102054_spiral.pkl", "rb")) as openfile:
+#         while True:
+#             try:
+#                 objects.append(pickle.load(openfile))
+#             except EOFError:
+#                 break
+
+#     meshTrajectoryLQ =  objects[0][0]
+#     pdfLQ =  objects[0][1]
+#     mesTrajectoryTR =  objects[0][2]
+#     pdfTR =  objects[0][3]
+
+# else:
+meshTrajectoryLQ =  simulation.meshTrajectory
+pdfLQ =  simulation.pdfTrajectory
+meshTrajectoryTR =  simulationTR.meshTrajectory
+pdfTR =  simulation.pdfTrajectory
 
 plottingMax = 5
 if problem == "hill":
         # plottingMax = 1
-       plotRowNinePlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory,simulationTR.meshTrajectory, simulationTR.pdfTrajectory, h, [5, 15,-1], [-12,12,-12,12], simulation.times)
+       plotRowNinePlots(plottingMax, meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [5, 15,-1], [-12,12,-12,12], simulation.times)
 
 if problem == "erf":
     # plottingMax = 1
-    plotRowNinePlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory,simulationTR.meshTrajectory, simulationTR.pdfTrajectory, h, [3, 15,-1], [-14,14,-14,14], simulation.times)
+    plotRowNinePlots(plottingMax, meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [3, 15,-1], [-14,14,-14,14], simulation.times)
 
 if problem == "spiral":
     # plottingMax = 1
-    plotRowNinePlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory,simulationTR.meshTrajectory, simulationTR.pdfTrajectory, h, [19, 49 ,-1],[-10,10,-10,10], simulation.times)
+    plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [19, 49 ,-1],[-10,10,-10,10], simulation.times)
     # plotRowSixPlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory, h, [50, 85 ,len(simulation.meshTrajectory)-1],[-10,10,-10,10])
 
 if problem == "complex":
     # plottingMax =1
-    plotRowNinePlots(plottingMax, simulation.meshTrajectory, simulation.pdfTrajectory,simulationTR.meshTrajectory, simulationTR.pdfTrajectory, h, [29, 49 ,-1], [-6,6,-6,6], simulation.times)
+    plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [29, 49 ,-1], [-6,6,-6,6], simulation.times)
