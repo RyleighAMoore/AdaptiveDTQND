@@ -13,7 +13,7 @@ from Functions import get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHil
 from Errors import ErrorValsOneTime
 
 
-problem = "complex" # "spiral" "complex" "hill"
+problem = "spiral" # "spiral" "complex" "hill"
 approxError = False
 dimension = 2
 timeDiscretizationType = "EM"
@@ -56,8 +56,8 @@ if problem == "complex":
     driftFunction = functionBank.complextDrift_2D
     diffusionFunction = functionBank.complexDiff
     spatialDiff = True
-    kstepMin = 0.25
-    kstepMax = 0.3
+    kstepMin = 0.2
+    kstepMax = 0.2
     endTime = 1.5
     radius = 2
     beta = 4
@@ -134,7 +134,9 @@ if problem == "erf":
     plotRowNinePlots(plottingMax, meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [3, 29,-1], [-14,14,-14,14], simulation.times)
 
 if problem == "spiral":
-    plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [19, 39 ,-1],[-10,10,-10,10], simulation.times)
+    plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [19, 59 ,-1],[-10,10,-10,10], simulation.times)
+    plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [19, 49 ,-1],[-10,10,-10,10], simulation.times)
+    plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [19, 69 ,-1],[-10,10,-10,10], simulation.times)
 
 if problem == "complex":
     plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [29, 49 ,-1], [-8,8,-8,8], simulation.times)
