@@ -38,7 +38,7 @@ if problem == "erf":
     kstepMax = 0.2
     endTime = 4
     radius = 3
-    beta = 4
+    beta = 3
     h=0.04
 
 if problem == "spiral":
@@ -133,7 +133,7 @@ if problem == "hill":
     plotRowNinePlots(plottingMax, meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [5, 15,-1], [-12,12,-12,12], simulation.times)
 
 if problem == "erf":
-    plotRowNinePlots(plottingMax, meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [3, 15,-1], [-12,12,-12,12], simulation.times)
+    plotRowNinePlots(plottingMax, meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [3, 15,-1], [-14,14,-14,14], simulation.times)
 
 if problem == "spiral":
     plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [19, 69 ,-1],[-10,10,-10,10], simulation.times)
