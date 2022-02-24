@@ -97,7 +97,9 @@ if problem =="hill":
     meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-3, 3,-3, 3, spacingTR, 0)# '''erf'''
 
 if problem =="erf":
+    spacingTR = 0.08
     meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-14,14,-14, 14, spacingTR, 0)# '''erf'''
+
 
 if problem =="spiral":
     meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-8,8,-8, 8, spacingTR, 0)# '''erf'''
