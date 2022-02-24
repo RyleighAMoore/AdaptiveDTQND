@@ -255,8 +255,6 @@ def plotRowNinePlots(plottingMax, Meshes, PdfTraj, MeshesTR, PdfTrajTR, h, indic
 
         axs[times+3].scatter(Meshes[ij][:,0], Meshes[ij][:,1],marker=".", color="k", s=0.005)
 
-
-
         #Get rid of points that are inf or -inf
         point_maskTR = np.isfinite(np.log10(PdfTrajTR[index]))
         maskedMeshTR = MeshesTR[index][point_maskTR,:]
@@ -270,7 +268,6 @@ def plotRowNinePlots(plottingMax, Meshes, PdfTraj, MeshesTR, PdfTrajTR, h, indic
             S.append(x)
         M = np.asarray(M)
         S = np.asarray(S)
-        levels = np.linspace(np.log10(0.001), np.log10(1) , 19)
 
         # min_radius = 0.1
         # triang = tr.Triangulation(M[:,0], M[:,1])

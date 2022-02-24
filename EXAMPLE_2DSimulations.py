@@ -13,7 +13,7 @@ from Functions import get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHil
 from Errors import ErrorValsOneTime
 
 
-problem = "spiral" # "spiral" "complex" "hill"
+problem = "erf" # "spiral" "complex" "hill"
 approxError = False
 dimension = 2
 timeDiscretizationType = "EM"
@@ -28,7 +28,7 @@ if problem == "hill":
     endTime =1
     radius = 2
     beta = 4
-    h=0.05
+    h=0.02
 
 if problem == "erf":
     driftFunction = functionBank.erfDrift
@@ -92,7 +92,7 @@ hnew=0.01
 hfactor = int(h/hnew)
 assert hnew*hfactor == h
 h = hnew
-spacingTR = 0.1
+spacingTR = 0.05
 if problem =="hill":
     meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-3,3,-3, 3, spacingTR, 0)# '''erf'''
 
@@ -122,8 +122,8 @@ timesTR = []
 for i in range(len(simulationTR.pdfTrajectory)):
     if (i+1)% hfactor ==0:
         meshTrajectoryTR.append(simulationTR.meshTrajectory[i])
-        pdfTR.append(simulationTR.pdfTrajectory[i])
-        timesTR.append(simulationTR.times[i])
+        pdfTR.append(np.copy(simulationTR.pdfTrajectory[i]))
+        timesTR.append(np.copy(simulationTR.times[i]))
 
 
 plottingMax = 5
@@ -141,4 +141,5 @@ if problem == "complex":
 
 
 assert timesTR == simulation.times
-
+print(max(simulation.pdfTrajectory[19]))
+print(max(pdfTR[19]))
