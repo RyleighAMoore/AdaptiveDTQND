@@ -46,11 +46,11 @@ if problem == "spiral":
     diffusionFunction = functionBank.ptSixDiffusion
     spatialDiff = False
     kstepMin = 0.2
-    kstepMax = 0.22
+    kstepMax = 0.2
     endTime = 2.4
     radius = 2
     beta = 4
-    h=0.04
+    h=0.02
 
 if problem == "complex":
     driftFunction = functionBank.complextDrift_2D
