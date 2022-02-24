@@ -13,7 +13,7 @@ from Functions import get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHil
 from Errors import ErrorValsOneTime
 
 
-problem = "complex" # "spiral" "complex" "hill"
+problem = "erf" # "spiral" "complex" "hill"
 approxError = False
 dimension = 2
 timeDiscretizationType = "EM"
@@ -131,7 +131,7 @@ if problem == "hill":
     plotRowNinePlots(plottingMax, meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [5, 15,-1], [-12,12,-12,12], simulation.times)
 
 if problem == "erf":
-    plotRowNinePlots(plottingMax, meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [3, 29,-1], [-14,14,-14,14], simulation.times)
+    plotRowNinePlots(plottingMax, meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [3, 29,-1], [-12,12,-12,12], simulation.times)
 
 if problem == "spiral":
     plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [19, 69 ,-1],[-10,10,-10,10], simulation.times)
