@@ -13,7 +13,7 @@ from Functions import get2DTrapezoidalMeshBasedOnLejaQuadratureSolutionMovingHil
 from Errors import ErrorValsOneTime
 
 
-problem = "erf" # "spiral" "complex" "hill"
+problem = "spiral" # "spiral" "complex" "hill"
 approxError = False
 dimension = 2
 timeDiscretizationType = "EM"
@@ -94,7 +94,7 @@ assert hnew*hfactor == h
 h = hnew
 spacingTR = 0.05
 if problem =="hill":
-    meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-3,3,-3, 3, spacingTR, 0)# '''erf'''
+    meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-3, 3,-3, 3, spacingTR, 0)# '''erf'''
 
 if problem =="erf":
     meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-14,14,-14, 14, spacingTR, 0)# '''erf'''
