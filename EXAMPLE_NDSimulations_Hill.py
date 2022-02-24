@@ -53,9 +53,9 @@ for dimension in [5,4,3]:
         beta = 3
 
     if dimension == 5:
-        kstepMin = 0.15
-        kstepMax = 0.15
-        endTime = 0.2
+        kstepMin = 0.1
+        kstepMax = 0.1
+        endTime = 0.05
         radius = 0.5
         h=0.01
         beta = 3
