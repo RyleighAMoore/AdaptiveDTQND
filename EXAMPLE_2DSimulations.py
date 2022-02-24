@@ -35,7 +35,7 @@ if problem == "erf":
     diffusionFunction = functionBank.pt75Diffusion
     spatialDiff = False
     kstepMin = 0.2
-    kstepMax = 0.22
+    kstepMax = 0.21
     endTime = 4
     radius = 3
     beta = 4
