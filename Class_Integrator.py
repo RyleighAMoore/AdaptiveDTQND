@@ -118,6 +118,7 @@ class IntegratorLejaQuadrature(Integrator):
         scaling.setCov((parameters.h*cov@cov.T))
 
         transformedAltMethodLejaPoints = map_from_canonical_space(self.altMethodLejaPoints, scaling)
+
         meshNearest, distances, indx = findNearestKPoints(scaling.mu, pdf.meshCoordinates,parameters.numQuadFit, getIndices = True)
         pdfNew = pdf.pdfVals[indx]
 
