@@ -27,18 +27,18 @@ if problem == "hill":
     kstepMax = 0.2
     endTime =1
     radius = 2
-    beta = 4
+    beta = 3
     h=0.02
 
 if problem == "erf":
     driftFunction = functionBank.erfDrift
     diffusionFunction = functionBank.pt75Diffusion
     spatialDiff = False
-    kstepMin = 0.2
-    kstepMax = 0.2
+    kstepMin = 0.5
+    kstepMax = 0.3
     endTime = 4
     radius = 3
-    beta = 3
+    beta = 4
     h=0.04
 
 if problem == "spiral":
