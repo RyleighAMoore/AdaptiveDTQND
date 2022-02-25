@@ -55,7 +55,7 @@ for dimension in [5,4,3]:
     if dimension == 5:
         kstepMin = 0.1
         kstepMax = 0.1
-        endTime = 0.04
+        endTime = 0.03
         radius = 0.5
         h=0.01
         beta = 3
@@ -85,6 +85,8 @@ for dimension in [5,4,3]:
 
     print("dimension", dimension)
     print("L2w Error:", L2wErrors)
-    print("mesh size:", len(simulation.pdfTrajectory[-1]))
+    print("Starting mesh size:", len(simulation.pdfTrajectory[0]))
+    print("Ending mesh size:", len(simulation.pdfTrajectory[-1]))
+
 
 
