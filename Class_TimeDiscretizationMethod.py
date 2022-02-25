@@ -31,7 +31,7 @@ class EulerMaruyamaTimeDiscretizationMethod(TimeDiscretizationMethod):
         parameters: parameters for the simulation (class object)
         '''
         if parameters.useAdaptiveMesh:
-            self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*10
+            self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength*4
         else:
             self.sizeTransitionMatrixIncludingEmpty =  pdf.meshLength
 
