@@ -34,7 +34,7 @@ if problem == "erf":
     driftFunction = functionBank.erfDrift
     diffusionFunction = functionBank.pt75Diffusion
     spatialDiff = False
-    kstepMin = 0.5
+    kstepMin = 0.25
     kstepMax = 0.3
     endTime = 4
     radius = 3
