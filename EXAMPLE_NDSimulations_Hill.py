@@ -53,6 +53,7 @@ for dimension in [5,4,3]:
         beta = 3
 
     if dimension == 5:
+        print("Please adjust parameters.matrixSizeMultiple to a smaller value if memory problems occur. It may help.")
         kstepMin = 0.1
         kstepMax = 0.1
         endTime = 0.04

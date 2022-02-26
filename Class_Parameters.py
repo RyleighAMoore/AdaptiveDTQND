@@ -42,6 +42,7 @@ class Parameters:
         self.eligibleToRemovePointsTimeStep = 9
         self.addPointsEveryNSteps = 1
         self.removePointsEveryNSteps = 10
+        self.matrixSizeMultiple =10
 
         if timeDiscretizationType == "AM":
             print("Warning: The Anderson-Mattingly method is still under development and may not be ready for use. Please consider using Euler-Maruyama instead.")
