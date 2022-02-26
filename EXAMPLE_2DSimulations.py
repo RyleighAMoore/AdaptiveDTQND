@@ -35,7 +35,7 @@ if problem == "erf":
     diffusionFunction = functionBank.pt75Diffusion
     spatialDiff = False
     kstepMin = 0.25
-    kstepMax = 0.27
+    kstepMax = 0.3
     endTime = 4
     radius = 3
     beta = 4
@@ -133,8 +133,7 @@ if problem == "hill":
     plotRowNinePlots(plottingMax, meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [5, 15,-1], [-12,12,-12,12], simulation.times)
 
 if problem == "erf":
-    plotRowNinePlots(plottingMax, meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [3, 25,-1], [-14,14,-14,14], simulation.times)
-    plotRowNinePlots(plottingMax, meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [3, 19,-1], [-14,14,-14,14], simulation.times)
+    plotRowNinePlots(plottingMax, meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [3, 15,-1], [-14,14,-14,14], simulation.times)
 
 if problem == "spiral":
     plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [19, 69 ,-1],[-10,10,-10,10], simulation.times)
