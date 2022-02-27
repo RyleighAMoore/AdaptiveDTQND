@@ -93,8 +93,8 @@ for dimension in [4,5]:
 
 
 
-from Functions import nDGridMeshCenteredAtOrigin
+# from Functions import nDGridMeshCenteredAtOrigin
 
-meshTrueSolnLQ = nDGridMeshCenteredAtOrigin(4, 2, 0.05)
-pdfTrueSolnLQ = sde.exactSolution(meshTrueSolnLQ,  endTime)
+# meshTrueSolnLQ = nDGridMeshCenteredAtOrigin(4, 2, 0.05)
+# pdfTrueSolnLQ = sde.exactSolution(meshTrueSolnLQ,  endTime)
 
