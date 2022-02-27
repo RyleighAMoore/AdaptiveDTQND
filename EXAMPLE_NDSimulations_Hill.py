@@ -48,7 +48,7 @@ for dimension in [4,5]:
         kstepMin = 0.18
         kstepMax = 0.18
         endTime = 0.5
-        radius = 0.8
+        radius = 0.5
         h=0.02
         beta = 3
 
@@ -92,4 +92,9 @@ for dimension in [4,5]:
     print("Min ending pdf:", min(simulation.pdfTrajectory[-1]))
 
 
+
+from Functions import nDGridMeshCenteredAtOrigin
+
+meshTrueSolnLQ = nDGridMeshCenteredAtOrigin(4, 2, 0.05)
+pdfTrueSolnLQ = sde.exactSolution(meshTrueSolnLQ,  endTime)
 

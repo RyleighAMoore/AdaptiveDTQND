@@ -37,7 +37,7 @@ if problem == "erf":
     spatialDiff = False
     kstepMin = 0.25
     kstepMax = 0.25
-    endTime = 1
+    endTime = 2
     h=0.02
     vminVal = -5
     vmaxVal = 1
