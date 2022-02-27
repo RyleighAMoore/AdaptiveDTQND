@@ -39,10 +39,10 @@ class Parameters:
         self.OverideMesh = OverideMesh
         self.saveHistory = saveHistory
         self.eligibleToAddPointsTimeStep = 1
-        self.eligibleToRemovePointsTimeStep = 9
+        self.eligibleToRemovePointsTimeStep = 10
         self.addPointsEveryNSteps = 1
         self.removePointsEveryNSteps = 10
-        self.matrixSizeMultiple =10
+        self.matrixSizeMultiple =5
 
         if timeDiscretizationType == "AM":
             print("Warning: The Anderson-Mattingly method is still under development and may not be ready for use. Please consider using Euler-Maruyama instead.")

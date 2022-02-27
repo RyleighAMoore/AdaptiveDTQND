@@ -18,7 +18,7 @@ driftFunction = functionBank.oneDrift
 diffusionFunction = functionBank.ptSixDiffusion
 spatialDiff = False
 
-for dimension in [4,5]:
+for dimension in [5,4]:
     if dimension == 1:
         beta = 4
         radius = 3
@@ -48,7 +48,7 @@ for dimension in [4,5]:
         kstepMin = 0.18
         kstepMax = 0.18
         endTime = 0.5
-        radius = 0.5
+        radius = 0.8
         h=0.02
         beta = 3
 
@@ -90,11 +90,7 @@ for dimension in [4,5]:
     print("Ending mesh size:", len(simulation.pdfTrajectory[-1]))
     print("Max ending pdf:", max(simulation.pdfTrajectory[-1]))
     print("Min ending pdf:", min(simulation.pdfTrajectory[-1]))
+    print("Max ending x val:", max(simulation.meshTrajectory[-1][:,0]))
 
 
-
-# from Functions import nDGridMeshCenteredAtOrigin
-
-# meshTrueSolnLQ = nDGridMeshCenteredAtOrigin(4, 2, 0.05)
-# pdfTrueSolnLQ = sde.exactSolution(meshTrueSolnLQ,  endTime)
 

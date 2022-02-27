@@ -23,7 +23,7 @@ fontprops = {'fontweight': 'bold'}
 dimension =1
 beta = 4
 radius = 2
-kstepMin= 0.25
+kstepMin= 0.4
 kstepMax = kstepMin
 h = 0.05
 endTime =10
@@ -64,7 +64,7 @@ for ind in indices:
     labelString = 't = %.2f' % time
     plt.plot(simulation.meshTrajectory[ind], simulation.pdfTrajectory[ind], '.', label=labelString)
 
-plt.xlim([-5, 40])
+plt.xlim([-5, 35])
 plt.legend(markerscale=2)
 
 
@@ -86,4 +86,7 @@ if Animate:
     ax.set_ylim(0, np.max(simulation.pdfTrajectory[0]))
     ani = animation.FuncAnimation(fig, update_graph, frames=len(simulation.pdfTrajectory), interval=50, blit=False)
     plt.show()
+
+simulation.computeLejaAndAlternativeUse()
+simulation.computeTotalPointsUsed()
 
