@@ -38,7 +38,7 @@ class Parameters:
         self.AMMeshSpacing = AMSpacing
         self.OverideMesh = OverideMesh
         self.saveHistory = saveHistory
-        self.eligibleToAddPointsTimeStep = 3
+        self.eligibleToAddPointsTimeStep = 1
         self.eligibleToRemovePointsTimeStep = 9
         self.addPointsEveryNSteps = 1
         self.removePointsEveryNSteps = 10

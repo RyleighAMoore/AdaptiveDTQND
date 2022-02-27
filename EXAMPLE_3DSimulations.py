@@ -19,7 +19,7 @@ beta = 3
 radius = 1
 
 
-if problem == "erf":
+if problem == "hill":
     driftFunction = functionBank.oneDrift
     diffusionFunction = functionBank.ptSixDiffusion
     spatialDiff = False
@@ -35,9 +35,9 @@ if problem == "erf":
     driftFunction = functionBank.erfDrift
     diffusionFunction = functionBank.pt75Diffusion
     spatialDiff = False
-    kstepMin = 0.15
-    kstepMax = 0.15
-    endTime = 0.5
+    kstepMin = 0.25
+    kstepMax = 0.25
+    endTime = 1
     h=0.02
     vminVal = -5
     vmaxVal = 1

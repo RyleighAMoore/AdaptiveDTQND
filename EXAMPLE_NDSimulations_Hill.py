@@ -18,7 +18,7 @@ driftFunction = functionBank.oneDrift
 diffusionFunction = functionBank.ptSixDiffusion
 spatialDiff = False
 
-for dimension in [5,4,3]:
+for dimension in [4,5]:
     if dimension == 1:
         beta = 4
         radius = 3
@@ -88,6 +88,8 @@ for dimension in [5,4,3]:
     print("L2w Error:", L2wErrors)
     print("Starting mesh size:", len(simulation.pdfTrajectory[0]))
     print("Ending mesh size:", len(simulation.pdfTrajectory[-1]))
+    print("Max ending pdf:", max(simulation.pdfTrajectory[-1]))
+    print("Min ending pdf:", min(simulation.pdfTrajectory[-1]))
 
 
 

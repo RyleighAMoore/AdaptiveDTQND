@@ -79,3 +79,6 @@ def complexDiff(mesh):
     if mesh.ndim == 1:
         mesh = np.expand_dims(mesh, axis=0)
     return np.diag([0.01*mesh[:,0][0]**2+0.5,0.01*mesh[:,1][0]**2+0.5]) + np.ones((2,2))*0.2
+
+def bimodal1D(mesh):
+    return mesh*(4-mesh**2)
