@@ -88,60 +88,62 @@ simulation.computeTotalPointsUsed()
 
 endTime = simulation.times[-1]
 
-hnew=0.01
-hfactor = int(h/hnew)
-assert hnew*hfactor == h
-h = hnew
-spacingTR = 0.05
-if problem =="hill":
-    meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-3, 3,-3, 3, spacingTR, 0)# '''erf'''
+TrapCompare = False
+if TrapCompare:
+    hnew=0.01
+    hfactor = int(h/hnew)
+    assert hnew*hfactor == h
+    h = hnew
+    spacingTR = 0.05
+    if problem =="hill":
+        meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-3, 3,-3, 3, spacingTR, 0)# '''erf'''
 
-if problem =="erf":
-    spacingTR = 0.08
-    meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-14,14,-14, 14, spacingTR, 0)# '''erf'''
-
-
-if problem =="spiral":
-    meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-8,8,-8, 8, spacingTR, 0)# '''erf'''
-
-if problem =="complex":
-    meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-8,8,-8, 8, spacingTR, 0)# '''erf'''
+    if problem =="erf":
+        spacingTR = 0.08
+        meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-14,14,-14, 14, spacingTR, 0)# '''erf'''
 
 
-parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR, saveHistory=True)
+    if problem =="spiral":
+        meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-8,8,-8, 8, spacingTR, 0)# '''erf'''
 
-simulationTR = Simulation(sde, parametersTR, endTime)
-simulationTR.setUpTransitionMatrix(sde, parametersTR)
-
-stepByStepTimingTR = simulationTR.computeAllTimes(sde, parametersTR)
-
-
-meshTrajectoryLQ =  simulation.meshTrajectory
-pdfLQ =  simulation.pdfTrajectory
-meshTrajectoryTR = []
-pdfTR = []
-timesTR = []
-for i in range(len(simulationTR.pdfTrajectory)):
-    if (i+1)% hfactor ==0:
-        meshTrajectoryTR.append(simulationTR.meshTrajectory[i])
-        pdfTR.append(np.copy(simulationTR.pdfTrajectory[i]))
-        timesTR.append(np.copy(simulationTR.times[i]))
+    if problem =="complex":
+        meshTR = get2DTrapezoidalMeshBasedOnDefinedRange(-8,8,-8, 8, spacingTR, 0)# '''erf'''
 
 
-plottingMax = 5
-if problem == "hill":
-    plotRowNinePlots(plottingMax, meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [5, 15,-1], [-12,12,-12,12], simulation.times)
+    parametersTR = Parameters(sde, beta, radius, spacingTR, spacingTR, h,useAdaptiveMesh =False, timeDiscretizationType = "EM", integratorType="TR", OverideMesh = meshTR, saveHistory=True)
 
-if problem == "erf":
-    plotRowNinePlots(plottingMax, meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [3, 15,-1], [-14,14,-14,14], simulation.times)
+    simulationTR = Simulation(sde, parametersTR, endTime)
+    simulationTR.setUpTransitionMatrix(sde, parametersTR)
 
-if problem == "spiral":
-    plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [19, 69 ,-1],[-10,10,-10,10], simulation.times)
-
-if problem == "complex":
-    plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [14, 44 ,-1], [-8,8,-8,8], simulation.times)
+    stepByStepTimingTR = simulationTR.computeAllTimes(sde, parametersTR)
 
 
-assert timesTR == simulation.times
-print(max(simulation.pdfTrajectory[19]))
-print(max(pdfTR[19]))
+    meshTrajectoryLQ =  simulation.meshTrajectory
+    pdfLQ =  simulation.pdfTrajectory
+    meshTrajectoryTR = []
+    pdfTR = []
+    timesTR = []
+    for i in range(len(simulationTR.pdfTrajectory)):
+        if (i+1)% hfactor ==0:
+            meshTrajectoryTR.append(simulationTR.meshTrajectory[i])
+            pdfTR.append(np.copy(simulationTR.pdfTrajectory[i]))
+            timesTR.append(np.copy(simulationTR.times[i]))
+
+
+    plottingMax = 5
+    if problem == "hill":
+        plotRowNinePlots(plottingMax, meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [5, 15,-1], [-12,12,-12,12], simulation.times)
+
+    if problem == "erf":
+        plotRowNinePlots(plottingMax, meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [3, 15,-1], [-14,14,-14,14], simulation.times)
+
+    if problem == "spiral":
+        plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [19, 69 ,-1],[-10,10,-10,10], simulation.times)
+
+    if problem == "complex":
+        plotRowNinePlots(plottingMax,meshTrajectoryLQ, pdfLQ, meshTrajectoryTR, pdfTR, h, [14, 44 ,-1], [-8,8,-8,8], simulation.times)
+
+
+    assert timesTR == simulation.times
+    print(max(simulation.pdfTrajectory[19]))
+    print(max(pdfTR[19]))

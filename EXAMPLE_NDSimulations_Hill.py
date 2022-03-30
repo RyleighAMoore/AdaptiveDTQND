@@ -18,7 +18,7 @@ driftFunction = functionBank.oneDrift
 diffusionFunction = functionBank.ptSixDiffusion
 spatialDiff = False
 
-for dimension in [5,4]:
+for dimension in [4,5]:
     if dimension == 1:
         beta = 4
         radius = 3
@@ -94,3 +94,21 @@ for dimension in [5,4]:
 
 
 
+from Functions import nDGridMeshCenteredAtOrigin
+grid = nDGridMeshCenteredAtOrigin(dimension, 0.2, 0.1, useNoiseBool = False, trimToCircle = False)
+
+pdfTrueSolnLQ = sde.exactSolution(grid,  0.04)
+fig=plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+title = ax.set_title('3D Test')
+num=-15
+p1 = 0
+p2 =1
+ax.scatter3D(grid[:,p1], grid[:,p2],np.log10(pdfTrueSolnLQ))
+
+otherDir = 0.04
+pdfTrueSolnLQ = sde.exactSolution(np.asarray([[0.6,otherDir,otherDir,otherDir,otherDir]]),  0.04)
+print(pdfTrueSolnLQ)
+
+pdfTrueSolnLQ = sde.exactSolution(np.asarray([[0.04,0,0,0,0.6]]),  0.04)
+print(pdfTrueSolnLQ)
