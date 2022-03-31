@@ -62,7 +62,7 @@ if problem == "complex":
 
 
 sde = SDE(dimension, driftFunction, diffusionFunction, spatialDiff)
-parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh =True, timeDiscretizationType = "EM", integratorType = "LQ")
+parameters = Parameters(sde, beta, radius, kstepMin, kstepMax, h, useAdaptiveMesh =True, timeDiscretizationType = "EM", integratorType = "LQ", saveHistory=False)
 simulation = Simulation(sde, parameters, endTime)
 
 start = time.time()

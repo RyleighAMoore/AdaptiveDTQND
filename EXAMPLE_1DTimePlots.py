@@ -26,11 +26,11 @@ radius = 2
 kstepMin= 0.4
 kstepMax = kstepMin
 h = 0.05
-endTime =10
+endTime =5
 
 # driftFunction = functionBank.zeroDrift
-# driftFunction = functionBank.erfDrift
-driftFunction = functionBank.twoDrift
+driftFunction = functionBank.erfDrift
+# driftFunction = functionBank.twoDrift
 diffusionFunction = functionBank.oneDiffusion
 
 spatialDiff = False

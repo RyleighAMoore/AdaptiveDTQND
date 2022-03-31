@@ -111,10 +111,10 @@ class IntegratorLejaQuadrature(Integrator):
         return value, condNumber
 
     def computeUpdateWithAlternativeMethod(self, sde, parameters, pdf, index):
-        print("Used alt method")
         scaling = GaussScale(sde.dimension)
         scaling.setMu(np.asarray(pdf.meshCoordinates[index,:]+parameters.h*sde.driftFunction(pdf.meshCoordinates[index,:])).T)
-        cov = sde.diffusionFunction(scaling.mu.T)
+        #cov = sde.diffusionFunction(scaling.mu.T)
+        cov = sde.diffusionFunction(pdf.meshCoordinates[index,:])
         scaling.setCov((parameters.h*cov@cov.T))
 
         transformedAltMethodLejaPoints = map_from_canonical_space(self.altMethodLejaPoints, scaling)
@@ -158,7 +158,7 @@ class IntegratorLejaQuadrature(Integrator):
     def weightExp(self, scaling, mesh):
         '''Compute weight for alternative procedure'''
         if np.size(mesh,1) == 1:
-            newvals = np.exp(-(mesh-scaling.mu)**2)#*(1/scaling.cov)
+            newvals = np.exp(-(mesh-scaling.mu)**2*(1/scaling.cov))
             return np.squeeze(newvals)
 
         soln_vals = np.empty(len(mesh))
