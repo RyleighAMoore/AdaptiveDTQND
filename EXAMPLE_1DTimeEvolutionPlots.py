@@ -29,8 +29,8 @@ h = 0.05
 endTime =10
 
 # driftFunction = functionBank.zeroDrift
-driftFunction = functionBank.erfDrift
-# driftFunction = functionBank.twoDrift
+# driftFunction = functionBank.erfDrift
+driftFunction = functionBank.twoDrift
 diffusionFunction = functionBank.oneDiffusion
 
 spatialDiff = False

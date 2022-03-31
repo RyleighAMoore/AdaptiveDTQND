@@ -18,7 +18,7 @@ driftFunction = functionBank.oneDrift
 diffusionFunction = functionBank.ptSixDiffusion
 spatialDiff = False
 
-for dimension in [4,5]:
+for dimension in [3,4,5]:
     if dimension == 1:
         beta = 4
         radius = 3
